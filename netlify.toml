@@ -1,0 +1,29 @@
+# Configuración Netlify para FLASK
+# El sitio es HTML estático puro: no hay build step.
+
+[build]
+  publish = "."
+
+# Página 404 personalizada (Netlify sirve 404.html automáticamente)
+
+# ---------- HEADERS ----------
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
+
+# Cache largo para CSS con hash-safe headers
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# HTML: no cachear agresivamente para poder desplegar cambios al instante
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"

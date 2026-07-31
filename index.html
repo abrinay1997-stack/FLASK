@@ -5,368 +5,34 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FLASK — Sitios rápidos. Código tuyo. Panamá.</title>
 <meta name="description" content="Agencia web en Panamá. Sitios Jamstack que cargan en menos de un segundo, entregados en días, con el código en tu propio GitHub. Desde $295.">
+<meta name="theme-color" content="#100101">
+
+<!-- OpenGraph / Twitter -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="FLASK — Sitios rápidos. Código tuyo.">
+<meta property="og:description" content="Sitios Jamstack en Panamá. Carga <1s, entrega en días, código 100% tuyo. Desde $295.">
+<meta property="og:locale" content="es_PA">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="FLASK — Sitios rápidos. Código tuyo.">
+<meta name="twitter:description" content="Sitios Jamstack en Panamá. Desde $295. Código 100% tuyo.">
+
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%23FF5100'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --deep-black:#100101;
-    --signal-red:#EE0000;
-    --soft-white:#FFF7F7;
-    --studio-gray:#BABABA;
-    --flash-orange:#FF5100;
-    --font:'Archivo',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-  }
-  *{margin:0;padding:0;box-sizing:border-box;}
-  html{scroll-behavior:smooth;}
-  body{
-    font-family:var(--font);
-    background:var(--deep-black);
-    color:var(--soft-white);
-    line-height:1.4;
-    overflow-x:hidden;
-  }
-  a{color:inherit;text-decoration:none;}
-  :focus-visible{outline:2px solid var(--flash-orange);outline-offset:3px;border-radius:4px;}
-  .container{max-width:1280px;margin:0 auto;padding:0 40px;}
-
-  /* ---------- NAVBAR ---------- */
-  header{
-    position:fixed;top:0;left:0;width:100%;z-index:100;
-    background:rgba(16,1,1,.72);
-    backdrop-filter:blur(14px);
-    -webkit-backdrop-filter:blur(14px);
-    border-bottom:1px solid rgba(255,255,255,.06);
-  }
-  .nav{
-    display:flex;align-items:center;justify-content:space-between;
-    height:74px;
-  }
-  .nav-links{display:flex;gap:34px;list-style:none;}
-  .nav-links a{
-    font-size:13px;font-weight:500;letter-spacing:.14em;
-    text-transform:uppercase;color:var(--studio-gray);
-    transition:color .25s;
-  }
-  .nav-links a:hover{color:var(--flash-orange);}
-  .brand{
-    font-weight:700;font-size:22px;letter-spacing:.22em;
-    line-height:1;text-transform:uppercase;
-    display:inline-flex;align-items:baseline;gap:2px;
-  }
-  .brand .dot{color:var(--flash-orange);}
-
-  /* ---------- HERO ---------- */
-  .hero{
-    position:relative;min-height:100vh;
-    display:flex;flex-direction:column;justify-content:center;
-    padding-top:74px;overflow:hidden;
-  }
-  .hero::after{
-    content:"";position:absolute;top:-10%;right:-10%;
-    width:70vw;height:70vw;border-radius:50%;
-    background:radial-gradient(circle at center,
-      var(--flash-orange) 0%,
-      rgba(238,0,0,.55) 38%,
-      rgba(16,1,1,0) 72%);
-    filter:blur(20px);z-index:0;
-    pointer-events:none;
-  }
-  .hero-inner{position:relative;z-index:2;padding:60px 0;}
-  .hero .year{
-    position:absolute;top:24px;left:40px;font-size:14px;
-    color:var(--studio-gray);letter-spacing:.1em;
-  }
-  .hero .handle{
-    position:absolute;top:24px;right:40px;font-size:14px;
-    color:var(--studio-gray);letter-spacing:.1em;
-  }
-  .hero h1{
-    font-size:clamp(48px,8vw,112px);
-    font-weight:600;line-height:.98;letter-spacing:-.02em;
-    text-transform:uppercase;max-width:14ch;
-  }
-  .hero h1 .muted{color:var(--studio-gray);}
-  .hero p.lead{
-    margin-top:28px;max-width:52ch;
-    font-size:18px;font-weight:300;color:var(--studio-gray);
-  }
-  .hero-actions{display:flex;gap:16px;margin-top:40px;flex-wrap:wrap;}
-
-  .btn{
-    display:inline-flex;align-items:center;gap:12px;
-    padding:14px 26px;border-radius:40px;
-    font-size:14px;font-weight:500;letter-spacing:.03em;
-    cursor:pointer;border:none;transition:transform .2s,opacity .2s;
-    font-family:inherit;
-  }
-  .btn:hover{transform:translateY(-2px);}
-  .btn-primary{background:var(--soft-white);color:var(--deep-black);}
-  .btn-primary .dot{
-    width:22px;height:22px;border-radius:50%;
-    background:var(--flash-orange);display:inline-block;
-  }
-  .btn-ghost{
-    background:transparent;color:var(--soft-white);
-    border:1px solid rgba(255,255,255,.35);
-  }
-  .btn-ghost:hover{border-color:var(--flash-orange);color:var(--flash-orange);}
-
-  /* ---------- STATS ---------- */
-  .stats{
-    display:flex;flex-wrap:wrap;gap:60px;margin-top:70px;
-    position:relative;z-index:2;
-  }
-  .stat .num{
-    font-size:clamp(40px,6vw,88px);font-weight:600;
-    line-height:1;letter-spacing:-.02em;
-  }
-  .stat .label{
-    margin-top:10px;font-size:13px;color:var(--studio-gray);
-    text-transform:uppercase;letter-spacing:.12em;
-  }
-  .stat .num.accent{color:var(--flash-orange);}
-
-  /* ---------- SECTIONS ---------- */
-  section{padding:120px 0;}
-  .eyebrow{
-    font-size:14px;text-transform:uppercase;letter-spacing:.16em;
-    color:var(--flash-orange);margin-bottom:24px;display:block;
-  }
-  h2.section-title{
-    font-size:clamp(36px,5vw,64px);
-    font-weight:600;line-height:1.02;letter-spacing:-.02em;
-    text-transform:uppercase;max-width:20ch;margin-bottom:60px;
-  }
-  h2.section-title .muted{color:var(--studio-gray);}
-
-  /* ---------- QUOTE ---------- */
-  .quote{border-top:1px solid rgba(255,255,255,.06);}
-  .quote blockquote{
-    font-size:clamp(28px,4.4vw,56px);
-    font-weight:600;line-height:1.15;letter-spacing:-.01em;
-    max-width:22ch;
-  }
-  .quote blockquote .muted{color:var(--studio-gray);}
-  .quote .cite{margin-top:34px;font-size:15px;color:var(--studio-gray);}
-
-  /* ---------- SERVICES ---------- */
-  .service-list{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;}
-  .service-card{
-    border:1px solid rgba(255,255,255,.1);border-radius:20px;
-    padding:36px 30px;background:rgba(255,255,255,.02);
-    transition:border-color .25s,background .25s;
-  }
-  .service-card:hover{border-color:var(--flash-orange);background:rgba(255,81,0,.06);}
-  .service-card .idx{color:var(--flash-orange);font-size:14px;letter-spacing:.1em;}
-  .service-card h3{font-size:24px;font-weight:600;margin:16px 0 12px;}
-  .service-card p{color:var(--studio-gray);font-size:15px;font-weight:300;}
-
-  /* ---------- PLANES ---------- */
-  .plans-grid{
-    display:grid;grid-template-columns:repeat(4,1fr);gap:18px;
-  }
-  .plan{
-    display:flex;flex-direction:column;
-    border:1px solid rgba(255,255,255,.1);border-radius:22px;
-    padding:32px 26px;background:rgba(255,255,255,.02);
-    transition:border-color .25s,transform .25s;
-    position:relative;
-  }
-  .plan:hover{border-color:var(--flash-orange);transform:translateY(-4px);}
-  .plan.featured{
-    border-color:var(--flash-orange);
-    background:linear-gradient(180deg,rgba(255,81,0,.10),rgba(255,81,0,0) 60%);
-  }
-  .plan .badge{
-    position:absolute;top:-12px;left:26px;
-    background:var(--flash-orange);color:var(--deep-black);
-    font-size:11px;font-weight:600;letter-spacing:.14em;
-    text-transform:uppercase;padding:5px 12px;border-radius:20px;
-  }
-  .plan .plan-name{font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:var(--studio-gray);}
-  .plan .plan-name strong{color:var(--soft-white);font-weight:600;}
-  .plan .price{
-    font-size:44px;font-weight:600;letter-spacing:-.02em;
-    line-height:1;margin:14px 0 6px;
-  }
-  .plan .delivery{font-size:13px;color:var(--flash-orange);letter-spacing:.06em;text-transform:uppercase;}
-  .plan .desc{font-size:14px;color:var(--studio-gray);font-weight:300;margin-top:18px;}
-  .plan ul{list-style:none;margin-top:20px;flex:1;}
-  .plan ul li{
-    font-size:14px;font-weight:300;color:var(--soft-white);
-    padding:8px 0 8px 22px;position:relative;
-    border-top:1px solid rgba(255,255,255,.06);
-  }
-  .plan ul li:first-child{border-top:none;}
-  .plan ul li::before{
-    content:"";position:absolute;left:0;top:14px;
-    width:8px;height:8px;border-radius:50%;background:var(--flash-orange);
-  }
-  .plan .plan-cta{
-    margin-top:22px;text-align:center;
-    padding:12px 20px;border-radius:30px;
-    border:1px solid rgba(255,255,255,.25);
-    font-size:13px;font-weight:500;letter-spacing:.08em;
-    text-transform:uppercase;transition:all .25s;
-  }
-  .plan .plan-cta:hover{background:var(--soft-white);color:var(--deep-black);border-color:var(--soft-white);}
-  .plan.featured .plan-cta{background:var(--soft-white);color:var(--deep-black);border-color:var(--soft-white);}
-  .plan.featured .plan-cta:hover{background:var(--flash-orange);border-color:var(--flash-orange);color:var(--deep-black);}
-
-  .diag-band{
-    margin-top:26px;padding:28px 32px;border-radius:22px;
-    background:linear-gradient(120deg,var(--flash-orange),var(--signal-red));
-    color:var(--soft-white);
-    display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap;
-  }
-  .diag-band .diag-copy h3{font-size:22px;font-weight:600;margin-bottom:6px;}
-  .diag-band .diag-copy p{font-size:14px;font-weight:300;max-width:60ch;opacity:.95;}
-  .diag-band .diag-price{font-size:32px;font-weight:600;letter-spacing:-.02em;white-space:nowrap;}
-
-  /* ---------- MÓDULOS ---------- */
-  .modules-intro{
-    max-width:56ch;color:var(--studio-gray);font-size:17px;font-weight:300;
-    margin-top:-20px;margin-bottom:50px;
-  }
-  .modules-grid{
-    display:grid;grid-template-columns:repeat(3,1fr);gap:16px;
-  }
-  .module{
-    border:1px solid rgba(255,255,255,.1);border-radius:16px;
-    padding:26px;background:rgba(255,255,255,.02);
-    display:flex;flex-direction:column;gap:10px;
-    transition:border-color .25s;
-  }
-  .module:hover{border-color:var(--flash-orange);}
-  .module .mod-name{font-size:17px;font-weight:600;}
-  .module .mod-price{font-size:22px;font-weight:600;color:var(--flash-orange);letter-spacing:-.01em;}
-  .module .mod-stack{font-size:13px;color:var(--studio-gray);font-weight:300;}
-
-  /* ---------- CARE ---------- */
-  .care{background:rgba(255,255,255,.02);border-top:1px solid rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.06);}
-  .care-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
-  .care-card{
-    border:1px solid rgba(255,255,255,.1);border-radius:22px;
-    padding:34px 30px;background:var(--deep-black);
-    display:flex;flex-direction:column;
-  }
-  .care-card.featured{border-color:var(--flash-orange);}
-  .care-card .care-name{font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:var(--studio-gray);}
-  .care-card .care-price{font-size:40px;font-weight:600;letter-spacing:-.02em;margin:14px 0 4px;}
-  .care-card .care-price small{font-size:15px;color:var(--studio-gray);font-weight:400;letter-spacing:0;}
-  .care-card ul{list-style:none;margin-top:22px;}
-  .care-card ul li{
-    font-size:14px;font-weight:300;color:var(--soft-white);
-    padding:9px 0 9px 22px;position:relative;
-  }
-  .care-card ul li::before{
-    content:"";position:absolute;left:0;top:14px;
-    width:8px;height:8px;border-radius:50%;background:var(--flash-orange);
-  }
-  .care-note{
-    margin-top:34px;padding:22px 26px;border-radius:16px;
-    border:1px solid rgba(255,255,255,.1);
-    color:var(--studio-gray);font-size:14px;font-weight:300;line-height:1.6;
-  }
-  .care-note strong{color:var(--soft-white);font-weight:500;}
-
-  /* ---------- PROCESO ---------- */
-  .proceso-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
-  .proceso-card .proceso-num{
-    font-size:56px;font-weight:600;color:var(--flash-orange);
-    letter-spacing:-.03em;line-height:1;
-  }
-  .proceso-card h3{font-size:22px;font-weight:600;margin:14px 0 10px;}
-  .proceso-card p{font-size:15px;font-weight:300;color:var(--studio-gray);}
-
-  /* ---------- FAQ ---------- */
-  .faq details{
-    border-top:1px solid rgba(255,255,255,.1);
-    padding:22px 0;
-  }
-  .faq details:last-of-type{border-bottom:1px solid rgba(255,255,255,.1);}
-  .faq summary{
-    font-size:20px;font-weight:500;cursor:pointer;
-    display:flex;justify-content:space-between;align-items:center;
-    list-style:none;gap:20px;
-  }
-  .faq summary::-webkit-details-marker{display:none;}
-  .faq summary::after{
-    content:"+";color:var(--flash-orange);font-size:28px;font-weight:400;
-    transition:transform .25s;line-height:1;
-  }
-  .faq details[open] summary::after{content:"–";}
-  .faq details p{
-    margin-top:16px;color:var(--studio-gray);font-size:16px;
-    font-weight:300;line-height:1.6;max-width:70ch;
-  }
-
-  /* ---------- CTA ---------- */
-  .cta{text-align:center;position:relative;overflow:hidden;}
-  .cta::before{
-    content:"";position:absolute;inset:0;
-    background:radial-gradient(circle at 50% 120%,
-      var(--flash-orange),rgba(16,1,1,0) 60%);
-    z-index:0;
-  }
-  .cta-inner{position:relative;z-index:2;}
-  .cta h2{
-    font-size:clamp(40px,7vw,96px);font-weight:600;
-    text-transform:uppercase;letter-spacing:-.02em;line-height:.98;
-  }
-  .cta p{margin:24px auto 0;max-width:48ch;color:var(--studio-gray);font-weight:300;}
-  .cta .btn{margin-top:40px;}
-
-  /* ---------- FOOTER ---------- */
-  footer{
-    border-top:1px solid rgba(255,255,255,.08);
-    padding:50px 0;font-size:14px;color:var(--studio-gray);
-  }
-  .footer-row{display:flex;justify-content:space-between;flex-wrap:wrap;gap:20px;align-items:center;}
-
-  /* ---------- REDUCED MOTION ---------- */
-  @media(prefers-reduced-motion:reduce){
-    *,*::before,*::after{
-      animation-duration:.001ms !important;
-      transition-duration:.001ms !important;
-      scroll-behavior:auto !important;
-    }
-    .btn:hover,.plan:hover{transform:none;}
-  }
-
-  /* ---------- RESPONSIVE ---------- */
-  @media(max-width:1024px){
-    .plans-grid{grid-template-columns:repeat(2,1fr);}
-    .modules-grid{grid-template-columns:repeat(2,1fr);}
-    .service-list{grid-template-columns:1fr;}
-    .care-grid{grid-template-columns:1fr;}
-    .proceso-grid{grid-template-columns:1fr;}
-  }
-  @media(max-width:640px){
-    .container{padding:0 22px;}
-    section{padding:80px 0;}
-    .nav-links{display:none;}
-    .plans-grid{grid-template-columns:1fr;}
-    .modules-grid{grid-template-columns:1fr;}
-    .hero .year,.hero .handle{left:22px;right:22px;}
-    .hero .handle{left:auto;}
-    .stats{gap:32px;margin-top:50px;}
-    .diag-band{flex-direction:column;align-items:flex-start;}
-  }
-</style>
+<link rel="stylesheet" href="/assets/style.css">
 </head>
 <body>
 
 <header>
   <div class="container nav">
-    <a href="#top" class="brand" aria-label="FLASK — inicio">FLASK<span class="dot">.</span></a>
+    <a href="/" class="brand" aria-label="FLASK — inicio">FLASK<span class="dot">.</span></a>
     <ul class="nav-links">
       <li><a href="#servicios">Ventajas</a></li>
       <li><a href="#planes">Planes</a></li>
       <li><a href="#modulos">Módulos</a></li>
       <li><a href="#care">Mantenimiento</a></li>
-      <li><a href="#contacto">Contacto</a></li>
+      <li><a href="/contacto.html">Contacto</a></li>
     </ul>
   </div>
 </header>
@@ -433,7 +99,6 @@
     <h2 class="section-title">Cuatro planes. <span class="muted">Cero letra chica.</span></h2>
 
     <div class="plans-grid">
-      <!-- Corporate (destacado, primero) -->
       <div class="plan featured">
         <span class="badge">Recomendado</span>
         <div class="plan-name"><strong>Flask Corporate</strong></div>
@@ -448,10 +113,9 @@
           <li>Analytics + Search Console</li>
           <li>Deploy en Netlify + dominio</li>
         </ul>
-        <a class="plan-cta" href="https://wa.me/50762272025?text=Hola%20FLASK%2C%20me%20interesa%20el%20plan%20Corporate%20%28%24850%29" target="_blank" rel="noopener">Cotizar Corporate</a>
+        <a class="plan-cta" href="/contacto.html?plan=corporate">Cotizar Corporate</a>
       </div>
 
-      <!-- Launch -->
       <div class="plan">
         <div class="plan-name"><strong>Flask Launch</strong></div>
         <div class="price">$450</div>
@@ -464,10 +128,9 @@
           <li>Analytics + píxel</li>
           <li>Deploy en Netlify</li>
         </ul>
-        <a class="plan-cta" href="https://wa.me/50762272025?text=Hola%20FLASK%2C%20me%20interesa%20el%20plan%20Launch%20%28%24450%29" target="_blank" rel="noopener">Cotizar Launch</a>
+        <a class="plan-cta" href="/contacto.html?plan=launch">Cotizar Launch</a>
       </div>
 
-      <!-- Commerce -->
       <div class="plan">
         <div class="plan-name"><strong>Flask Commerce</strong></div>
         <div class="price">$1,200</div>
@@ -480,10 +143,9 @@
           <li>Yappy (Tilopay) + tarjeta + PayPal</li>
           <li>Panel de pedidos</li>
         </ul>
-        <a class="plan-cta" href="https://wa.me/50762272025?text=Hola%20FLASK%2C%20me%20interesa%20el%20plan%20Commerce%20%28%241%2C200%29" target="_blank" rel="noopener">Cotizar Commerce</a>
+        <a class="plan-cta" href="/contacto.html?plan=commerce">Cotizar Commerce</a>
       </div>
 
-      <!-- Start -->
       <div class="plan">
         <div class="plan-name"><strong>Flask Start</strong></div>
         <div class="price">$295</div>
@@ -496,7 +158,7 @@
           <li>Analytics básico</li>
           <li>Deploy en Netlify</li>
         </ul>
-        <a class="plan-cta" href="https://wa.me/50762272025?text=Hola%20FLASK%2C%20me%20interesa%20el%20plan%20Start%20%28%24295%29" target="_blank" rel="noopener">Cotizar Start</a>
+        <a class="plan-cta" href="/contacto.html?plan=start">Cotizar Start</a>
       </div>
     </div>
 
@@ -518,46 +180,18 @@
     <p class="modules-intro">Un sistema completo no se cotiza en una sola factura. Se arma con módulos combinables: pagas y recibes por partes, sin riesgo y sin esperar meses para ver el primer entregable.</p>
 
     <div class="modules-grid">
-      <div class="module">
-        <span class="mod-name">Login + roles + usuarios</span>
-        <span class="mod-price">$450</span>
-        <span class="mod-stack">Supabase Auth + RLS</span>
-      </div>
-      <div class="module">
-        <span class="mod-name">Panel administrativo / dashboard</span>
-        <span class="mod-price">$650</span>
-        <span class="mod-stack">Next.js + Supabase + Recharts</span>
-      </div>
-      <div class="module">
-        <span class="mod-name">Sistema de reservas / citas</span>
-        <span class="mod-price">$600</span>
-        <span class="mod-stack">Supabase + FullCalendar</span>
-      </div>
-      <div class="module">
-        <span class="mod-name">Portal de clientes</span>
-        <span class="mod-price">$750</span>
-        <span class="mod-stack">Supabase Auth + RLS por usuario</span>
-      </div>
-      <div class="module">
-        <span class="mod-name">Integración de API externa</span>
-        <span class="mod-price">$350</span>
-        <span class="mod-stack">Railway worker / API route</span>
-      </div>
-      <div class="module">
-        <span class="mod-name">Automatización con IA / WhatsApp</span>
-        <span class="mod-price">$250–$900</span>
-        <span class="mod-stack">n8n + Claude API + WhatsApp API</span>
-      </div>
-      <div class="module">
-        <span class="mod-name">Inventario avanzado</span>
-        <span class="mod-price">$550</span>
-        <span class="mod-stack">Supabase + lógica de stock</span>
-      </div>
+      <div class="module"><span class="mod-name">Login + roles + usuarios</span><span class="mod-price">$450</span><span class="mod-stack">Supabase Auth + RLS</span></div>
+      <div class="module"><span class="mod-name">Panel administrativo / dashboard</span><span class="mod-price">$650</span><span class="mod-stack">Next.js + Supabase + Recharts</span></div>
+      <div class="module"><span class="mod-name">Sistema de reservas / citas</span><span class="mod-price">$600</span><span class="mod-stack">Supabase + FullCalendar</span></div>
+      <div class="module"><span class="mod-name">Portal de clientes</span><span class="mod-price">$750</span><span class="mod-stack">Supabase Auth + RLS por usuario</span></div>
+      <div class="module"><span class="mod-name">Integración de API externa</span><span class="mod-price">$350</span><span class="mod-stack">Railway worker / API route</span></div>
+      <div class="module"><span class="mod-name">Automatización con IA / WhatsApp</span><span class="mod-price">$250–$900</span><span class="mod-stack">n8n + Claude API + WhatsApp API</span></div>
+      <div class="module"><span class="mod-name">Inventario avanzado</span><span class="mod-price">$550</span><span class="mod-stack">Supabase + lógica de stock</span></div>
     </div>
   </div>
 </section>
 
-<!-- CARE / MANTENIMIENTO -->
+<!-- CARE -->
 <section class="care" id="care">
   <div class="container">
     <span class="eyebrow">FLASK Care</span>
@@ -658,12 +292,12 @@
 </section>
 
 <!-- CTA FINAL -->
-<section class="cta" id="contacto">
+<section class="cta">
   <div class="container cta-inner">
     <h2>Tu sitio en 5 días.</h2>
-    <p>Escríbenos por WhatsApp. Te enviamos un reporte PageSpeed de tu sitio actual y una propuesta escrita con alcance, cronograma y precio.</p>
-    <a class="btn btn-primary" href="https://wa.me/50762272025?text=Hola%20FLASK%2C%20quiero%20cotizar%20mi%20sitio%20web" target="_blank" rel="noopener">
-      <span class="dot"></span> Escribir por WhatsApp
+    <p>Cuéntanos qué necesitas. Te enviamos un reporte PageSpeed de tu sitio actual y una propuesta escrita con alcance, cronograma y precio.</p>
+    <a class="btn btn-primary" href="/contacto.html">
+      <span class="dot"></span> Ir al formulario
     </a>
   </div>
 </section>
@@ -671,7 +305,7 @@
 <!-- FOOTER -->
 <footer>
   <div class="container footer-row">
-    <a href="#top" class="brand" aria-label="FLASK — volver arriba">FLASK<span class="dot">.</span></a>
+    <a href="/" class="brand" aria-label="FLASK — inicio">FLASK<span class="dot">.</span></a>
     <div>© 2026 FLASK · Panamá · Sitios web Jamstack</div>
     <div>WhatsApp <a href="https://wa.me/50762272025" target="_blank" rel="noopener" style="color:var(--flash-orange);">+507 6227 2025</a></div>
   </div>

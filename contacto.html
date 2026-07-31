@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contacto — FLASK</title>
+<meta name="description" content="Cotiza tu sitio web con FLASK. Respuesta en menos de 24 horas. Panamá.">
+<meta name="theme-color" content="#100101">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="Contacto — FLASK">
+<meta property="og:description" content="Cotiza tu sitio con FLASK. Respuesta en <24h.">
+<meta property="og:locale" content="es_PA">
+
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%23FF5100'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+
+<header>
+  <div class="container nav">
+    <a href="/" class="brand" aria-label="FLASK — inicio">FLASK<span class="dot">.</span></a>
+    <ul class="nav-links">
+      <li><a href="/#servicios">Ventajas</a></li>
+      <li><a href="/#planes">Planes</a></li>
+      <li><a href="/#modulos">Módulos</a></li>
+      <li><a href="/#care">Mantenimiento</a></li>
+      <li><a href="/contacto.html" aria-current="page">Contacto</a></li>
+    </ul>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero hero-short">
+  <div class="container hero-inner">
+    <span class="year">Cotización</span>
+    <span class="handle">Respuesta &lt; 24 h</span>
+    <h1>Cotiza tu <span class="muted">sitio.</span></h1>
+    <p class="lead">Cuéntanos qué necesitas. Te respondemos con una propuesta escrita que incluye alcance, cronograma y precio final. Sin sorpresas ni letra chica.</p>
+  </div>
+</section>
+
+<!-- FORMULARIO + PANEL LATERAL -->
+<section style="padding-top:0;padding-bottom:60px;">
+  <div class="container">
+    <div class="contact-wrap">
+      <!-- Formulario -->
+      <div class="contact-form-card">
+        <h2>Escríbenos</h2>
+        <p class="form-lead">Los campos con <span style="color:var(--flash-orange);">*</span> son obligatorios. Nunca compartimos tus datos con terceros.</p>
+
+        <form
+          name="contacto"
+          method="POST"
+          action="/gracias.html"
+          data-netlify="true"
+          data-netlify-honeypot="bot-field"
+          netlify
+        >
+          <input type="hidden" name="form-name" value="contacto">
+          <p class="honeypot">
+            <label>No llenes este campo: <input name="bot-field"></label>
+          </p>
+
+          <div class="field">
+            <label for="nombre">Nombre <span class="req">*</span></label>
+            <input id="nombre" name="nombre" type="text" required autocomplete="name" placeholder="Cómo te llamas">
+          </div>
+
+          <div class="field">
+            <label for="email">Correo <span class="req">*</span></label>
+            <input id="email" name="email" type="email" required autocomplete="email" placeholder="tunombre@correo.com">
+          </div>
+
+          <div class="field">
+            <label for="whatsapp">WhatsApp</label>
+            <input id="whatsapp" name="whatsapp" type="tel" autocomplete="tel" placeholder="+507 6000 0000">
+          </div>
+
+          <div class="field">
+            <label for="plan">Plan de interés <span class="req">*</span></label>
+            <select id="plan" name="plan" required>
+              <option value="">Elige uno…</option>
+              <option value="corporate">Flask Corporate — $850</option>
+              <option value="launch">Flask Launch — $450</option>
+              <option value="commerce">Flask Commerce — $1,200</option>
+              <option value="start">Flask Start — $295</option>
+              <option value="diagnostico">Diagnóstico FLASK — $49</option>
+              <option value="modulos">Sistema por módulos</option>
+              <option value="care">Solo mantenimiento (Care)</option>
+              <option value="otro">Aún no lo sé</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="mensaje">Cuéntanos sobre tu proyecto <span class="req">*</span></label>
+            <textarea id="mensaje" name="mensaje" required placeholder="Qué haces, qué necesitas del sitio, si ya tienes uno actual, plazos…"></textarea>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+              <span class="dot"></span> Enviar mensaje
+            </button>
+            <span class="form-note">
+              ¿Prefieres WhatsApp? <a href="https://wa.me/50762272025?text=Hola%20FLASK%2C%20quiero%20cotizar%20mi%20sitio%20web" target="_blank" rel="noopener">Escríbenos por aquí</a>
+            </span>
+          </div>
+        </form>
+      </div>
+
+      <!-- Panel lateral -->
+      <aside class="contact-side">
+        <h3>Contacto directo</h3>
+        <div class="prefer">Respuesta rápida por <span class="muted">WhatsApp.</span></div>
+
+        <ul class="contact-list">
+          <li>
+            <span class="clabel">WhatsApp</span>
+            <div class="cvalue">
+              <a href="https://wa.me/50762272025?text=Hola%20FLASK%2C%20quiero%20cotizar%20mi%20sitio%20web" target="_blank" rel="noopener">+507 6227 2025</a>
+            </div>
+            <div class="cmeta">Respondemos en horario laboral.</div>
+          </li>
+          <li>
+            <span class="clabel">Horario</span>
+            <div class="cvalue">Lun–Vie · 9:00 – 18:00</div>
+            <div class="cmeta">Hora de Panamá (GMT-5)</div>
+          </li>
+          <li>
+            <span class="clabel">Ubicación</span>
+            <div class="cvalue">Panamá</div>
+            <div class="cmeta">Trabajamos 100 % en remoto para todo el país.</div>
+          </li>
+        </ul>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container footer-row">
+    <a href="/" class="brand" aria-label="FLASK — inicio">FLASK<span class="dot">.</span></a>
+    <div>© 2026 FLASK · Panamá · Sitios web Jamstack</div>
+    <div>WhatsApp <a href="https://wa.me/50762272025" target="_blank" rel="noopener" style="color:var(--flash-orange);">+507 6227 2025</a></div>
+  </div>
+</footer>
+
+<script>
+  // Prellena el select si viene ?plan=... desde la home
+  (function(){
+    var params = new URLSearchParams(window.location.search);
+    var plan = params.get('plan');
+    if(plan){
+      var sel = document.getElementById('plan');
+      if(sel && Array.from(sel.options).some(function(o){return o.value === plan;})){
+        sel.value = plan;
+      }
+    }
+  })();
+</script>
+
+</body>
+</html>
