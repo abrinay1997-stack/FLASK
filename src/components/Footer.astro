@@ -1,0 +1,18 @@
+---
+import { site, contact, waLink } from '../data/site';
+---
+
+<footer>
+  <div class="container footer-row">
+    <a href="/" class="brand" aria-label={`${site.name} — inicio`}>
+      {site.name}<span class="dot">.</span>
+    </a>
+    <div>© {site.year} {site.name} · {site.location} · Sitios web Jamstack</div>
+    <div>
+      WhatsApp{' '}
+      <a href={waLink()} target="_blank" rel="noopener" style="color:var(--flash-orange);">
+        {contact.whatsapp}
+      </a>
+    </div>
+  </div>
+</footer>

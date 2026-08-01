@@ -1,0 +1,169 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PlanCard from '../components/PlanCard.astro';
+import ModuleCard from '../components/ModuleCard.astro';
+import CareCard from '../components/CareCard.astro';
+import DiagBand from '../components/DiagBand.astro';
+
+import { site, waLink } from '../data/site';
+import { plans } from '../data/plans';
+import { modules } from '../data/modules';
+import { carePlans, careNote } from '../data/care';
+import { faq } from '../data/faq';
+import { services, procesoSteps } from '../data/services';
+---
+
+<BaseLayout
+  title={`${site.name} — ${site.tagline} ${site.location}.`}
+  description={site.description}
+  activePath="/"
+>
+  <!-- HERO -->
+  <section class="hero" id="top">
+    <div class="container hero-inner">
+      <span class="year">{site.year}</span>
+      <span class="handle">{site.location}</span>
+      <h1>Sitios rápidos. <span class="muted">Código</span> tuyo.</h1>
+      <p class="lead">
+        Diseñamos y programamos sitios Jamstack que cargan en menos de un segundo, entregados en
+        días, con el código 100 % en tu propio GitHub. Desde $295.
+      </p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href={waLink()} target="_blank" rel="noopener">
+          <span class="dot"></span> Hablar por WhatsApp
+        </a>
+        <a class="btn btn-ghost" href="#planes">Ver planes</a>
+      </div>
+
+      <div class="stats">
+        <div class="stat"><div class="num">&lt;1s</div><div class="label">Tiempo de carga</div></div>
+        <div class="stat"><div class="num accent">≥90</div><div class="label">PageSpeed garantizado</div></div>
+        <div class="stat"><div class="num">5</div><div class="label">Días de entrega</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- QUOTE -->
+  <section class="quote">
+    <div class="container">
+      <blockquote>
+        El de $199 te entrega un WordPress <span class="muted">que carga en 5 segundos y que Google castiga.</span>
+        Nosotros te entregamos un sitio que carga en menos de 1 segundo,
+        <span class="muted">con el código en tu propio GitHub, en 5 días.</span>
+      </blockquote>
+      <div class="cite">— Argumento comercial, {site.name}</div>
+    </div>
+  </section>
+
+  <!-- SERVICIOS -->
+  <section class="services" id="servicios">
+    <div class="container">
+      <span class="eyebrow">Por qué {site.name}</span>
+      <h2 class="section-title">
+        Tres ventajas <span class="muted">que la competencia no puede copiar.</span>
+      </h2>
+      <div class="service-list">
+        {services.map((s) => (
+          <div class="service-card">
+            <span class="idx">{s.idx}</span>
+            <h3>{s.title}</h3>
+            <p>{s.desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- PLANES -->
+  <section class="planes" id="planes">
+    <div class="container">
+      <span class="eyebrow">Catálogo</span>
+      <h2 class="section-title">Cuatro planes. <span class="muted">Cero letra chica.</span></h2>
+
+      <div class="plans-grid">
+        {plans.map((plan) => <PlanCard plan={plan} />)}
+      </div>
+
+      <DiagBand />
+    </div>
+  </section>
+
+  <!-- MÓDULOS -->
+  <section class="modulos" id="modulos">
+    <div class="container">
+      <span class="eyebrow">Proyectos grandes</span>
+      <h2 class="section-title">
+        ¿Necesitas un sistema? <span class="muted">Se vende por módulos.</span>
+      </h2>
+      <p class="modules-intro">
+        Un sistema completo no se cotiza en una sola factura. Se arma con módulos combinables:
+        pagas y recibes por partes, sin riesgo y sin esperar meses para ver el primer entregable.
+      </p>
+
+      <div class="modules-grid">
+        {modules.map((mod) => <ModuleCard module={mod} />)}
+      </div>
+    </div>
+  </section>
+
+  <!-- CARE -->
+  <section class="care" id="care">
+    <div class="container">
+      <span class="eyebrow">{site.name} Care</span>
+      <h2 class="section-title">Tu sitio, <span class="muted">cuidado todos los meses.</span></h2>
+
+      <div class="care-grid">
+        {carePlans.map((plan) => <CareCard plan={plan} />)}
+      </div>
+
+      <div class="care-note">
+        <strong>Pago anual adelantado:</strong> {careNote.replace('Pago anual adelantado: ', '')}
+      </div>
+    </div>
+  </section>
+
+  <!-- PROCESO -->
+  <section class="proceso">
+    <div class="container">
+      <span class="eyebrow">Cómo trabajamos</span>
+      <h2 class="section-title">Sin sorpresas. <span class="muted">Sin scope creep.</span></h2>
+      <div class="proceso-grid">
+        {procesoSteps.map((step) => (
+          <div class="proceso-card">
+            <div class="proceso-num">{step.num}</div>
+            <h3>{step.title}</h3>
+            <p>{step.desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="faq">
+    <div class="container">
+      <span class="eyebrow">Preguntas</span>
+      <h2 class="section-title">Antes de <span class="muted">escribirnos.</span></h2>
+      {faq.map((item) => (
+        <details>
+          <summary>{item.q}</summary>
+          <p>{item.a}</p>
+        </details>
+      ))}
+    </div>
+  </section>
+
+  <!-- CTA FINAL -->
+  <section class="cta">
+    <div class="container cta-inner">
+      <h2>Tu sitio en 5 días.</h2>
+      <p>
+        Cuéntanos qué necesitas. Te enviamos un reporte PageSpeed de tu sitio actual y una
+        propuesta escrita con alcance, cronograma y precio.
+      </p>
+      <a class="btn btn-primary" href="/contacto.html">
+        <span class="dot"></span> Ir al formulario
+      </a>
+    </div>
+  </section>
+</BaseLayout>

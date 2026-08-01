@@ -1,0 +1,62 @@
+---
+import '../styles/global.css';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import { site } from '../data/site';
+
+interface Props {
+  title: string;
+  description?: string;
+  noindex?: boolean;
+  activePath?: string;
+  bodyClass?: string;
+}
+
+const {
+  title,
+  description = site.description,
+  noindex = false,
+  activePath,
+  bodyClass,
+} = Astro.props;
+
+const fullTitle = title.includes(site.name) ? title : `${title} — ${site.name}`;
+---
+
+<!DOCTYPE html>
+<html lang={site.lang}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="theme-color" content={site.themeColor} />
+    {noindex && <meta name="robots" content="noindex" />}
+
+    <!-- OpenGraph / Twitter -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:locale" content={site.locale} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%23FF5100'/%3E%3C/svg%3E"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Archivo:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body class={bodyClass}>
+    <Nav activePath={activePath} />
+    <slot />
+    <Footer />
+  </body>
+</html>

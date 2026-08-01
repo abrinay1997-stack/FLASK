@@ -1,0 +1,22 @@
+---
+import type { Plan } from '../data/plans';
+
+interface Props {
+  plan: Plan;
+}
+
+const { plan } = Astro.props;
+const cotizarHref = `/contacto.html?plan=${plan.slug}`;
+---
+
+<div class:list={['plan', { featured: plan.featured }]}>
+  {plan.badge && <span class="badge">{plan.badge}</span>}
+  <div class="plan-name"><strong>{plan.name}</strong></div>
+  <div class="price">{plan.price}</div>
+  <div class="delivery">{plan.delivery}</div>
+  <p class="desc">{plan.desc}</p>
+  <ul>
+    {plan.features.map((f) => <li>{f}</li>)}
+  </ul>
+  <a class="plan-cta" href={cotizarHref}>Cotizar {plan.name.replace('Flask ', '')}</a>
+</div>

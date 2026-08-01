@@ -1,0 +1,26 @@
+{
+  "name": "flask",
+  "version": "1.0.0",
+  "description": "Sitio web de FLASK — agencia de sitios Jamstack en Panamá.",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abrinay1997-stack/FLASK.git"
+  },
+  "author": "FLASK",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/abrinay1997-stack/FLASK/issues"
+  },
+  "homepage": "https://github.com/abrinay1997-stack/FLASK#readme",
+  "dependencies": {
+    "astro": "^7.1.6"
+  }
+}

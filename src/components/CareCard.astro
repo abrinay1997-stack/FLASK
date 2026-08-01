@@ -1,0 +1,17 @@
+---
+import type { CarePlan } from '../data/care';
+
+interface Props {
+  plan: CarePlan;
+}
+
+const { plan } = Astro.props;
+---
+
+<div class:list={['care-card', { featured: plan.featured }]}>
+  <div class="care-name">{plan.name}</div>
+  <div class="care-price">{plan.price}<small>{plan.suffix}</small></div>
+  <ul>
+    {plan.features.map((f) => <li>{f}</li>)}
+  </ul>
+</div>

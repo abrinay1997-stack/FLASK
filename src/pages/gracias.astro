@@ -1,0 +1,32 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { waLink } from '../data/site';
+---
+
+<BaseLayout
+  title="Gracias"
+  description="Mensaje recibido. FLASK te responde en menos de 24 horas."
+  noindex={true}
+>
+  <main class="simple-page">
+    <div class="simple-inner">
+      <span class="simple-tag">Mensaje recibido</span>
+      <h1>Gracias. <br /><span style="color:var(--flash-orange);">Te escribimos pronto.</span></h1>
+      <p>
+        Ya llegó tu mensaje. Te respondemos en menos de 24 horas con una propuesta escrita: alcance,
+        cronograma y precio. Si prefieres cerrar antes, escríbenos directo por WhatsApp.
+      </p>
+      <div class="simple-actions">
+        <a
+          class="btn btn-primary"
+          href={waLink('Hola FLASK, acabo de enviar el formulario')}
+          target="_blank"
+          rel="noopener"
+        >
+          <span class="dot"></span> Ir a WhatsApp
+        </a>
+        <a class="btn btn-ghost" href="/">Volver al inicio</a>
+      </div>
+    </div>
+  </main>
+</BaseLayout>

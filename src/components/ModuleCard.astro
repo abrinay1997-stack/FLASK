@@ -1,0 +1,15 @@
+---
+import type { Module } from '../data/modules';
+
+interface Props {
+  module: Module;
+}
+
+const { module: mod } = Astro.props;
+---
+
+<div class="module">
+  <span class="mod-name">{mod.name}</span>
+  <span class="mod-price">{mod.price}</span>
+  <span class="mod-stack">{mod.stack}</span>
+</div>

@@ -1,0 +1,27 @@
+---
+import { navLinks } from '../data/services';
+
+interface Props {
+  activePath?: string;
+}
+
+const { activePath = '' } = Astro.props;
+---
+
+<header>
+  <div class="container nav">
+    <a href="/" class="brand" aria-label="FLASK — inicio">FLASK<span class="dot">.</span></a>
+    <ul class="nav-links">
+      {navLinks.map((link) => (
+        <li>
+          <a
+            href={link.href}
+            aria-current={activePath === link.href ? 'page' : undefined}
+          >
+            {link.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+</header>

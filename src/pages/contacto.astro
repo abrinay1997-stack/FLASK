@@ -1,0 +1,159 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { contact, waLink, site } from '../data/site';
+import { planOptions } from '../data/plans';
+---
+
+<BaseLayout
+  title="Contacto"
+  description={`Cotiza tu sitio web con ${site.name}. Respuesta en menos de 24 horas. ${site.location}.`}
+  activePath="/contacto.html"
+>
+  <!-- HERO -->
+  <section class="hero hero-short">
+    <div class="container hero-inner">
+      <span class="year">Cotización</span>
+      <span class="handle">Respuesta &lt; 24 h</span>
+      <h1>Cotiza tu <span class="muted">sitio.</span></h1>
+      <p class="lead">
+        Cuéntanos qué necesitas. Te respondemos con una propuesta escrita que incluye alcance,
+        cronograma y precio final. Sin sorpresas ni letra chica.
+      </p>
+    </div>
+  </section>
+
+  <!-- FORMULARIO + PANEL LATERAL -->
+  <section style="padding-top:0;padding-bottom:60px;">
+    <div class="container">
+      <div class="contact-wrap">
+        <!-- Formulario -->
+        <div class="contact-form-card">
+          <h2>Escríbenos</h2>
+          <p class="form-lead">
+            Los campos con <span style="color:var(--flash-orange);">*</span> son obligatorios. Nunca
+            compartimos tus datos con terceros.
+          </p>
+
+          <form
+            name="contacto"
+            method="POST"
+            action="/gracias.html"
+            data-netlify="true"
+            data-netlify-honeypot="bot-field"
+            netlify
+          >
+            <input type="hidden" name="form-name" value="contacto" />
+            <p class="honeypot">
+              <label>No llenes este campo: <input name="bot-field" /></label>
+            </p>
+
+            <div class="field">
+              <label for="nombre">Nombre <span class="req">*</span></label>
+              <input
+                id="nombre"
+                name="nombre"
+                type="text"
+                required
+                autocomplete="name"
+                placeholder="Cómo te llamas"
+              />
+            </div>
+
+            <div class="field">
+              <label for="email">Correo <span class="req">*</span></label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                required
+                autocomplete="email"
+                placeholder="tunombre@correo.com"
+              />
+            </div>
+
+            <div class="field">
+              <label for="whatsapp">WhatsApp</label>
+              <input
+                id="whatsapp"
+                name="whatsapp"
+                type="tel"
+                autocomplete="tel"
+                placeholder="+507 6000 0000"
+              />
+            </div>
+
+            <div class="field">
+              <label for="plan">Plan de interés <span class="req">*</span></label>
+              <select id="plan" name="plan" required>
+                <option value="">Elige uno…</option>
+                {planOptions.map((opt) => (
+                  <option value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="mensaje">Cuéntanos sobre tu proyecto <span class="req">*</span></label>
+              <textarea
+                id="mensaje"
+                name="mensaje"
+                required
+                placeholder="Qué haces, qué necesitas del sitio, si ya tienes uno actual, plazos…"
+              />
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">
+                <span class="dot"></span> Enviar mensaje
+              </button>
+              <span class="form-note">
+                ¿Prefieres WhatsApp?{' '}
+                <a href={waLink()} target="_blank" rel="noopener">Escríbenos por aquí</a>
+              </span>
+            </div>
+          </form>
+        </div>
+
+        <!-- Panel lateral -->
+        <aside class="contact-side">
+          <h3>Contacto directo</h3>
+          <div class="prefer">Respuesta rápida por <span class="muted">WhatsApp.</span></div>
+
+          <ul class="contact-list">
+            <li>
+              <span class="clabel">WhatsApp</span>
+              <div class="cvalue">
+                <a href={waLink()} target="_blank" rel="noopener">{contact.whatsapp}</a>
+              </div>
+              <div class="cmeta">Respondemos en horario laboral.</div>
+            </li>
+            <li>
+              <span class="clabel">Horario</span>
+              <div class="cvalue">{contact.horario}</div>
+              <div class="cmeta">{contact.timezone}</div>
+            </li>
+            <li>
+              <span class="clabel">Ubicación</span>
+              <div class="cvalue">{site.location}</div>
+              <div class="cmeta">Trabajamos 100 % en remoto para todo el país.</div>
+            </li>
+          </ul>
+        </aside>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script is:inline>
+  // Prellena el <select> si viene ?plan=... desde la home
+  (function () {
+    var params = new URLSearchParams(window.location.search);
+    var plan = params.get('plan');
+    if (plan) {
+      var sel = document.getElementById('plan');
+      if (sel && Array.from(sel.options).some(function (o) { return o.value === plan; })) {
+        sel.value = plan;
+      }
+    }
+  })();
+</script>
