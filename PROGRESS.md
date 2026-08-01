@@ -244,48 +244,46 @@ un endpoint externo (Formspree, Web3Forms): cambiar el `action` del form y quita
 
 ## Pendientes
 
-### Fase D — Contenido pendiente del cliente
+> Lista única y ordenada por impacto. Si retomas el proyecto, empieza por P1.
+> El porqué de los puntos de auditoría está desarrollado en `AUDITORIA.md`.
 
-Bloqueado por contenido real. NO inventar (regla CLAUDE.md original).
+### P1 — Bloquea lanzar de verdad
 
-- **`/sobre`** — bio real, foto profesional y credenciales técnicas. El bloque "Detrás de FLASK"
-  ya no muestra la nota interna: habla del estudio y de compromisos que ya están por escrito en
-  `/planes` y `/proceso`. Cuando llegue la bio, sustituir el `<dl class="who-facts">` y añadir la
-  foto en `src/assets/sobre/`. Hay un comentario en la página marcando el punto exacto.
-- **`/proyectos`** — 3 demos verticales en vivo (inmobiliaria, clínica, restaurante) con casos de
-  estudio. Página aún no creada; cuando existan las demos se crea.
-- **`/blog`** — solo si van a existir posts reales. Cero blogs vacíos.
+| # | Pendiente | Quién lo desbloquea | Nota |
+|---|---|---|---|
+| 1 | **El formulario solo sale por WhatsApp.** Único punto donde se pierde un lead: en escritorio sin WhatsApp Web el flujo se corta. | Decisión tuya + cuenta externa | Si eliges correo: crear cuenta en Formspree o Web3Forms, poner el endpoint en el `action` del form de `contacto.astro` y borrar el interceptor `data-wa-fallback`. Ver "El formulario de contacto, explicado". |
+| 2 | **Cero prueba social.** Ni testimonios, ni logos, ni casos. Contra WordPress barato la objeción real no es el precio, es "¿y este quién es?". | Contenido tuyo | Lo que más movería la aguja de todo lo que queda. |
+| 3 | **Analítica.** No hay ninguna instalada. Sin datos, las decisiones de conversión son opinión. | Decisión tuya | Decidir antes de anunciar el sitio, no después. |
 
-### Pendientes que salieron de la auditoría
+### P2 — Contenido tuyo que no se puede inventar
 
-Ordenados por impacto. El detalle y el porqué están en `AUDITORIA.md`.
+Regla del CLAUDE.md original: **no inventar contenido del cliente.**
 
-1. **El formulario solo sale por WhatsApp.** Es el único punto donde se pierde un
-   lead: quien esté en escritorio sin WhatsApp Web se queda a medias. Decidir si
-   se añade un endpoint de correo (Formspree/Web3Forms) como vía principal.
-2. **Cero prueba social en todo el sitio.** Ni testimonios, ni logos, ni casos.
-   Contra WordPress barato la objeción real no es el precio, es "¿y este quién
-   es?". Bloqueado por contenido del cliente.
-3. **`/planes` tiene 16 CTA compitiendo.** Las tarjetas de capacidad no deberían
-   ser enlaces individuales, sino una lista con un solo CTA al cierre del bloque.
-4. **Sin señal de progreso en páginas largas** (`/planes` mide ~7000 px). Una
-   fila de anclas bajo el titular lo resuelve barato.
-5. **Sin probar con lector de pantalla real** (NVDA/VoiceOver). Lo auditado es
-   estructura, no experiencia.
-6. **La marca es solo tipográfica.** El rayo del favicon no aparece en el nav, ni
-   en el footer, ni en la imagen social. Y no hay versión sobre fondo claro para
-   facturas o propuestas en PDF.
+| # | Pendiente | Dónde tocar |
+|---|---|---|
+| 4 | **Bio real de `/sobre`** — historia, foto profesional, credenciales. | Sustituir el bloque `.who-copy` de `sobre.astro`. Hay un comentario en la página marcando el punto exacto. La foto va a `src/assets/sobre/` y se registra en `src/data/images.ts`. |
+| 5 | **`/proyectos`** — 3 demos verticales en vivo (inmobiliaria, clínica, restaurante) con casos de estudio. | Página aún no creada; se crea cuando existan las demos. |
+| 6 | **`/blog`** — solo si van a existir posts reales. Cero blogs vacíos. | — |
 
-### Fase G — Medición y decisiones abiertas
+### P3 — Mejoras de conversión y navegación
 
-- **Lighthouse pass en el sitio en vivo** → LCP, INP y CLS reales. Es lo único que no se puede
-  cerrar desde el repo: hay que medirlo en Pages con el CDN real.
-- **Search Console** — sitemap y canonical ya se emiten bien; falta darlos de alta y verificar.
-- **Analytics** — todavía no hay ninguno instalado. Decidir si va (y cuál) antes de anunciar el sitio.
-- **URLs limpias sin `.html`** (`trailingSlash:'always'` + `format:'directory'`). Cambiaría todas
-  las rutas de `links.ts`; hacerlo antes de que el sitio tenga enlaces externos apuntándole, no después.
-- **Dominio propio** — al comprarlo: cambiar `site` en `astro.config.mjs`, borrar `base`, y volver a
-  correr `npm run brand` no hace falta (los assets no llevan dominio dentro).
+| # | Pendiente | Nota |
+|---|---|---|
+| 7 | **`/planes` tiene 16 CTA compitiendo.** | Las 7 tarjetas de capacidad no deberían ser enlaces individuales, sino una lista con un solo CTA al cierre del bloque. |
+| 8 | **Sin señal de progreso en páginas largas** (`/planes` mide ~7000 px). | Barato: una fila de anclas bajo el titular (`Planes · Capacidades · Care · FAQ`). Caro: índice lateral pegajoso. |
+| 9 | **El hero de la home no dice qué hace FLASK hasta la bajada.** | Apuesta consciente por tono sobre claridad (el descriptor se quitó a petición). Revisable si algún día llega tráfico frío de búsqueda. |
+
+### P4 — Técnico y de marca
+
+| # | Pendiente | Nota |
+|---|---|---|
+| 10 | **Lighthouse en el sitio en vivo** → LCP, INP y CLS reales. | Lo único que no se puede cerrar desde el repo: hay que medirlo en Pages con el CDN real. |
+| 11 | **Search Console.** | Sitemap y canonical ya se emiten bien; falta darlos de alta y verificar. |
+| 12 | **Prueba con lector de pantalla real** (NVDA/VoiceOver). | Lo auditado es estructura, no experiencia. Es el único hueco de accesibilidad que queda. |
+| 13 | **La marca es solo tipográfica.** | El rayo del favicon no aparece en el nav, ni en el footer, ni en la imagen social. Tampoco hay versión sobre fondo claro para facturas o propuestas en PDF. |
+| 14 | **URLs limpias sin `.html`** (`trailingSlash:'always'` + `format:'directory'`). | Cambiaría todas las rutas de `links.ts`. Hacerlo **antes** de que el sitio tenga enlaces externos apuntándole, no después. |
+| 15 | **Dominio propio.** | Al comprarlo: cambiar `site` en `astro.config.mjs` y borrar `base`. No hace falta volver a correr `npm run brand` (los assets no llevan dominio dentro). |
+| 16 | **El shader es un `requestAnimationFrame` permanente** mientras el hero está en pantalla. | Ya se pausa fuera del viewport y no arranca con reduce-motion. Si algún día importa la batería, se puede bajar a 30 fps sin que se note. |
 
 ---
 
