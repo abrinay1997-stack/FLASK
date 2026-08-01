@@ -56,6 +56,7 @@ FLASK/
 │   │   ├── faq.ts                 # 5 preguntas
 │   │   ├── services.ts            # 3 servicios + procesoSteps + navLinks
 │   │   ├── images.ts              # mapeo imagen ↔ sección + alt + encuadre
+│   │   ├── quote.ts               # motor del cotizador (compone precios, no los inventa)
 │   │   └── links.ts               # helper withBase() + routes.*
 │   ├── pages/
 │   │   ├── index.astro            # home aliviada (hero + previews + CTA)
@@ -63,6 +64,7 @@ FLASK/
 │   │   ├── planes.astro           # precios → respaldo → vitrina → capacidades → care → FAQ
 │   │   ├── proceso.astro          # banda a sangre + 3 escenas con número gigante
 │   │   ├── sobre.astro            # manifiesto + "Hablas con quien programa" (bio pendiente)
+│   │   ├── cotizador.astro        # 4 preguntas → precio → datos. Destino del CTA del nav
 │   │   ├── contacto.astro         # form → WhatsApp (o Netlify Forms) + panel lateral
 │   │   ├── gracias.astro          # post-envío (noindex)
 │   │   └── 404.astro              # error (noindex)
@@ -85,7 +87,8 @@ FLASK/
 │   └── images/README.md           # instrucciones para subir mockups
 ├── scripts/
 │   └── generate-brand-assets.mjs  # `npm run brand` → favicons + og.png
-├── AUDITORIA.md                   # auditoría medida: jerarquía, a11y, conversión, animación, marca
+├── AUDITORIA.md                   # auditoría medida: jerarquía, a11y, intuitividad, animación, marca
+├── AUDITORIA-CONVERSION.md        # auditoría de venta + por qué cotizador y no chatbot
 ├── stitch_3d_web_creation_hero/   # VERSIONADO — referencias visuales del equipo (ver su README)
 ├── .github/workflows/deploy.yml   # deploy a Pages
 ├── astro.config.mjs               # site + base + sitemap + compressHTML
@@ -99,13 +102,14 @@ FLASK/
 
 1. **Rutas internas: nunca hardcodear `href="/..."`.** Usar `routes.*` o `withBase('...')` de `src/data/links.ts`. GitHub Pages sirve bajo `/FLASK/`; hardcodear rompe todo.
 2. **Datos siempre en `src/data/*.ts`.** Cambiar el precio de un plan = 1 sola edición. Cero copy-paste entre páginas.
-3. **Un solo H1 por página** — respetado en las 8 páginas.
+3. **Un solo H1 por página** — respetado en las 9 páginas (verificado en las pruebas e2e).
 4. **Cero placeholders** en producción: nada de `#`, `lorem`, `G-XXXXXXXXXX`.
 5. **Solo animar `transform` y `opacity`** — regla del CLAUDE.md original.
 6. **Máx 2 secciones con `pin` por página**, ningún `pin` en móvil sin adaptar.
 7. **Un solo acento cromático:** naranja `--flash-orange #FF5100` para UI **y para los acentos de texto**; rojo `--ember-red #FF1E1E` reservado a fondos (shader del hero, vetas de las imágenes). Verificado: el ember no aparece en ningún texto del sitio.
-9. **Las imágenes van de fondo, nunca como pieza de producto.** Se montan con `<SceneBg>`: a sangre, apagadas y bajo un velo que abre carril al texto. Lo que brilla es el titular.
 8. **`prefers-reduced-motion: reduce`** debe desactivar todas las animaciones. Ya implementado en Reveal, SmoothScroll, HeroShader.
+9. **Las imágenes van de fondo, nunca como pieza de producto.** Se montan con `<SceneBg>`: a sangre, apagadas y bajo un velo que abre carril al texto. Lo que brilla es el titular.
+10. **El cotizador no tiene precios propios.** `src/data/quote.ts` los compone de `plans.ts` y `modules.ts`. Un cotizador que diga un número distinto al de `/planes` destruye justo la confianza que el sitio vende.
 
 ---
 
@@ -133,7 +137,7 @@ Sitio inicial en HTML puro. Deprecado.
 ### Fase C — Imágenes cinemáticas integradas ✅
 - Las 8 imágenes utilizables de Stitch copiadas a `src/assets/<página>/` con nombre kebab-case
 - `src/data/images.ts` como único mapeo imagen ↔ sección, con `alt` y `object-position` por imagen
-- `<CineFrame>`: marco reutilizable con recorte, `ratio` distinto en desktop y móvil, baño de marca y zoom al hover
+- Marco reutilizable con recorte y baño de marca (`<CineFrame>`, **sustituido después por `<SceneBg>` en la fase H**)
 - `/servicios`: los tres `.visual-placeholder` reemplazados por las imágenes reales
 - `/sobre`: banda del manifiesto + visual en "Detrás de FLASK"
 - `/proceso`: banda 21:8 entre el hero y los pasos
@@ -149,6 +153,35 @@ Sitio inicial en HTML puro. Deprecado.
   y guard `dataset.bound` para no duplicar listeners
 - **Skip link** "Saltar al contenido" + `<main id="contenido">` en el layout
 - `npm run check` (astro check) en verde: 0 errores
+
+### Fase I — Cotizador y auditoría de conversión ✅
+
+Ver `AUDITORIA-CONVERSION.md` para el razonamiento completo.
+
+**`/cotizador`** — cuatro preguntas, precio al final, datos después.
+- Los precios se **componen** de `plans.ts` y `modules.ts`; el cotizador no tiene
+  tabla propia. Verificado en pruebas: el $850 del cotizador y el de `/planes` son
+  el mismo dato.
+- Recomienda el plan **más pequeño** que cubre lo marcado y dice por qué.
+- Las capacidades ya incluidas salen como "Incluido" en vez de ocultarse.
+- Los rangos se propagan honestos (IA $250–$900 sobre Start → "$545 – $1,195").
+- El envío compone el resumen completo por WhatsApp: no se repite nada.
+- **El CTA "Cotizar" del nav apunta aquí**, no al formulario. Es el cambio de mayor
+  alcance: ese botón está en las 9 páginas.
+
+**Por qué no un chatbot:** el sitio es estático (no hay dónde correrlo sin exponer
+una clave o montar serverless), contradice el posicionamiento de "precio público,
+cero consultar por interno", y un precio alucinado es un pasivo comercial. La tarea
+es cerrada (~10 variables): el wizard gana; el chat gana en soporte, no en esto.
+
+**Por qué el precio va antes de pedir datos:** pedir el correo para "revelar" el
+precio contradiría toda la promesa del sitio. Enseñarlo primero convierte el
+formulario final de peaje en paso obvio.
+
+**Bug encontrado:** las filas del desglose las crea el script con `innerHTML`, así
+que nacen sin el `data-astro-cid-*` de la página y los estilos con scope no las
+alcanzaban. Resuelto con `.cot-lines :global(.cot-line)`. Es el mismo patrón que ya
+mordió en la fase C con los componentes.
 
 ### Fase H — Rediseño de jerarquía y auditoría ✅
 
@@ -247,13 +280,17 @@ un endpoint externo (Formspree, Web3Forms): cambiar el `action` del form y quita
 > Lista única y ordenada por impacto. Si retomas el proyecto, empieza por P1.
 > El porqué de los puntos de auditoría está desarrollado en `AUDITORIA.md`.
 
-### P1 — Bloquea lanzar de verdad
+### P1 — Bloquea vender de verdad
+
+Los tres primeros salen de `AUDITORIA-CONVERSION.md` y están ordenados por dinero perdido.
 
 | # | Pendiente | Quién lo desbloquea | Nota |
 |---|---|---|---|
-| 1 | **El formulario solo sale por WhatsApp.** Único punto donde se pierde un lead: en escritorio sin WhatsApp Web el flujo se corta. | Decisión tuya + cuenta externa | Si eliges correo: crear cuenta en Formspree o Web3Forms, poner el endpoint en el `action` del form de `contacto.astro` y borrar el interceptor `data-wa-fallback`. Ver "El formulario de contacto, explicado". |
-| 2 | **Cero prueba social.** Ni testimonios, ni logos, ni casos. Contra WordPress barato la objeción real no es el precio, es "¿y este quién es?". | Contenido tuyo | Lo que más movería la aguja de todo lo que queda. |
-| 3 | **Analítica.** No hay ninguna instalada. Sin datos, las decisiones de conversión son opinión. | Decisión tuya | Decidir antes de anunciar el sitio, no después. |
+| 1 | **Cero prueba social.** 17 precios publicados y cero pruebas de que alguien haya pagado alguno. La objeción real no es el precio, es "¿y este quién es?". | Contenido tuyo | Lo mínimo hoy y sin cliente nuevo: el PageSpeed de **este** sitio, en grande, con enlace verificable a Google. Lo correcto: las 3 demos verticales en vivo. |
+| 2 | **Cero reversión de riesgo.** "Garantizado" aparece 1 vez en todo el sitio y es sobre PageSpeed. El cliente pone el 50 % por adelantado y asume el 100 % del riesgo. | Decisión tuya | Algo acotado que puedas cumplir: "si el primer diseño no te convence, devolvemos el adelanto". En Jamstack productizado el coste real es bajo. |
+| 3 | **Analítica.** No hay ninguna. Sin datos, todo lo de las auditorías es criterio informado, no certeza. | Decisión tuya | Decidir antes de anunciar el sitio, no después. Las 4 métricas que importan están al final de `AUDITORIA-CONVERSION.md`. |
+| 4 | **El envío solo sale por WhatsApp** (formulario y cotizador). En escritorio sin WhatsApp Web el flujo se corta. | Decisión tuya + cuenta externa | Si eliges correo: cuenta en Formspree o Web3Forms, endpoint en el `action` de `contacto.astro`, borrar el interceptor `data-wa-fallback`, y cambiar el envío del cotizador. |
+| 5 | **Revisar el mapeo respuesta → plan del cotizador.** Los precios son tuyos, pero las reglas que deciden qué plan corresponde a cada respuesta son una propuesta mía. | Validación tuya | Todo en `src/data/quote.ts`. No des por buena una cotización hasta revisarlo. |
 
 ### P2 — Contenido tuyo que no se puede inventar
 
@@ -261,29 +298,36 @@ Regla del CLAUDE.md original: **no inventar contenido del cliente.**
 
 | # | Pendiente | Dónde tocar |
 |---|---|---|
-| 4 | **Bio real de `/sobre`** — historia, foto profesional, credenciales. | Sustituir el bloque `.who-copy` de `sobre.astro`. Hay un comentario en la página marcando el punto exacto. La foto va a `src/assets/sobre/` y se registra en `src/data/images.ts`. |
-| 5 | **`/proyectos`** — 3 demos verticales en vivo (inmobiliaria, clínica, restaurante) con casos de estudio. | Página aún no creada; se crea cuando existan las demos. |
-| 6 | **`/blog`** — solo si van a existir posts reales. Cero blogs vacíos. | — |
+| 6 | **Bio real de `/sobre`** — historia, foto profesional, credenciales. | Sustituir el bloque `.who-copy` de `sobre.astro`. Hay un comentario en la página marcando el punto exacto. La foto va a `src/assets/sobre/` y se registra en `src/data/images.ts`. |
+| 7 | **`/proyectos`** — 3 demos verticales en vivo (inmobiliaria, clínica, restaurante). | Página aún no creada; se crea cuando existan las demos. Resuelve además el P1 #1. |
+| 8 | **`/blog`** — solo si van a existir posts reales. Cero blogs vacíos. | — |
 
-### P3 — Mejoras de conversión y navegación
+### P3 — Ventas: lo que queda por construir
+
+Todo esto está argumentado en `AUDITORIA-CONVERSION.md`.
 
 | # | Pendiente | Nota |
 |---|---|---|
-| 7 | **`/planes` tiene 16 CTA compitiendo.** | Las 7 tarjetas de capacidad no deberían ser enlaces individuales, sino una lista con un solo CTA al cierre del bloque. |
-| 8 | **Sin señal de progreso en páginas largas** (`/planes` mide ~7000 px). | Barato: una fila de anclas bajo el titular (`Planes · Capacidades · Care · FAQ`). Caro: índice lateral pegajoso. |
-| 9 | **El hero de la home no dice qué hace FLASK hasta la bajada.** | Apuesta consciente por tono sobre claridad (el descriptor se quitó a petición). Revisable si algún día llega tráfico frío de búsqueda. |
+| 9 | **El Diagnóstico de $49 está enterrado.** Es la oferta de entrada de menor fricción y vive como una banda debajo de la tabla de precios. | Darle página propia y tratarla como la puerta para tráfico frío, con los planes reservados a quien ya sabe qué quiere. |
+| 10 | **No hay captura para quien no está listo hoy.** Cero correo, cero lista, cero imán. | El imán ya está escrito en tu home ("te enviamos un reporte PageSpeed de tu sitio actual") y no está implementado: falta el campo donde pegar la URL. |
+| 11 | **Los planes no se pueden comparar.** Cuatro listas distintas, sin filas comunes; `Commerce` dice "Todo lo de Corporate" y obliga a subir con la vista. | Una tabla comparativa con las mismas filas para los cuatro. |
+| 12 | **Care ($35–$250/mes) está fuera del momento de venta.** Es el ingreso recurrente y aparece al 70 % del scroll de `/planes`. | Que aparezca en el resultado del cotizador y en la propuesta, marcado por defecto. |
+| 13 | **El argumento contra el WordPress de $199 está solo en la home**, no en `/planes`, que es donde se compara. | Una fila de comparación junto a la tabla de precios, con datos. |
+| 14 | **`/planes` tiene 16 CTA compitiendo.** | Las 7 tarjetas de capacidad no deberían ser enlaces individuales, sino una lista con un solo CTA al cierre. |
+| 15 | **Sin señal de progreso en páginas largas** (`/planes` mide ~7000 px). | Barato: una fila de anclas bajo el titular. Caro: índice lateral pegajoso. |
+| 16 | **El hero de la home no dice qué hace FLASK hasta la bajada.** | Apuesta consciente por tono sobre claridad. Revisable si llega tráfico frío de búsqueda. |
 
 ### P4 — Técnico y de marca
 
 | # | Pendiente | Nota |
 |---|---|---|
-| 10 | **Lighthouse en el sitio en vivo** → LCP, INP y CLS reales. | Lo único que no se puede cerrar desde el repo: hay que medirlo en Pages con el CDN real. |
-| 11 | **Search Console.** | Sitemap y canonical ya se emiten bien; falta darlos de alta y verificar. |
-| 12 | **Prueba con lector de pantalla real** (NVDA/VoiceOver). | Lo auditado es estructura, no experiencia. Es el único hueco de accesibilidad que queda. |
-| 13 | **La marca es solo tipográfica.** | El rayo del favicon no aparece en el nav, ni en el footer, ni en la imagen social. Tampoco hay versión sobre fondo claro para facturas o propuestas en PDF. |
-| 14 | **URLs limpias sin `.html`** (`trailingSlash:'always'` + `format:'directory'`). | Cambiaría todas las rutas de `links.ts`. Hacerlo **antes** de que el sitio tenga enlaces externos apuntándole, no después. |
-| 15 | **Dominio propio.** | Al comprarlo: cambiar `site` en `astro.config.mjs` y borrar `base`. No hace falta volver a correr `npm run brand` (los assets no llevan dominio dentro). |
-| 16 | **El shader es un `requestAnimationFrame` permanente** mientras el hero está en pantalla. | Ya se pausa fuera del viewport y no arranca con reduce-motion. Si algún día importa la batería, se puede bajar a 30 fps sin que se note. |
+| 17 | **Lighthouse en el sitio en vivo** → LCP, INP y CLS reales. | Lo único que no se puede cerrar desde el repo: hay que medirlo en Pages con el CDN real. |
+| 18 | **Search Console.** | Sitemap y canonical ya se emiten bien; falta darlos de alta y verificar. |
+| 19 | **Prueba con lector de pantalla real** (NVDA/VoiceOver). | Lo auditado es estructura, no experiencia. Es el único hueco de accesibilidad que queda. |
+| 20 | **La marca es solo tipográfica.** | El rayo del favicon no aparece en el nav, ni en el footer, ni en la imagen social. Tampoco hay versión sobre fondo claro para facturas o propuestas en PDF. |
+| 21 | **URLs limpias sin `.html`** (`trailingSlash:'always'` + `format:'directory'`). | Cambiaría todas las rutas de `links.ts`. Hacerlo **antes** de que el sitio tenga enlaces externos apuntándole, no después. |
+| 22 | **Dominio propio.** | Al comprarlo: cambiar `site` en `astro.config.mjs` y borrar `base`. No hace falta volver a correr `npm run brand` (los assets no llevan dominio dentro). |
+| 23 | **El shader es un `requestAnimationFrame` permanente** mientras el hero está en pantalla. | Ya se pausa fuera del viewport y no arranca con reduce-motion. Si algún día importa la batería, se puede bajar a 30 fps sin que se note. |
 
 ---
 

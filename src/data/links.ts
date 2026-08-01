@@ -26,6 +26,7 @@ export const routes = {
   planes: withBase('planes.html'),
   proceso: withBase('proceso.html'),
   sobre: withBase('sobre.html'),
+  cotizador: withBase('cotizador.html'),
   contacto: withBase('contacto.html'),
   gracias: withBase('gracias.html'),
 };
