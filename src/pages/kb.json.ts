@@ -47,7 +47,7 @@ export const GET: APIRoute = () => {
    * Vocabulario de intención por plan.
    *
    * La recuperación es léxica: solo encuentra lo que está escrito. Nadie
-   * pregunta "cuánto cuesta Flask Commerce", preguntan "quiero vender en
+   * pregunta "cuánto cuesta CuatroNodos Commerce", preguntan "quiero vender en
    * línea". Estas frases son el puente entre cómo habla la gente y cómo se
    * llaman los productos, y es aquí donde se arregla un fallo de recuperación
    * — no tocando el prompt ni cambiando de modelo.
@@ -190,7 +190,7 @@ export const GET: APIRoute = () => {
       'permanencia',
     ],
     text:
-      'FLASK Care es el mantenimiento mensual: ' +
+      'CuatroNodos Care es el mantenimiento mensual: ' +
       carePlans.map((c) => `${c.name} ${c.price}${c.suffix}`).join(', ') +
       `. ${careNote} Sin plan Care activo no monitorizamos el sitio ni respondemos incidencias.`,
   });
@@ -272,7 +272,7 @@ export const GET: APIRoute = () => {
       'que es jamstack',
     ],
     text:
-      'FLASK no usa WordPress. Construye de otra forma: sin complementos que actualizar y sin panel público ' +
+      'CuatroNodos no usa WordPress. Construye de otra forma: sin complementos que actualizar y sin panel público ' +
       'por el que puedan entrar. Un WordPress barato suele abrir en cinco segundos y hay que mantenerlo cada ' +
       'semana; estos sitios abren en menos de uno y puedes dejarlos solos un año.',
   });

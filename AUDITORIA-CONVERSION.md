@@ -90,7 +90,7 @@ qué contrastar, y $295 se lee caro contra nada.
 **Qué hacer:** una fila de comparación junto a la tabla de precios: qué te dan por
 $199 y qué te damos por $295. Con datos, no adjetivos.
 
-### 6. FLASK Care ($35–$250/mes) está fuera del momento de venta
+### 6. CuatroNodos Care ($35–$250/mes) está fuera del momento de venta
 
 Es tu ingreso recurrente — lo único que hace que el negocio no dependa de vender
 un sitio nuevo cada mes — y vive en el 70 % del scroll de una página de 7.000 px,

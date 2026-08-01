@@ -172,8 +172,8 @@ function ogSvg() {
       <path d="${BOLT}" fill="url(#boltG)"/>
     </g>
     <text x="62" y="18" font-family="Archivo" font-weight="700" font-size="34"
-          letter-spacing="7.5" fill="${SOFT_WHITE}">FLASK</text>
-    <text x="220" y="18" font-family="Archivo" font-weight="700" font-size="34"
+          letter-spacing="1" fill="${SOFT_WHITE}">CuatroNodos</text>
+    <text x="305" y="18" font-family="Archivo" font-weight="700" font-size="34"
           fill="${FLASH_ORANGE}">.</text>
   </g>
 

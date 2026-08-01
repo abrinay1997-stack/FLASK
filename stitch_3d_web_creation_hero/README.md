@@ -26,7 +26,7 @@ copia real en `src/assets/`; el mapeo página ↔ imagen vive en `src/data/image
 | `an_expansive_..._digital_architecture/` | Monolitos con circuitos sobre llanura fracturada | ✅ `src/assets/servicios/seguridad.png` — Pilar 02 |
 | `a_close_up_..._structured_code/` | Hélice de bloques de cristal rojo | ✅ `src/assets/servicios/entrega.png` — Pilar 03 |
 | `a_futuristic_..._web_grid/` | Grid infinito de servidores encendidos | ✅ `src/assets/sobre/web-grid.png` — banda del manifiesto |
-| `a_futuristic_..._interface_hand/` | Mano de cristal tocando una esfera de datos | ✅ `src/assets/sobre/interfaz.png` — "Detrás de FLASK" |
+| `a_futuristic_..._interface_hand/` | Mano de cristal tocando una esfera de datos | ✅ `src/assets/sobre/interfaz.png` — "Detrás de CuatroNodos" |
 | `cinematic_..._digital_flow/` | Cintas de luz sobre obsidiana | ✅ `src/assets/proceso/flujo.png` — banda bajo el hero |
 | `a_cinematic_..._start_web_design/` | Esfera incandescente en cámara oscura | ✅ `src/assets/planes/start.png` — vitrina plan Start |
 | `a_professional_..._corporate_web/` | Estructura de cristal negro con vetas rojas | ✅ `src/assets/planes/corporate.png` — vitrina plan Corporate |
@@ -34,11 +34,11 @@ copia real en `src/assets/`; el mapeo página ↔ imagen vive en `src/data/image
 ### Código de referencia
 
 - **`aesthetix_animated_hero_flow/code.html`** (26 KB) — HTML completo generado por Stitch para el hero de Aesthetix. Referencia de composición y estructura.
-- **`shader/code.html`** (5.5 KB) — Shader WebGL puro con simplex 2D noise. **Ya adaptado e integrado** en `src/components/HeroShader.astro` con colores del branding híbrido FLASK.
+- **`shader/code.html`** (5.5 KB) — Shader WebGL puro con simplex 2D noise. **Ya adaptado e integrado** en `src/components/HeroShader.astro` con colores del branding híbrido CuatroNodos.
 
 ### Sistema de diseño
 
-- **`obsidian_ember/DESIGN.md`** — sistema completo "Obsidian & Ember" generado por Stitch: paleta de colores, tipografía (Plus Jakarta Sans + Hanken Grotesk), spacing (grid de 4px, section gaps 160px), componentes, elevación y shape language. **FLASK adopta parcialmente este sistema:** mantenemos Archivo como tipografía y el naranja `#FF5100` como color de interfaz, pero incorporamos el rojo ember `#FF1E1E` como acento cinemático (usado en el hero shader y palabras destacadas del H1).
+- **`obsidian_ember/DESIGN.md`** — sistema completo "Obsidian & Ember" generado por Stitch: paleta de colores, tipografía (Plus Jakarta Sans + Hanken Grotesk), spacing (grid de 4px, section gaps 160px), componentes, elevación y shape language. **CuatroNodos adopta parcialmente este sistema:** mantenemos Archivo como tipografía y el naranja `#FF5100` como color de interfaz, pero incorporamos el rojo ember `#FF1E1E` como acento cinemático (usado en el hero shader y palabras destacadas del H1).
 
 ---
 
