@@ -21,19 +21,18 @@ export const footerColumns: FooterColumn[] = [
   {
     title: 'Servicios',
     links: [
-      { label: 'Los tres pilares', href: routes.servicios },
+      { label: 'Mantenimiento (Care)', href: anchor(routes.servicios, '#care') },
+      { label: 'Diagnóstico de tu sitio', href: anchor(routes.servicios, '#diagnostico') },
       { label: 'Planes y precios', href: routes.planes },
       { label: 'Capacidades avanzadas', href: anchor(routes.planes, '#modulos') },
-      { label: 'FLASK Care', href: anchor(routes.planes, '#care') },
       { label: 'Cotizador', href: routes.cotizador },
     ],
   },
   {
     title: 'Estudio',
     links: [
-      { label: 'Nosotros', href: routes.sobre },
       { label: 'Cómo trabajamos', href: routes.proceso },
-      { label: 'Preguntas frecuentes', href: anchor(routes.planes, '#faq') },
+      { label: 'Centro de ayuda', href: routes.ayuda },
       { label: 'Contacto', href: routes.contacto },
     ],
   },
@@ -85,6 +84,6 @@ export const socials: SocialLink[] = [
 /** Certezas del negocio que conviene repetir al pie. */
 export const footerTrust: string[] = [
   'Precio fijo por escrito',
-  'El repositorio se transfiere a tu GitHub',
+  'El código queda a tu nombre',
   'Dominio a tu nombre',
 ];

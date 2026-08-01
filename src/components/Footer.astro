@@ -14,8 +14,8 @@ import { footerColumns, socials, footerTrust } from '../data/footer';
         </a>
         <p class="foot-tagline">{site.tagline}</p>
         <p class="foot-pitch">
-          Sitios Jamstack que cargan en menos de un segundo, entregados en días y con el código
-          en tu propio GitHub. Desde $295, en {site.location}.
+          Webs que abren en menos de un segundo, listas en días y que quedan a tu nombre.
+          Desde $295, en {site.location}.
         </p>
 
         <ul class="foot-trust">
@@ -98,7 +98,9 @@ import { footerColumns, socials, footerTrust } from '../data/footer';
   .site-footer {
     position: relative;
     margin-top: 40px;
-    padding: 0 0 40px;
+    /* Espacio extra abajo: la burbuja del chat es fija en esta esquina y sin
+       reserva tapaba los enlaces legales. */
+    padding: 0 0 92px;
     border-top: 1px solid rgba(255, 255, 255, 0.08);
     background:
       radial-gradient(120% 100% at 50% 0%, rgba(255, 81, 0, 0.07), transparent 60%),

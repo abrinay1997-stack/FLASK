@@ -1,0 +1,277 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Reveal from '../components/Reveal.astro';
+import { faqGroups, faq } from '../data/faq';
+import { routes } from '../data/links';
+import { site, contact, waLink } from '../data/site';
+
+/**
+ * Centro de ayuda.
+ *
+ * Antes era un acordeón al final de /planes con cinco preguntas. Ahí solo lo
+ * leía quien ya estaba decidido; las dudas que frenan la compra aparecen mucho
+ * antes y en otro sitio. Ahora es una página propia, agrupada por el momento en
+ * que surge cada duda, no por categoría interna.
+ */
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faq.map((item) => ({
+    '@type': 'Question',
+    name: item.q,
+    acceptedAnswer: { '@type': 'Answer', text: item.a },
+  })),
+};
+---
+
+<BaseLayout
+  title="Ayuda"
+  description="Respuestas claras a las dudas reales antes de encargar una web: precios, plazos, qué necesitas tener listo, qué pasa si no te gusta y de quién es el sitio al final."
+  activePath={routes.ayuda}
+  jsonLd={[faqSchema]}
+>
+  <section class="ayuda">
+    <div class="container">
+      <header class="ayuda-head">
+        <span class="eyebrow">Ayuda</span>
+        <h1>Las preguntas <span class="muted">que de verdad importan.</span></h1>
+        <p class="ayuda-lead">
+          Escritas para alguien que nunca ha encargado una web y no tiene por qué saber qué
+          preguntar. Sin tecnicismos: si hace falta una palabra rara, se explica ahí mismo.
+        </p>
+      </header>
+
+      <!-- Índice: la página es larga y hay que poder saltar -->
+      <nav class="ayuda-index" aria-label="Secciones de ayuda">
+        {faqGroups.map((g) => (
+          <a href={`#${g.id}`}>{g.title}</a>
+        ))}
+      </nav>
+
+      {faqGroups.map((group) => (
+        <section class="ayuda-group" id={group.id}>
+          <div class="ayuda-group-head">
+            <h2>{group.title}</h2>
+            <p>{group.intro}</p>
+          </div>
+
+          <div class="ayuda-items">
+            {group.items.map((item) => (
+              <Reveal>
+                <details class="ayuda-item">
+                  <summary>
+                    <span>{item.q}</span>
+                    <span class="ayuda-mark" aria-hidden="true"></span>
+                  </summary>
+                  <p>{item.a}</p>
+                </details>
+              </Reveal>
+            ))}
+          </div>
+        </section>
+      ))}
+
+      <!-- Salida para lo que no esté cubierto -->
+      <aside class="ayuda-more">
+        <div>
+          <h2>¿No está tu pregunta aquí?</h2>
+          <p>
+            Escríbenos y te respondemos en horario laboral ({contact.horario}). Contesta la misma
+            persona que programaría tu sitio, así que no hay que explicar nada dos veces.
+          </p>
+        </div>
+        <div class="ayuda-more-actions">
+          <a class="btn btn-primary" href={waLink(`Hola ${site.name}, tengo una pregunta`)} target="_blank" rel="noopener">
+            <span class="dot"></span> Preguntar por WhatsApp
+          </a>
+          <a class="btn btn-ghost" href={routes.contacto}>Escribir un mensaje</a>
+        </div>
+      </aside>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .ayuda {
+    padding-top: 168px;
+    padding-bottom: 110px;
+  }
+  .ayuda-head {
+    margin-bottom: 40px;
+  }
+  .ayuda-head h1 {
+    font-size: clamp(38px, 5.6vw, 72px);
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -0.025em;
+    text-transform: uppercase;
+    max-width: 17ch;
+  }
+  .ayuda-head h1 .muted {
+    color: var(--studio-gray);
+  }
+  .ayuda-lead {
+    margin-top: 24px;
+    max-width: 58ch;
+    font-size: 18px;
+    font-weight: 300;
+    color: var(--studio-gray);
+    line-height: 1.6;
+  }
+
+  .ayuda-index {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding-bottom: 54px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .ayuda-index a {
+    padding: 10px 18px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 999px;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    color: var(--studio-gray);
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+  }
+  .ayuda-index a:hover {
+    border-color: var(--flash-orange);
+    color: var(--soft-white);
+    background: rgba(255, 81, 0, 0.06);
+  }
+
+  .ayuda-group {
+    display: grid;
+    grid-template-columns: 0.75fr 1.25fr;
+    gap: 60px;
+    padding: 64px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    /* El nav flotante no puede tapar el titular al saltar por ancla */
+    scroll-margin-top: 110px;
+  }
+  .ayuda-group-head h2 {
+    font-size: clamp(26px, 3.2vw, 40px);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+    margin-bottom: 14px;
+  }
+  .ayuda-group-head p {
+    font-size: 15px;
+    font-weight: 300;
+    color: var(--studio-gray);
+    line-height: 1.6;
+    max-width: 30ch;
+  }
+
+  .ayuda-items {
+    display: grid;
+    gap: 2px;
+  }
+  .ayuda-item {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .ayuda-item summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 20px 0;
+    font-size: 17px;
+    font-weight: 500;
+    line-height: 1.4;
+    cursor: pointer;
+    list-style: none;
+  }
+  .ayuda-item summary::-webkit-details-marker {
+    display: none;
+  }
+  .ayuda-item summary:hover {
+    color: var(--flash-orange);
+  }
+  /* Signo dibujado con dos barras: rota en vez de cambiar de carácter, que
+     provocaba un salto de una pixelada a otra. */
+  .ayuda-mark {
+    position: relative;
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+  }
+  .ayuda-mark::before,
+  .ayuda-mark::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    background: var(--flash-orange);
+    transition: transform 0.25s ease;
+  }
+  .ayuda-mark::before {
+    width: 16px;
+    height: 1.5px;
+  }
+  .ayuda-mark::after {
+    width: 1.5px;
+    height: 16px;
+  }
+  .ayuda-item[open] .ayuda-mark::after {
+    transform: rotate(90deg);
+  }
+  .ayuda-item p {
+    padding: 0 0 24px;
+    max-width: 68ch;
+    font-size: 16px;
+    font-weight: 300;
+    color: var(--studio-gray);
+    line-height: 1.75;
+  }
+
+  .ayuda-more {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 40px;
+    flex-wrap: wrap;
+    margin-top: 64px;
+    padding: 44px 46px;
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.03);
+  }
+  .ayuda-more h2 {
+    font-size: clamp(24px, 3vw, 34px);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+  }
+  .ayuda-more p {
+    max-width: 52ch;
+    font-size: 16px;
+    font-weight: 300;
+    color: var(--studio-gray);
+    line-height: 1.65;
+  }
+  .ayuda-more-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  @media (max-width: 900px) {
+    .ayuda {
+      padding-top: 140px;
+    }
+    .ayuda-group {
+      grid-template-columns: 1fr;
+      gap: 26px;
+      padding: 48px 0;
+    }
+    .ayuda-group-head p {
+      max-width: none;
+    }
+    .ayuda-more {
+      padding: 32px 26px;
+    }
+  }
+</style>

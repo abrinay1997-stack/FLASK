@@ -46,7 +46,6 @@ FLASK/
 │   │   ├── PlanCard.astro
 │   │   ├── ModuleCard.astro
 │   │   ├── CareCard.astro
-│   │   ├── DiagBand.astro
 │   │   ├── HeroShader.astro       # fondo WebGL animado (mouse-reactivo)
 │   │   ├── SceneBg.astro          # imagen a sangre como FONDO de sección + velo
 │   │   ├── ChatWidget.astro       # burbuja de chat (degrada a WhatsApp sin backend)
@@ -55,22 +54,22 @@ FLASK/
 │   ├── data/                      # UNICA fuente de verdad de contenido
 │   │   ├── site.ts                # nombre, tagline, WhatsApp, horario
 │   │   ├── plans.ts               # 4 planes + Diagnóstico + planOptions
-│   │   ├── modules.ts             # 7 módulos
+│   │   ├── modules.ts             # 7 capacidades avanzadas
 │   │   ├── care.ts                # 3 planes Care
-│   │   ├── faq.ts                 # 5 preguntas
+│   │   ├── faq.ts                 # 20 preguntas en 4 grupos (centro de ayuda)
 │   │   ├── services.ts            # 3 servicios + procesoSteps + navLinks
 │   │   ├── images.ts              # mapeo imagen ↔ sección + alt + encuadre
 │   │   ├── quote.ts               # motor del cotizador (compone precios, no los inventa)
 │   │   ├── footer.ts              # columnas, redes y garantías del pie
 │   │   └── links.ts               # helper withBase() + routes.*
 │   ├── pages/
-│   │   ├── index.astro            # home aliviada (hero + previews + CTA)
-│   │   ├── servicios.astro        # 3 escenas grandes (una por pilar)
-│   │   ├── planes.astro           # precios → respaldo → vitrina → capacidades → care → FAQ
-│   │   ├── proceso.astro          # banda a sangre + 3 escenas con número gigante
-│   │   ├── sobre.astro            # manifiesto + "Hablas con quien programa" (bio pendiente)
+│   │   ├── index.astro            # hero + previews + cita
+│   │   ├── servicios.astro        # Care + Diagnóstico primero, luego los 3 pilares
+│   │   ├── planes.astro           # precios → respaldo → vitrina → capacidades
+│   │   ├── proceso.astro          # proceso + manifiesto + quiénes (fusionó la antigua /sobre)
+│   │   ├── ayuda.astro            # centro de ayuda: 20 preguntas agrupadas por momento
 │   │   ├── cotizador.astro        # 4 preguntas → precio → datos. Destino del CTA del nav
-│   │   ├── contacto.astro         # form → WhatsApp (o Netlify Forms) + panel lateral
+│   │   ├── contacto.astro         # WhatsApp destacado + formulario sobre imagen de fondo
 │   │   ├── privacidad.astro       # política de privacidad
 │   │   ├── terminos.astro         # términos del servicio
 │   │   ├── kb.json.ts             # base de conocimiento del chat, generada en el build
@@ -123,7 +122,9 @@ FLASK/
 9. **Las imágenes van de fondo, nunca como pieza de producto.** Se montan con `<SceneBg>`: a sangre, apagadas y bajo un velo que abre carril al texto. Lo que brilla es el titular.
 10. **Nada duplica los precios.** El cotizador (`quote.ts`) y la base del chat (`kb.json.ts`) los componen de `plans.ts` y `modules.ts`. Un cotizador o un bot que digan un número distinto al de `/planes` destruyen justo la confianza que el sitio vende.
 11. **Estilos para nodos creados por JS: siempre `:global()`** colgando de un ancestro que sí esté en la plantilla. Ha mordido tres veces (raíces de componente, filas del cotizador, burbujas del chat).
-12. **El cotizador no tiene precios propios.** `src/data/quote.ts` los compone de `plans.ts` y `modules.ts`. Un cotizador que diga un número distinto al de `/planes` destruye justo la confianza que el sitio vende.
+12. **Cero jerga en el copy de cara al cliente.** Nada de Supabase, Railway, Next.js, Jamstack, CDN, LCP ni "scope creep". Solo se permiten los nombres que el cliente ya reconoce: WordPress, Google, WhatsApp, GitHub, Yappy. Si una frase solo la entiende un programador, está mal escrita para esta página. Verificado: `grep` de esos términos sobre `dist/*.html` da cero.
+13. **El bloque de cierre ("¿Empezamos?") vive SOLO en /proceso.** Estaba repetido en cinco páginas con cinco titulares distintos que pedían lo mismo; repetir la misma petición cinco veces la convierte en ruido. La salida en el resto de páginas la dan el CTA del nav y el del footer.
+14. **El cotizador no tiene precios propios.** `src/data/quote.ts` los compone de `plans.ts` y `modules.ts`. Un cotizador que diga un número distinto al de `/planes` destruye justo la confianza que el sitio vende.
 
 ---
 
@@ -167,6 +168,39 @@ Sitio inicial en HTML puro. Deprecado.
   y guard `dataset.bound` para no duplicar listeners
 - **Skip link** "Saltar al contenido" + `<main id="contenido">` en el layout
 - `npm run check` (astro check) en verde: 0 errores
+
+### Fase K — Reestructura de arquitectura y copy ✅
+
+**Copy sin jerga.** Se reescribieron `modules.ts`, `plans.ts`, `care.ts` y
+`services.ts` para hablar de lo que el cliente consigue, no de con qué se
+construye. "Supabase Auth + RLS" pasó a "Cada persona entra con su clave y ve
+solo lo que le corresponde". El hero, la cita de la home y el hero de /proceso
+("scope creep") se reescribieron al dolor concreto.
+
+**Mapa del sitio.**
+- `/sobre` desaparece: su manifiesto y su bloque de "quiénes" se fusionan en
+  `/proceso`. Eran la misma conversación partida en dos.
+- Nace `/ayuda`: centro de ayuda con 20 preguntas agrupadas por el momento en que
+  surge la duda (antes de empezar / precio / durante / después), no por categoría
+  interna. Antes eran 5 preguntas al final de `/planes`, donde solo las leía
+  quien ya estaba decidido.
+- `/servicios` abre con Care y con el Diagnóstico, igual que `/planes` abre con
+  precios. Los tres pilares pasan detrás: son el porqué, y el porqué se lee
+  después de lo que se compra.
+- `/contacto` rediseñada: WhatsApp con peso de tarjeta arriba, formulario sobre
+  imagen de fondo.
+
+**Nav** con "Inicio" explícito (el logo no basta para quien no da por hecho que
+lleva al inicio) y barra ensanchada a 1180 px para las 6 entradas.
+
+**Chat**: longitud de respuesta ajustada a estándar de soporte — 2 a 4 frases,
+40–70 palabras, con recorte duro a 600 caracteres por si el modelo se desborda.
+
+**Auditoría móvil** en 320/390/414/768 px: cero desbordes horizontales, cero
+áreas táctiles bajo 24 px, cero prosa por debajo de 13 px y el menú desplegado
+cabe en un iPhone SE. Se corrigieron dos hallazgos reales: el H2 "¿Empezamos?" se
+salía de su caja a 320 px, y la burbuja del chat tapaba los enlaces legales del
+footer.
 
 ### Fase J — Chat, footer, legales y hero móvil ✅
 

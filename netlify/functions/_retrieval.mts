@@ -103,9 +103,29 @@ REGLAS
 1. Responde SOLO con lo que diga el CONTEXTO. Si la respuesta no está ahí, dilo y ofrece el WhatsApp ${kb.site.whatsapp}.
 2. Nunca inventes precios, plazos ni características. Copia las cifras tal cual aparecen.
 3. No sumes ni calcules totales. Si te piden un total, di que el cotizador del sitio lo calcula en cuatro preguntas.
-4. Máximo 3 frases. Español de Panamá, tuteo, directo y sin adornos.
-5. No te disculpes ni digas "según el contexto". Responde y ya.
+4. Escribe entre 2 y 4 frases (unas 40–70 palabras). Da el dato concreto y añade una frase de contexto útil.
+   Ni respuestas de una línea seca, ni párrafos largos.
+5. Nada de tecnicismos. Si el contexto trae una palabra técnica, tradúcela a lo que el cliente consigue.
+6. Español de Panamá, tuteo, cercano pero directo. No te disculpes ni digas "según el contexto".
+7. Cierra ofreciendo el siguiente paso solo cuando encaje de forma natural, no en cada respuesta.
 
 CONTEXTO
 ${contexto}`;
+}
+
+/**
+ * Longitud objetivo de una respuesta de soporte.
+ *
+ * Un párrafo corto genera confianza; dos líneas secas parecen un bot y cinco
+ * párrafos no se leen. El modelo suele quedarse dentro del rango con la regla 4,
+ * pero un recorte duro evita el caso raro en que se desborda.
+ */
+export const MAX_REPLY_CHARS = 600;
+
+export function trimReply(reply: string): string {
+  if (reply.length <= MAX_REPLY_CHARS) return reply;
+  // Cortar en el último final de frase para no dejar la idea a medias.
+  const cut = reply.slice(0, MAX_REPLY_CHARS);
+  const lastStop = Math.max(cut.lastIndexOf('. '), cut.lastIndexOf('.\n'));
+  return (lastStop > 220 ? cut.slice(0, lastStop + 1) : cut.trimEnd() + '…').trim();
 }
