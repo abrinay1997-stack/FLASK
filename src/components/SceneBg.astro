@@ -1,0 +1,101 @@
+---
+/**
+ * Imagen cinemática como FONDO de una sección, no como pieza de producto.
+ *
+ * Es una decisión de jerarquía: la imagen es atmósfera — va a sangre, apagada y
+ * bajo un degradado que abre un carril legible para el texto. Lo que tiene que
+ * brillar es el titular, nunca la foto.
+ *
+ * El contenedor padre necesita `position: relative` y su contenido un
+ * `position: relative; z-index: 1` para quedar por encima.
+ */
+import { Image } from 'astro:assets';
+import type { Visual } from '../data/images';
+
+interface Props {
+  visual: Visual;
+  /** Lado donde vive el texto: ahí el degradado cierra más. */
+  side?: 'left' | 'right' | 'center';
+  /**
+   * Opacidad de la imagen. La del `Visual` manda sobre esta, porque es un dato
+   * de la imagen (cuánto brillo trae), no de la sección donde se usa.
+   */
+  dim?: number;
+  eager?: boolean;
+  class?: string;
+}
+
+const { visual, side = 'left', dim = 0.34, eager = false, class: className = '' } = Astro.props;
+const opacity = visual.dim ?? dim;
+---
+
+<div
+  class:list={['scene-bg', className]}
+  data-side={side}
+  style={`--focus:${visual.focus ?? 'center center'};--dim:${opacity}`}
+  aria-hidden="true"
+>
+  <Image
+    src={visual.src}
+    alt=""
+    widths={[768, 1280, 1920, 2560]}
+    sizes="100vw"
+    format="webp"
+    quality={64}
+    loading={eager ? 'eager' : 'lazy'}
+    decoding="async"
+  />
+  <span class="scene-scrim"></span>
+</div>
+
+<style>
+  .scene-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+    background: var(--deep-black);
+  }
+  .scene-bg :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: var(--focus, center center);
+    display: block;
+    opacity: var(--dim, 0.34);
+  }
+  /*
+    Dos capas: una vertical que funde la escena con las secciones vecinas (sin
+    ella se ven costuras entre secciones), y una horizontal que abre el carril
+    de lectura del lado donde va el texto.
+  */
+  .scene-scrim {
+    position: absolute;
+    inset: 0;
+  }
+  .scene-bg[data-side='left'] .scene-scrim {
+    background:
+      linear-gradient(90deg, rgba(16, 1, 1, 0.96) 0%, rgba(16, 1, 1, 0.82) 38%, rgba(16, 1, 1, 0.18) 78%, rgba(16, 1, 1, 0.35) 100%),
+      linear-gradient(180deg, var(--deep-black) 0%, transparent 22%, transparent 74%, var(--deep-black) 100%);
+  }
+  .scene-bg[data-side='right'] .scene-scrim {
+    background:
+      linear-gradient(270deg, rgba(16, 1, 1, 0.96) 0%, rgba(16, 1, 1, 0.82) 38%, rgba(16, 1, 1, 0.18) 78%, rgba(16, 1, 1, 0.35) 100%),
+      linear-gradient(180deg, var(--deep-black) 0%, transparent 22%, transparent 74%, var(--deep-black) 100%);
+  }
+  .scene-bg[data-side='center'] .scene-scrim {
+    background:
+      radial-gradient(ellipse 70% 60% at 50% 50%, rgba(16, 1, 1, 0.9) 0%, rgba(16, 1, 1, 0.55) 55%, rgba(16, 1, 1, 0.25) 100%),
+      linear-gradient(180deg, var(--deep-black) 0%, transparent 20%, transparent 76%, var(--deep-black) 100%);
+  }
+
+  /* En móvil el texto ocupa todo el ancho: el carril lateral deja de tener
+     sentido y hace falta un velo parejo, más cerrado. */
+  @media (max-width: 900px) {
+    .scene-bg[data-side] .scene-scrim {
+      background:
+        linear-gradient(180deg, var(--deep-black) 0%, rgba(16, 1, 1, 0.66) 24%, rgba(16, 1, 1, 0.66) 76%, var(--deep-black) 100%);
+    }
+  }
+</style>

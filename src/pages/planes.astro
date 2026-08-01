@@ -5,13 +5,13 @@ import ModuleCard from '../components/ModuleCard.astro';
 import CareCard from '../components/CareCard.astro';
 import DiagBand from '../components/DiagBand.astro';
 import Reveal from '../components/Reveal.astro';
-import CineFrame from '../components/CineFrame.astro';
-import { planVisuals } from '../data/images';
+import SceneBg from '../components/SceneBg.astro';
 
 import { plans, diagnostico } from '../data/plans';
 import { modules } from '../data/modules';
 import { carePlans, careNote } from '../data/care';
 import { faq } from '../data/faq';
+import { planVisuals } from '../data/images';
 import { routes } from '../data/links';
 import { site } from '../data/site';
 
@@ -66,32 +66,21 @@ const faqSchema = {
 
 <BaseLayout
   title="Planes"
-  description="Cuatro planes fijos entre $295 y $1,200. Sistemas grandes por módulos. Mantenimiento mensual con SLA. Cero letra chica."
+  description="Cuatro planes fijos entre $295 y $1,200. Capacidades avanzadas por separado. Mantenimiento mensual con SLA. Cero letra chica."
   activePath={routes.planes}
   jsonLd={[serviceSchema, faqSchema]}
 >
-  <!-- HERO -->
-  <section class="hero hero-short">
-    <div class="container hero-inner">
-      <span class="year">Catálogo</span>
-      <span class="handle">Rango $49 – $1,200</span>
-      <Reveal>
-        <h1>Cuatro planes. <span class="muted">Cero letra chica.</span></h1>
-      </Reveal>
-      <Reveal delay={0.15}>
-        <p class="lead">
-          Precios fijos, entregas por escrito, código en tu GitHub. Si necesitas algo más
-          grande, se cotiza por módulos. Si buscas mantenimiento, tenemos plan mensual.
-        </p>
-      </Reveal>
-    </div>
-  </section>
-
-  <!-- PLANES -->
+  <!--
+    Los precios van primero, sin hero de por medio: quien entra aquí ya sabe qué
+    quiere ver. El argumento de venta ("Cuatro planes. Cero letra chica.") pasa
+    justo debajo, cuando ya tiene las cifras delante y le sirve de respaldo.
+  -->
   <section class="planes" id="planes">
     <div class="container">
-      <span class="eyebrow">Sitios web</span>
-      <h2 class="section-title">Elige un plan. <span class="muted">O escríbenos si dudas.</span></h2>
+      <div class="planes-head">
+        <span class="eyebrow">Sitios web · $295 – $1,200</span>
+        <h1 class="planes-title">Elige un plan. <span class="muted">O escríbenos si dudas.</span></h1>
+      </div>
 
       <div class="plans-grid">
         {plans.map((plan) => (
@@ -107,50 +96,84 @@ const faqSchema = {
     </div>
   </section>
 
-  <!-- VITRINA -->
-  <section class="showcase">
+  <!-- RESPALDO: lo que sostiene esos precios -->
+  <section class="promise">
     <div class="container">
-      <span class="eyebrow">De un extremo al otro</span>
-      <h2 class="section-title">Del arranque <span class="muted">a la operación completa.</span></h2>
-
-      <div class="showcase-grid">
-        {showcase.map(({ plan, visual }) => (
-          <Reveal>
-            <a class="showcase-item" href={`${routes.contacto}?plan=${plan.slug}`}>
-              <CineFrame visual={visual} ratio="16 / 11" sizes="(max-width: 900px) calc(100vw - 44px), 46vw" />
-              <div class="showcase-meta">
-                <span class="showcase-name">{plan.name.replace('Flask ', '')}</span>
-                <span class="showcase-price">{plan.price}</span>
-              </div>
-              <p class="showcase-desc">{plan.desc}</p>
-              <span class="showcase-cta">
-                Cotizar este plan <span aria-hidden="true">→</span>
-              </span>
-            </a>
+      <div class="promise-grid">
+        <Reveal>
+          <h2 class="promise-title">Cuatro planes. <span class="muted">Cero letra chica.</span></h2>
+        </Reveal>
+        <div class="promise-facts">
+          <Reveal delay={0.1}>
+            <div class="promise-fact">
+              <span class="promise-k">Precio cerrado</span>
+              <p>El número que ves es el que pagas. El alcance va por escrito antes de arrancar y lo que quede fuera se cotiza aparte, sin sorpresas a mitad del proyecto.</p>
+            </div>
           </Reveal>
-        ))}
+          <Reveal delay={0.18}>
+            <div class="promise-fact">
+              <span class="promise-k">Plazo cerrado</span>
+              <p>Cada plan trae su cronograma. Los días cuentan desde que recibimos tu contenido y el 50 % del pago, no desde una fecha imaginaria.</p>
+            </div>
+          </Reveal>
+          <Reveal delay={0.26}>
+            <div class="promise-fact">
+              <span class="promise-k">El código es tuyo</span>
+              <p>El repositorio se transfiere a tu GitHub al pago final y el dominio queda a tu nombre. Si mañana te vas, te llevas todo.</p>
+            </div>
+          </Reveal>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- MÓDULOS -->
+  <!-- VITRINA: los dos extremos del catálogo, como escenas -->
+  {showcase.map(({ plan, visual }, i) => {
+    const side = i % 2 === 0 ? 'left' : 'right';
+    return (
+      <section class="showcase-scene" data-side={side}>
+        <SceneBg visual={visual} side={side} dim={0.42} />
+        <div class="container">
+          <div class="showcase-copy">
+            <Reveal>
+              <span class="showcase-eyebrow">{i === 0 ? 'El arranque' : 'La operación completa'}</span>
+              <h2>{plan.name.replace('Flask ', '')}</h2>
+            </Reveal>
+            <Reveal delay={0.12}>
+              <p class="showcase-desc">{plan.desc}</p>
+              <div class="showcase-meta">
+                <span class="showcase-price">{plan.price}</span>
+                <span class="showcase-delivery">{plan.delivery}</span>
+              </div>
+              <a class="btn btn-primary" href={`${routes.contacto}?plan=${plan.slug}`}>
+                <span class="dot"></span> Cotizar {plan.name.replace('Flask ', '')}
+              </a>
+            </Reveal>
+          </div>
+        </div>
+      </section>
+    );
+  })}
+
+  <!-- CAPACIDADES AVANZADAS -->
   <section class="modulos" id="modulos">
     <div class="container">
-      <span class="eyebrow">Proyectos grandes</span>
+      <span class="eyebrow">Capacidades avanzadas</span>
       <h2 class="section-title">
-        ¿Necesitas un sistema? <span class="muted">Se vende por módulos.</span>
+        ¿Tu negocio necesita más? <span class="muted">Súmale potencia.</span>
       </h2>
       <Reveal>
         <p class="modules-intro">
-          Un sistema completo no se cotiza en una sola factura. Se arma con módulos combinables:
-          pagas y recibes por partes, sin riesgo y sin esperar meses para ver el primer entregable.
+          Un sitio no tiene por qué quedarse en un sitio. Cada capacidad de abajo se enchufa a lo
+          que ya tienes, con precio cerrado y sin rehacer nada: activas la que necesitas, cuando la
+          necesitas. Puedes empezar con una y sumar el resto más adelante.
         </p>
       </Reveal>
 
       <div class="modules-grid">
-        {modules.map((mod) => (
+        {modules.map((mod, i) => (
           <Reveal>
-            <ModuleCard module={mod} />
+            <ModuleCard module={mod} idx={i} />
           </Reveal>
         ))}
       </div>
@@ -210,67 +233,145 @@ const faqSchema = {
 </BaseLayout>
 
 <style>
-  .showcase {
-    padding-top: 0;
+  /* Sin hero: el nav flotante necesita aire propio arriba */
+  .planes {
+    padding-top: 168px;
   }
-  .showcase-grid {
+  .planes-head {
+    margin-bottom: 54px;
+  }
+  .planes-title {
+    font-size: clamp(38px, 5.6vw, 72px);
+    font-weight: 600;
+    line-height: 1.0;
+    letter-spacing: -0.025em;
+    text-transform: uppercase;
+    max-width: 20ch;
+  }
+  .planes-title .muted {
+    color: var(--studio-gray);
+  }
+
+  /* ---------- RESPALDO ---------- */
+  .promise {
+    padding: 100px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+  }
+  .promise-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 34px;
+    grid-template-columns: 0.9fr 1.1fr;
+    gap: 60px;
+    align-items: start;
   }
-  .showcase-item {
+  .promise-title {
+    font-size: clamp(32px, 4.2vw, 56px);
+    font-weight: 600;
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+  }
+  .promise-title .muted {
+    color: var(--studio-gray);
+  }
+  .promise-facts {
+    display: grid;
+    gap: 28px;
+  }
+  .promise-k {
     display: block;
+    font-size: 13px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--flash-orange);
+    margin-bottom: 10px;
+  }
+  .promise-fact p {
+    font-size: 16px;
+    font-weight: 300;
+    color: var(--studio-gray);
+    line-height: 1.65;
+    max-width: 56ch;
+  }
+
+  /* ---------- VITRINA ---------- */
+  .showcase-scene {
+    position: relative;
+    min-height: 78vh;
+    display: flex;
+    align-items: center;
+    padding: 110px 0;
+    overflow: hidden;
+  }
+  .showcase-scene .container {
+    position: relative;
+    z-index: 1;
+  }
+  .showcase-copy {
+    max-width: 44ch;
+  }
+  .showcase-scene[data-side='right'] .showcase-copy {
+    margin-left: auto;
+  }
+  .showcase-eyebrow {
+    display: inline-block;
+    font-size: 13px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--flash-orange);
+    margin-bottom: 18px;
+  }
+  .showcase-copy h2 {
+    font-size: clamp(40px, 6vw, 80px);
+    font-weight: 700;
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    text-transform: uppercase;
+    margin-bottom: 22px;
+    text-shadow: 0 4px 40px rgba(16, 1, 1, 0.85);
+  }
+  .showcase-desc {
+    font-size: 17px;
+    font-weight: 300;
+    color: var(--studio-gray);
+    line-height: 1.6;
+    text-shadow: 0 2px 20px rgba(16, 1, 1, 0.9);
   }
   .showcase-meta {
     display: flex;
     align-items: baseline;
-    justify-content: space-between;
-    gap: 20px;
-    margin-top: 22px;
-  }
-  .showcase-name {
-    font-size: 22px;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-    text-transform: uppercase;
+    gap: 18px;
+    margin: 26px 0 30px;
   }
   .showcase-price {
-    font-size: 30px;
+    font-size: 46px;
     font-weight: 600;
-    letter-spacing: -0.02em;
-    color: var(--flash-orange);
+    letter-spacing: -0.03em;
+    line-height: 1;
   }
-  .showcase-desc {
-    margin-top: 12px;
-    font-size: 15px;
-    font-weight: 300;
-    color: var(--studio-gray);
-    line-height: 1.6;
-    max-width: 52ch;
-  }
-  .showcase-cta {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 18px;
+  .showcase-delivery {
     font-size: 13px;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--flash-orange);
-    transition: gap 0.25s;
   }
-  .showcase-item:hover .showcase-cta {
-    gap: 14px;
-  }
+
   @media (max-width: 900px) {
-    .showcase-grid {
-      grid-template-columns: 1fr;
-      gap: 44px;
+    .planes {
+      padding-top: 140px;
     }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .showcase-item:hover .showcase-cta {
-      gap: 8px;
+    .promise-grid {
+      grid-template-columns: 1fr;
+      gap: 34px;
+    }
+    .showcase-scene {
+      min-height: 0;
+      padding: 84px 0;
+    }
+    .showcase-scene[data-side='right'] .showcase-copy {
+      margin-left: 0;
+    }
+    .showcase-copy {
+      max-width: none;
     }
   }
 </style>
