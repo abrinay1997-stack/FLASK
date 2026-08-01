@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Reveal from '../components/Reveal.astro';
+import HeroShader from '../components/HeroShader.astro';
 
 import { site, waLink } from '../data/site';
 import { plans } from '../data/plans';
@@ -13,21 +14,25 @@ import { routes } from '../data/links';
   description={site.description}
   activePath={routes.home}
 >
-  <!-- HERO -->
-  <section class="hero" id="top">
+  <!-- HERO CINEMÁTICO -->
+  <section class="hero hero-cinematic" id="top">
+    <HeroShader />
+
     <div class="container hero-inner">
-      <span class="year">{site.year}</span>
-      <span class="handle">{site.location}</span>
-      <Reveal y={40}>
-        <h1>Sitios rápidos. <span class="muted">Código</span> tuyo.</h1>
+      <span class="hero-eyebrow">Agencia web · {site.location}</span>
+      <Reveal y={50}>
+        <h1 class="hero-title">
+          Sitios que <span class="ember">encienden</span>.<br />
+          Código <span class="ember">tuyo</span>.
+        </h1>
       </Reveal>
-      <Reveal delay={0.15}>
-        <p class="lead">
-          Diseñamos y programamos sitios Jamstack que cargan en menos de un segundo, entregados
-          en días, con el código 100 % en tu propio GitHub. Desde $295.
+      <Reveal delay={0.2}>
+        <p class="hero-lead">
+          Diseñamos y programamos sitios Jamstack que cargan en menos de un segundo,
+          entregados en días, con el código 100 % en tu propio GitHub. Desde $295.
         </p>
       </Reveal>
-      <Reveal delay={0.25}>
+      <Reveal delay={0.35}>
         <div class="hero-actions">
           <a class="btn btn-primary" href={routes.planes}>
             <span class="dot"></span> Ver planes
@@ -37,15 +42,12 @@ import { routes } from '../data/links';
           </a>
         </div>
       </Reveal>
-
-      <Reveal delay={0.35}>
-        <div class="stats">
-          <div class="stat"><div class="num">&lt;1s</div><div class="label">Tiempo de carga</div></div>
-          <div class="stat"><div class="num accent">≥90</div><div class="label">PageSpeed garantizado</div></div>
-          <div class="stat"><div class="num">5</div><div class="label">Días de entrega</div></div>
-        </div>
-      </Reveal>
     </div>
+
+    <a class="hero-scroll-cue" href="#servicios" aria-label="Ver servicios">
+      <span>Scroll</span>
+      <span class="hero-scroll-line" aria-hidden="true"></span>
+    </a>
   </section>
 
   <!-- PREVIEW SERVICIOS -->
@@ -141,6 +143,120 @@ import { routes } from '../data/links';
 </BaseLayout>
 
 <style>
+  /* ---------- HERO CINEMÁTICO ---------- */
+  .hero-cinematic {
+    position: relative;
+    min-height: 100vh;
+    height: 100vh;
+    max-height: 1080px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 100px 0 60px;
+    overflow: hidden;
+  }
+  .hero-cinematic .hero-inner {
+    position: relative;
+    z-index: 2;
+    max-width: 1280px;
+  }
+  .hero-eyebrow {
+    display: inline-block;
+    font-size: 12px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--studio-gray);
+    margin-bottom: 32px;
+    padding: 6px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  .hero-title {
+    font-size: clamp(52px, 9vw, 132px);
+    font-weight: 700;
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    text-transform: none;
+    max-width: 18ch;
+    color: var(--soft-white);
+    text-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+  }
+  .hero-title .ember {
+    color: var(--ember-red);
+    font-style: italic;
+    font-weight: 700;
+  }
+  .hero-lead {
+    margin-top: 30px;
+    max-width: 54ch;
+    font-size: clamp(16px, 1.4vw, 20px);
+    font-weight: 300;
+    color: var(--studio-gray);
+    line-height: 1.5;
+    text-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
+  }
+  .hero-actions {
+    display: flex;
+    gap: 14px;
+    margin-top: 44px;
+    flex-wrap: wrap;
+  }
+
+  /* Scroll indicator */
+  .hero-scroll-cue {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    font-size: 11px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--studio-gray);
+    padding: 8px 12px;
+  }
+  .hero-scroll-cue:hover {
+    color: var(--soft-white);
+  }
+  .hero-scroll-line {
+    width: 1px;
+    height: 36px;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.5), transparent);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-scroll-line::after {
+    content: '';
+    position: absolute;
+    top: -36px;
+    left: 0;
+    width: 100%;
+    height: 36px;
+    background: linear-gradient(to bottom, transparent, var(--ember-red), transparent);
+    animation: scroll-cue 2.2s ease-in-out infinite;
+  }
+  @keyframes scroll-cue {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(72px); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero-scroll-line::after { animation: none; opacity: 0.4; }
+  }
+
+  /* Ocultar el gradiente CSS antiguo (lo reemplaza el shader) */
+  .hero-cinematic::after {
+    display: none !important;
+  }
+
+  /* ---------- RESTO DE LA HOME ---------- */
   .section-head {
     display: flex;
     align-items: flex-end;
@@ -149,9 +265,7 @@ import { routes } from '../data/links';
     margin-bottom: 60px;
     flex-wrap: wrap;
   }
-  .section-head h2.section-title {
-    margin-bottom: 0;
-  }
+  .section-head h2.section-title { margin-bottom: 0; }
   .section-link {
     display: inline-flex;
     align-items: center;
@@ -170,15 +284,9 @@ import { routes } from '../data/links';
     background: rgba(255, 81, 0, 0.1);
     border-color: var(--flash-orange);
   }
-  .service-card {
-    display: block;
-    cursor: pointer;
-  }
+  .service-card { display: block; cursor: pointer; }
 
-  /* Preview planes: mini-cards horizontales */
-  .planes-preview {
-    padding: 120px 0;
-  }
+  .planes-preview { padding: 120px 0; }
   .plans-preview-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -237,18 +345,13 @@ import { routes } from '../data/links';
     text-transform: uppercase;
   }
   @media (max-width: 900px) {
-    .plans-preview-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
-    .section-head {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 20px;
-    }
+    .plans-preview-grid { grid-template-columns: repeat(2, 1fr); }
+    .section-head { flex-direction: column; align-items: flex-start; gap: 20px; }
+    .hero-cinematic { min-height: 90vh; height: auto; padding: 120px 0 100px; }
+    .hero-title { font-size: clamp(44px, 12vw, 88px); }
   }
   @media (max-width: 640px) {
-    .plans-preview-grid {
-      grid-template-columns: 1fr;
-    }
+    .plans-preview-grid { grid-template-columns: 1fr; }
+    .hero-eyebrow { font-size: 11px; padding: 5px 12px; }
   }
 </style>
