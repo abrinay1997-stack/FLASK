@@ -27,7 +27,7 @@ pnpm-debug.log*
 # Claude / working
 .claude/
 
-# ---- Material interno FLASK: NUNCA subir a repo público ----
+# ---- Material interno CuatroNodos: NUNCA subir a repo público ----
 # Documentos de estrategia comercial, márgenes y proyecciones
 PLANES PAGINAS WEBS.pdf
 *.pdf

@@ -17,7 +17,7 @@ const planesUrl = new URL(routes.planes, origin).toString();
 /** El precio va como número: schema.org no acepta "$850". */
 const toAmount = (price: string) => Number(price.replace(/[^0-9.]/g, ''));
 
-// Catálogo de servicios: le dice a Google qué vende FLASK y a qué precio.
+// Catálogo de servicios: le dice a Google qué vende CuatroNodos y a qué precio.
 const serviceSchema = {
   '@context': 'https://schema.org',
   '@type': 'Service',
@@ -120,7 +120,7 @@ const showcase = ['start', 'corporate']
           <div class="showcase-copy">
             <Reveal>
               <span class="showcase-eyebrow">{i === 0 ? 'El arranque' : 'La operación completa'}</span>
-              <h2>{plan.name.replace('Flask ', '')}</h2>
+              <h2>{plan.name.replace('CuatroNodos ', '')}</h2>
             </Reveal>
             <Reveal delay={0.12}>
               <p class="showcase-desc">{plan.desc}</p>
@@ -129,7 +129,7 @@ const showcase = ['start', 'corporate']
                 <span class="showcase-delivery">{plan.delivery}</span>
               </div>
               <a class="btn btn-primary" href={`${routes.contacto}?plan=${plan.slug}`}>
-                <span class="dot"></span> Cotizar {plan.name.replace('Flask ', '')}
+                <span class="dot"></span> Cotizar {plan.name.replace('CuatroNodos ', '')}
               </a>
             </Reveal>
           </div>

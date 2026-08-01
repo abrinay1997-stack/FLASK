@@ -1,4 +1,4 @@
-# Auditoría del sitio FLASK
+# Auditoría del sitio CuatroNodos
 
 > Fecha: 2026-08-01 · Medida sobre el build de producción servido en local
 > (`npm run build && npm run preview`), con Chromium headless a 1440×900 y 390×844.
@@ -73,8 +73,8 @@ A 390 px de ancho estaban por debajo:
 
 | Elemento | Antes | Ahora |
 |---|---|---|
-| Marca `FLASK.` del nav | 77 × **14** | 77 × 38 |
-| Marca `FLASK.` del footer | 77 × **14** | 77 × 38 |
+| Marca `CuatroNodos.` del nav | 77 × **14** | 77 × 38 |
+| Marca `CuatroNodos.` del footer | 77 × **14** | 77 × 38 |
 | Teléfono del footer | 102 × **15** | 102 × 27 |
 | WhatsApp del panel de `/contacto` | 132 × **20** | 132 × 28 |
 | "Abrir chat en blanco" | 103 × **14** | 103 × 26 |
@@ -85,7 +85,7 @@ es el `input` del honeypot anti-spam, que está oculto a propósito y no es
 alcanzable ni por puntero ni por teclado.
 
 **b) Salto de nivel de encabezado en `/planes`.** La secuencia era
-`h1 → h3 → h2…`: el `h3` del bloque "Diagnóstico FLASK" venía justo detrás del
+`h1 → h3 → h2…`: el `h3` del bloque "Diagnóstico CuatroNodos" venía justo detrás del
 `h1`. Un lector de pantalla que navega por encabezados percibe ahí un nivel que
 no existe. Corregido a `h2`. Las 6 páginas quedan sin saltos.
 
@@ -135,7 +135,7 @@ no existe. Corregido a `h2`. Las 6 páginas quedan sin saltos.
   "el precio del mantenimiento" tiene que scrollear a ciegas. La solución barata
   es una fila de anclas bajo el titular (`Planes · Capacidades · Care · FAQ`);
   la cara, un índice lateral pegajoso.
-- **El hero de la home no dice qué hace FLASK hasta la bajada.** "Sitios que
+- **El hero de la home no dice qué hace CuatroNodos hasta la bajada.** "Sitios que
   encienden. Código tuyo." es memorable pero no informativo; el descriptor
   ("Agencia web · Panamá") se quitó a petición. Es una apuesta consciente por el
   tono sobre la claridad — bien mientras el tráfico venga de referidos, revisable
@@ -255,7 +255,7 @@ el naranja del texto y el rojo del fondo es lo que hace que la palabra salte.
 
 **Pendiente.**
 
-- **La marca es solo tipográfica.** `FLASK.` con el punto naranja funciona, pero
+- **La marca es solo tipográfica.** `CuatroNodos.` con el punto naranja funciona, pero
   no hay símbolo que sobreviva fuera del sitio. El rayo generado para el favicon
   es el candidato natural, pero hoy solo existe en el icono; no aparece en el nav,
   ni en el footer, ni en la imagen social.

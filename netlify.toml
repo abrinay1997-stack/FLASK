@@ -1,4 +1,4 @@
-# Configuración Netlify para FLASK (Astro)
+# Configuración Netlify para CuatroNodos (Astro)
 
 [build]
   command = "npm run build"

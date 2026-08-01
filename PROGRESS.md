@@ -1,4 +1,4 @@
-# FLASK — Progreso y pendientes
+# CuatroNodos — Progreso y pendientes
 
 > Documento vivo. Cualquier sesión que retome el proyecto debería leer esto primero.
 > Última actualización: 2026-08-01
@@ -154,7 +154,7 @@ Sitio inicial en HTML puro. Deprecado.
 - `src/data/images.ts` como único mapeo imagen ↔ sección, con `alt` y `object-position` por imagen
 - Marco reutilizable con recorte y baño de marca (`<CineFrame>`, **sustituido después por `<SceneBg>` en la fase H**)
 - `/servicios`: los tres `.visual-placeholder` reemplazados por las imágenes reales
-- `/sobre`: banda del manifiesto + visual en "Detrás de FLASK"
+- `/sobre`: banda del manifiesto + visual en "Detrás de CuatroNodos"
 - `/proceso`: banda 21:8 entre el hero y los pasos
 - `/planes`: vitrina Start / Corporate con enlace directo a `?plan=<slug>`
 - Coste real: PNG de 1.0–1.4 MB → WebP responsive de 5–83 kB
@@ -400,7 +400,7 @@ Todo esto está argumentado en `AUDITORIA-CONVERSION.md`.
 | 13 | **El argumento contra el WordPress de $199 está solo en la home**, no en `/planes`, que es donde se compara. | Una fila de comparación junto a la tabla de precios, con datos. |
 | 14 | **`/planes` tiene 16 CTA compitiendo.** | Las 7 tarjetas de capacidad no deberían ser enlaces individuales, sino una lista con un solo CTA al cierre. |
 | 15 | **Sin señal de progreso en páginas largas** (`/planes` mide ~7000 px). | Barato: una fila de anclas bajo el titular. Caro: índice lateral pegajoso. |
-| 16 | **El hero de la home no dice qué hace FLASK hasta la bajada.** | Apuesta consciente por tono sobre claridad. Revisable si llega tráfico frío de búsqueda. |
+| 16 | **El hero de la home no dice qué hace CuatroNodos hasta la bajada.** | Apuesta consciente por tono sobre claridad. Revisable si llega tráfico frío de búsqueda. |
 
 ### P4 — Técnico y de marca
 

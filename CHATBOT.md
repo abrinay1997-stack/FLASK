@@ -1,4 +1,4 @@
-# El chat de FLASK — cómo está armado y por qué
+# El chat de CuatroNodos — cómo está armado y por qué
 
 > Documento técnico. Si vas a tocar el chat, lee esto antes.
 

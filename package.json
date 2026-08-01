@@ -1,7 +1,7 @@
 {
-  "name": "flask",
+  "name": "cuatronodos",
   "version": "1.0.0",
-  "description": "Sitio web de FLASK — agencia de sitios Jamstack en Panamá.",
+  "description": "Sitio web de CuatroNodos — agencia de sitios Jamstack en Panamá.",
   "type": "module",
   "private": true,
   "scripts": {
@@ -16,7 +16,7 @@
     "type": "git",
     "url": "git+https://github.com/abrinay1997-stack/FLASK.git"
   },
-  "author": "FLASK",
+  "author": "CuatroNodos",
   "license": "UNLICENSED",
   "bugs": {
     "url": "https://github.com/abrinay1997-stack/FLASK/issues"

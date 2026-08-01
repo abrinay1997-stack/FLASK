@@ -1,4 +1,4 @@
-# Imágenes de FLASK
+# Imágenes de CuatroNodos
 
 Esta carpeta se sirve como `/FLASK/images/*` en producción (y `/images/*` en dev).
 

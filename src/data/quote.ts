@@ -172,7 +172,7 @@ export function optionPriceLabel(stepId: string, value: string): string | null {
     }
     if (rule.includedFrom) {
       const plan = plans.find((p) => p.slug === rule.includedFrom);
-      return plan ? `Incluido en ${plan.name.replace('Flask ', '')}` : null;
+      return plan ? `Incluido en ${plan.name.replace('CuatroNodos ', '')}` : null;
     }
     return null;
   }
