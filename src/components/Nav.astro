@@ -9,11 +9,17 @@ interface Props {
 const { activePath = '' } = Astro.props;
 ---
 
-<header class="floating-nav">
+<!--
+  transition:persist mantiene el nav vivo entre navegaciones (no reconstruye el
+  pill ni pierde el estado del menú). A cambio, el `aria-current` renderizado en
+  el servidor se queda congelado en la primera página: el script lo re-sincroniza
+  en cada `astro:page-load`.
+-->
+<header class="floating-nav" transition:persist="nav">
   <div class="nav-pill">
     <a href={routes.home} class="brand" aria-label="FLASK — inicio">FLASK<span class="dot">.</span></a>
 
-    <nav aria-label="Navegación principal">
+    <nav id="nav-principal" aria-label="Navegación principal">
       <ul class="nav-links">
         {navLinks.map((link) => (
           <li>
@@ -32,7 +38,13 @@ const { activePath = '' } = Astro.props;
       Cotizar
     </a>
 
-    <button class="nav-toggle" type="button" aria-label="Abrir menú" aria-expanded="false">
+    <button
+      class="nav-toggle"
+      type="button"
+      aria-label="Abrir menú"
+      aria-expanded="false"
+      aria-controls="nav-principal"
+    >
       <span></span>
       <span></span>
     </button>
@@ -40,24 +52,63 @@ const { activePath = '' } = Astro.props;
 </header>
 
 <script>
+  function closeMenu(pill: HTMLElement, toggle: HTMLButtonElement) {
+    pill.classList.remove('is-open');
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.setAttribute('aria-label', 'Abrir menú');
+  }
+
+  /**
+   * El nav sobrevive a las navegaciones (transition:persist), así que sus
+   * listeners también. Sin este guard, cada `astro:page-load` engancharía otro
+   * click y el menú se abriría y cerraría en el mismo toque.
+   */
   function initNavToggle() {
     const toggle = document.querySelector<HTMLButtonElement>('.nav-toggle');
     const pill = document.querySelector<HTMLElement>('.nav-pill');
     if (!toggle || !pill) return;
 
-    toggle.addEventListener('click', () => {
-      const open = pill.classList.toggle('is-open');
-      toggle.setAttribute('aria-expanded', String(open));
-      toggle.setAttribute('aria-label', open ? 'Cerrar menú' : 'Abrir menú');
-    });
+    if (!toggle.dataset.bound) {
+      toggle.dataset.bound = 'true';
 
-    // Cerrar al navegar
-    document.querySelectorAll('.nav-links a, .nav-cta').forEach((a) => {
-      a.addEventListener('click', () => {
-        pill.classList.remove('is-open');
-        toggle.setAttribute('aria-expanded', 'false');
+      toggle.addEventListener('click', () => {
+        const open = pill.classList.toggle('is-open');
+        toggle.setAttribute('aria-expanded', String(open));
+        toggle.setAttribute('aria-label', open ? 'Cerrar menú' : 'Abrir menú');
       });
+
+      // Cerrar al navegar o al escapar
+      pill.addEventListener('click', (e) => {
+        if ((e.target as HTMLElement).closest('.nav-links a, .nav-cta, .brand')) {
+          closeMenu(pill, toggle);
+        }
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && pill.classList.contains('is-open')) {
+          closeMenu(pill, toggle);
+          toggle.focus();
+        }
+      });
+    }
+
+    closeMenu(pill, toggle);
+    syncCurrent();
+  }
+
+  /** Marca el enlace de la página actual comparando pathname (sin .html). */
+  function syncCurrent() {
+    const here = location.pathname.replace(/\.html$/, '').replace(/\/$/, '');
+    document.querySelectorAll<HTMLAnchorElement>('.nav-links a, .nav-cta').forEach((a) => {
+      const target = new URL(a.href).pathname.replace(/\.html$/, '').replace(/\/$/, '');
+      if (target === here) a.setAttribute('aria-current', 'page');
+      else a.removeAttribute('aria-current');
     });
   }
+
   document.addEventListener('astro:page-load', initNavToggle);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initNavToggle, { once: true });
+  } else {
+    initNavToggle();
+  }
 </script>

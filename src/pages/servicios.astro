@@ -1,7 +1,9 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Reveal from '../components/Reveal.astro';
+import CineFrame from '../components/CineFrame.astro';
 import { services } from '../data/services';
+import { serviceVisuals } from '../data/images';
 import { routes } from '../data/links';
 ---
 
@@ -42,11 +44,14 @@ import { routes } from '../data/links';
             </div>
           </Reveal>
           <Reveal delay={0.2}>
-            <div class="service-visual">
-              <div class="visual-placeholder">
-                <span>{s.idx}</span>
-              </div>
-            </div>
+            <CineFrame
+              class="service-visual"
+              visual={serviceVisuals[s.idx]!}
+              tag={s.idx}
+              eager={i === 0}
+              ratioMobile="16 / 10"
+              sizes="(max-width: 900px) calc(100vw - 44px), 45vw"
+            />
           </Reveal>
         </div>
       </div>
@@ -88,10 +93,15 @@ import { routes } from '../data/links';
   .service-grid.reverse {
     grid-template-columns: 1fr 1.1fr;
   }
-  .service-grid.reverse .service-body {
+  /*
+    Los hijos directos de la grid son los <div> que inyecta <Reveal>, no
+    .service-body/.service-visual. El `order` tiene que ir sobre ellos, y con
+    :global() porque no llevan el scope de esta página.
+  */
+  .service-grid.reverse > :global(:first-child) {
     order: 2;
   }
-  .service-grid.reverse .service-visual {
+  .service-grid.reverse > :global(:last-child) {
     order: 1;
   }
   .service-idx {
@@ -125,43 +135,8 @@ import { routes } from '../data/links';
     line-height: 1.65;
     max-width: 60ch;
   }
-  .service-visual {
-    aspect-ratio: 4 / 5;
-    max-height: 520px;
-    border-radius: 24px;
-    background: linear-gradient(
-      135deg,
-      rgba(255, 81, 0, 0.15) 0%,
-      rgba(238, 0, 0, 0.05) 50%,
-      rgba(16, 1, 1, 0.4) 100%
-    );
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    position: relative;
-    overflow: hidden;
-  }
-  .visual-placeholder {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: clamp(80px, 14vw, 180px);
-    font-weight: 700;
-    color: var(--flash-orange);
-    opacity: 0.85;
-    letter-spacing: -0.05em;
-    line-height: 1;
-  }
-  .visual-placeholder::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(
-      circle at 30% 30%,
-      rgba(255, 81, 0, 0.35),
-      transparent 60%
-    );
-    pointer-events: none;
+  .service-grid :global(.service-visual) {
+    max-height: 560px;
   }
   .cta-actions {
     display: flex;
@@ -176,13 +151,13 @@ import { routes } from '../data/links';
       grid-template-columns: 1fr;
       gap: 32px;
     }
-    .service-grid.reverse .service-body,
-    .service-grid.reverse .service-visual {
+    /* En una sola columna el texto siempre va primero */
+    .service-grid.reverse > :global(:first-child),
+    .service-grid.reverse > :global(:last-child) {
       order: unset;
     }
-    .service-visual {
-      aspect-ratio: 16 / 10;
-      max-height: 320px;
+    .service-grid :global(.service-visual) {
+      max-height: 340px;
     }
   }
 </style>

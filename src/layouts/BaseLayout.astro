@@ -6,6 +6,11 @@ import '@fontsource/archivo/600.css';
 import '@fontsource/archivo/700.css';
 import '../styles/global.css';
 
+// Los dos pesos que usan los H1/H2 above-the-fold. Se preloadean para que el
+// texto no repinte al llegar la fuente (evita CLS y un flash de fallback).
+import archivo600 from '@fontsource/archivo/files/archivo-latin-600-normal.woff2?url';
+import archivo700 from '@fontsource/archivo/files/archivo-latin-700-normal.woff2?url';
+
 import { ClientRouter } from 'astro:transitions';
 
 import Nav from '../components/Nav.astro';
@@ -13,6 +18,7 @@ import Footer from '../components/Footer.astro';
 import SmoothScroll from '../components/SmoothScroll.astro';
 
 import { site, contact } from '../data/site';
+import { withBase, routes } from '../data/links';
 
 interface Props {
   title: string;
@@ -20,6 +26,8 @@ interface Props {
   noindex?: boolean;
   activePath?: string;
   bodyClass?: string;
+  /** Schemas JSON-LD extra de la página (Service, FAQPage, …). */
+  jsonLd?: Record<string, unknown>[];
 }
 
 const {
@@ -28,12 +36,15 @@ const {
   noindex = false,
   activePath,
   bodyClass,
+  jsonLd = [],
 } = Astro.props;
 
 const fullTitle = title.includes(site.name) ? title : `${title} — ${site.name}`;
 
 // URL canónica y OG:URL absolutas (necesitan `site` en astro.config)
-const canonical = new URL(Astro.url.pathname, Astro.site ?? 'http://localhost').toString();
+const origin = Astro.site ?? new URL('http://localhost:4321');
+const canonical = new URL(Astro.url.pathname, origin).toString();
+const ogImage = new URL(withBase('og.png'), origin).toString();
 
 // Organization schema (JSON-LD) — se emite solo en la home para no duplicar
 const isHome =
@@ -45,7 +56,9 @@ const orgSchema = {
   '@type': 'Organization',
   name: site.name,
   description: site.description,
-  url: canonical,
+  url: new URL(routes.home, origin).toString(),
+  logo: new URL(withBase('apple-touch-icon.png'), origin).toString(),
+  image: ogImage,
   areaServed: site.location,
   contactPoint: {
     '@type': 'ContactPoint',
@@ -54,6 +67,8 @@ const orgSchema = {
     availableLanguage: ['Spanish'],
   },
 };
+
+const schemas = isHome ? [orgSchema, ...jsonLd] : jsonLd;
 ---
 
 <!DOCTYPE html>
@@ -65,9 +80,13 @@ const orgSchema = {
     <meta name="description" content={description} />
     <meta name="theme-color" content={site.themeColor} />
     <meta name="color-scheme" content="dark" />
-    {noindex && <meta name="robots" content="noindex" />}
+    {noindex && <meta name="robots" content="noindex, follow" />}
 
     <link rel="canonical" href={canonical} />
+
+    <!-- La fuente self-hosted del H1: sin preload el texto repinta al llegar -->
+    <link rel="preload" href={archivo700} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={archivo600} as="font" type="font/woff2" crossorigin />
 
     <!-- OpenGraph / Twitter -->
     <meta property="og:type" content="website" />
@@ -76,26 +95,32 @@ const orgSchema = {
     <meta property="og:url" content={canonical} />
     <meta property="og:locale" content={site.locale} />
     <meta property="og:site_name" content={site.name} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={`${site.name} — ${site.tagline}`} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={fullTitle} />
     <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
 
-    <link
-      rel="icon"
-      type="image/svg+xml"
-      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%23FF5100'/%3E%3C/svg%3E"
-    />
+    <link rel="icon" type="image/svg+xml" href={withBase('favicon.svg')} />
+    <link rel="icon" type="image/png" sizes="32x32" href={withBase('favicon-32.png')} />
+    <link rel="apple-touch-icon" href={withBase('apple-touch-icon.png')} />
 
     <!-- View Transitions API entre páginas -->
     <ClientRouter />
 
-    {isHome && (
-      <script type="application/ld+json" set:html={JSON.stringify(orgSchema)} />
-    )}
+    {schemas.map((schema) => (
+      <script is:inline type="application/ld+json" set:html={JSON.stringify(schema)} />
+    ))}
   </head>
   <body class={bodyClass}>
+    <a class="skip-link" href="#contenido">Saltar al contenido</a>
     <Nav activePath={activePath} />
-    <slot />
+    <main id="contenido">
+      <slot />
+    </main>
     <Footer />
 
     <!-- Sistemas globales de motion. Se auto-inicializan y respetan reduce-motion. -->

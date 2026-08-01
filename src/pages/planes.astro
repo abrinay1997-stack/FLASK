@@ -5,18 +5,70 @@ import ModuleCard from '../components/ModuleCard.astro';
 import CareCard from '../components/CareCard.astro';
 import DiagBand from '../components/DiagBand.astro';
 import Reveal from '../components/Reveal.astro';
+import CineFrame from '../components/CineFrame.astro';
+import { planVisuals } from '../data/images';
 
-import { plans } from '../data/plans';
+import { plans, diagnostico } from '../data/plans';
 import { modules } from '../data/modules';
 import { carePlans, careNote } from '../data/care';
 import { faq } from '../data/faq';
 import { routes } from '../data/links';
+import { site } from '../data/site';
+
+const origin = Astro.site ?? new URL('http://localhost:4321');
+const planesUrl = new URL(routes.planes, origin).toString();
+
+/** El precio va como número: schema.org no acepta "$850". */
+const toAmount = (price: string) => Number(price.replace(/[^0-9.]/g, ''));
+
+// Catálogo de servicios: le dice a Google qué vende FLASK y a qué precio.
+const serviceSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  name: `Diseño y desarrollo web — ${site.name}`,
+  serviceType: 'Diseño y desarrollo de sitios web Jamstack',
+  description: site.description,
+  areaServed: { '@type': 'Country', name: site.location },
+  provider: {
+    '@type': 'Organization',
+    name: site.name,
+    url: new URL(routes.home, origin).toString(),
+  },
+  offers: [...plans, diagnostico].map((item) => ({
+    '@type': 'Offer',
+    name: item.name,
+    description: item.desc,
+    price: toAmount(item.price),
+    priceCurrency: 'USD',
+    url: planesUrl,
+    availability: 'https://schema.org/InStock',
+  })),
+};
+
+/**
+ * Vitrina: los dos extremos del catálogo de sitios. Muestra de dónde parte el
+ * rango y hasta dónde llega, con enlace directo al formulario ya preseleccionado.
+ */
+const showcase = ['start', 'corporate']
+  .map((slug) => ({ plan: plans.find((p) => p.slug === slug)!, visual: planVisuals[slug]! }))
+  .filter((item) => item.plan && item.visual);
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faq.map((item) => ({
+    '@type': 'Question',
+    name: item.q,
+    acceptedAnswer: { '@type': 'Answer', text: item.a },
+  })),
+};
 ---
 
 <BaseLayout
   title="Planes"
   description="Cuatro planes fijos entre $295 y $1,200. Sistemas grandes por módulos. Mantenimiento mensual con SLA. Cero letra chica."
   activePath={routes.planes}
+  jsonLd={[serviceSchema, faqSchema]}
 >
   <!-- HERO -->
   <section class="hero hero-short">
@@ -52,6 +104,32 @@ import { routes } from '../data/links';
       <Reveal delay={0.15}>
         <DiagBand />
       </Reveal>
+    </div>
+  </section>
+
+  <!-- VITRINA -->
+  <section class="showcase">
+    <div class="container">
+      <span class="eyebrow">De un extremo al otro</span>
+      <h2 class="section-title">Del arranque <span class="muted">a la operación completa.</span></h2>
+
+      <div class="showcase-grid">
+        {showcase.map(({ plan, visual }) => (
+          <Reveal>
+            <a class="showcase-item" href={`${routes.contacto}?plan=${plan.slug}`}>
+              <CineFrame visual={visual} ratio="16 / 11" sizes="(max-width: 900px) calc(100vw - 44px), 46vw" />
+              <div class="showcase-meta">
+                <span class="showcase-name">{plan.name.replace('Flask ', '')}</span>
+                <span class="showcase-price">{plan.price}</span>
+              </div>
+              <p class="showcase-desc">{plan.desc}</p>
+              <span class="showcase-cta">
+                Cotizar este plan <span aria-hidden="true">→</span>
+              </span>
+            </a>
+          </Reveal>
+        ))}
+      </div>
     </div>
   </section>
 
@@ -130,3 +208,69 @@ import { routes } from '../data/links';
     </div>
   </section>
 </BaseLayout>
+
+<style>
+  .showcase {
+    padding-top: 0;
+  }
+  .showcase-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 34px;
+  }
+  .showcase-item {
+    display: block;
+  }
+  .showcase-meta {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 20px;
+    margin-top: 22px;
+  }
+  .showcase-name {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+  .showcase-price {
+    font-size: 30px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--flash-orange);
+  }
+  .showcase-desc {
+    margin-top: 12px;
+    font-size: 15px;
+    font-weight: 300;
+    color: var(--studio-gray);
+    line-height: 1.6;
+    max-width: 52ch;
+  }
+  .showcase-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 18px;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--flash-orange);
+    transition: gap 0.25s;
+  }
+  .showcase-item:hover .showcase-cta {
+    gap: 14px;
+  }
+  @media (max-width: 900px) {
+    .showcase-grid {
+      grid-template-columns: 1fr;
+      gap: 44px;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .showcase-item:hover .showcase-cta {
+      gap: 8px;
+    }
+  }
+</style>
