@@ -11,12 +11,13 @@ import { modules } from '../data/modules';
 import { carePlans, careNote } from '../data/care';
 import { faq } from '../data/faq';
 import { services, procesoSteps } from '../data/services';
+import { routes } from '../data/links';
 ---
 
 <BaseLayout
   title={`${site.name} — ${site.tagline} ${site.location}.`}
   description={site.description}
-  activePath="/"
+  activePath={routes.home}
 >
   <!-- HERO -->
   <section class="hero" id="top">
@@ -161,7 +162,7 @@ import { services, procesoSteps } from '../data/services';
         Cuéntanos qué necesitas. Te enviamos un reporte PageSpeed de tu sitio actual y una
         propuesta escrita con alcance, cronograma y precio.
       </p>
-      <a class="btn btn-primary" href="/contacto.html">
+      <a class="btn btn-primary" href={routes.contacto}>
         <span class="dot"></span> Ir al formulario
       </a>
     </div>

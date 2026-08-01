@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { routes } from '../data/links';
 ---
 
 <BaseLayout title="Página no encontrada" noindex={true}>
@@ -12,10 +13,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         página se haya movido. Volvamos a terreno conocido.
       </p>
       <div class="simple-actions">
-        <a class="btn btn-primary" href="/">
+        <a class="btn btn-primary" href={routes.home}>
           <span class="dot"></span> Volver al inicio
         </a>
-        <a class="btn btn-ghost" href="/contacto.html">Escribirnos</a>
+        <a class="btn btn-ghost" href={routes.contacto}>Escribirnos</a>
       </div>
     </div>
   </main>

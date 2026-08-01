@@ -1,3 +1,5 @@
+import { routes, homeAnchor } from './links';
+
 export interface Service {
   idx: string;
   title: string;
@@ -52,9 +54,9 @@ export interface NavLink {
 }
 
 export const navLinks: NavLink[] = [
-  { href: '/#servicios', label: 'Ventajas' },
-  { href: '/#planes', label: 'Planes' },
-  { href: '/#modulos', label: 'Módulos' },
-  { href: '/#care', label: 'Mantenimiento' },
-  { href: '/contacto.html', label: 'Contacto' },
+  { href: homeAnchor('#servicios'), label: 'Ventajas' },
+  { href: homeAnchor('#planes'), label: 'Planes' },
+  { href: homeAnchor('#modulos'), label: 'Módulos' },
+  { href: homeAnchor('#care'), label: 'Mantenimiento' },
+  { href: routes.contacto, label: 'Contacto' },
 ];

@@ -2,12 +2,13 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { contact, waLink, site } from '../data/site';
 import { planOptions } from '../data/plans';
+import { routes } from '../data/links';
 ---
 
 <BaseLayout
   title="Contacto"
   description={`Cotiza tu sitio web con ${site.name}. Respuesta en menos de 24 horas. ${site.location}.`}
-  activePath="/contacto.html"
+  activePath={routes.contacto}
 >
   <!-- HERO -->
   <section class="hero hero-short">
@@ -37,7 +38,7 @@ import { planOptions } from '../data/plans';
           <form
             name="contacto"
             method="POST"
-            action="/gracias.html"
+            action={routes.gracias}
             data-netlify="true"
             data-netlify-honeypot="bot-field"
             netlify
@@ -49,37 +50,17 @@ import { planOptions } from '../data/plans';
 
             <div class="field">
               <label for="nombre">Nombre <span class="req">*</span></label>
-              <input
-                id="nombre"
-                name="nombre"
-                type="text"
-                required
-                autocomplete="name"
-                placeholder="Cómo te llamas"
-              />
+              <input id="nombre" name="nombre" type="text" required autocomplete="name" placeholder="Cómo te llamas" />
             </div>
 
             <div class="field">
               <label for="email">Correo <span class="req">*</span></label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                autocomplete="email"
-                placeholder="tunombre@correo.com"
-              />
+              <input id="email" name="email" type="email" required autocomplete="email" placeholder="tunombre@correo.com" />
             </div>
 
             <div class="field">
               <label for="whatsapp">WhatsApp</label>
-              <input
-                id="whatsapp"
-                name="whatsapp"
-                type="tel"
-                autocomplete="tel"
-                placeholder="+507 6000 0000"
-              />
+              <input id="whatsapp" name="whatsapp" type="tel" autocomplete="tel" placeholder="+507 6000 0000" />
             </div>
 
             <div class="field">
@@ -94,12 +75,7 @@ import { planOptions } from '../data/plans';
 
             <div class="field">
               <label for="mensaje">Cuéntanos sobre tu proyecto <span class="req">*</span></label>
-              <textarea
-                id="mensaje"
-                name="mensaje"
-                required
-                placeholder="Qué haces, qué necesitas del sitio, si ya tienes uno actual, plazos…"
-              />
+              <textarea id="mensaje" name="mensaje" required placeholder="Qué haces, qué necesitas del sitio, si ya tienes uno actual, plazos…" />
             </div>
 
             <div class="form-actions">

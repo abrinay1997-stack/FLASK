@@ -1,10 +1,11 @@
 ---
 import { site, contact, waLink } from '../data/site';
+import { routes } from '../data/links';
 ---
 
 <footer>
   <div class="container footer-row">
-    <a href="/" class="brand" aria-label={`${site.name} — inicio`}>
+    <a href={routes.home} class="brand" aria-label={`${site.name} — inicio`}>
       {site.name}<span class="dot">.</span>
     </a>
     <div>© {site.year} {site.name} · {site.location} · Sitios web Jamstack</div>

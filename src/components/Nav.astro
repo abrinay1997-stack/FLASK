@@ -1,5 +1,6 @@
 ---
 import { navLinks } from '../data/services';
+import { routes } from '../data/links';
 
 interface Props {
   activePath?: string;
@@ -10,7 +11,7 @@ const { activePath = '' } = Astro.props;
 
 <header>
   <div class="container nav">
-    <a href="/" class="brand" aria-label="FLASK — inicio">FLASK<span class="dot">.</span></a>
+    <a href={routes.home} class="brand" aria-label="FLASK — inicio">FLASK<span class="dot">.</span></a>
     <ul class="nav-links">
       {navLinks.map((link) => (
         <li>

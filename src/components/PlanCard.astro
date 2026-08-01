@@ -1,12 +1,13 @@
 ---
 import type { Plan } from '../data/plans';
+import { withBase } from '../data/links';
 
 interface Props {
   plan: Plan;
 }
 
 const { plan } = Astro.props;
-const cotizarHref = `/contacto.html?plan=${plan.slug}`;
+const cotizarHref = withBase(`contacto.html?plan=${plan.slug}`);
 ---
 
 <div class:list={['plan', { featured: plan.featured }]}>
