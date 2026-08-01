@@ -71,7 +71,7 @@ FLASK/
 ├── public/
 │   ├── robots.txt
 │   └── images/README.md           # instrucciones para subir mockups
-├── stitch_3d_web_creation_hero/   # IGNORADO por git — referencias visuales locales
+├── stitch_3d_web_creation_hero/   # VERSIONADO — referencias visuales del equipo (ver su README)
 ├── .github/workflows/deploy.yml   # deploy a Pages
 ├── astro.config.mjs               # site + base + sitemap + compressHTML
 ├── netlify.toml                   # alt deploy (Netlify) — headers de seguridad
@@ -126,7 +126,7 @@ Sitio inicial en HTML puro. Deprecado.
 
 ### Fase C — Integrar imágenes de Stitch (siguiente sesión)
 
-Las 9 imágenes cinemáticas están en `stitch_3d_web_creation_hero/` (ignoradas por git). Mapeo propuesto:
+Las 9 imágenes cinemáticas están en `stitch_3d_web_creation_hero/` (versionadas en el repo, con su propio `README.md` explicando cada archivo). Mapeo propuesto:
 
 | Imagen (nombre parcial) | Destino |
 |---|---|
@@ -181,7 +181,6 @@ Estos archivos existen en tu disco local y están bloqueados por `.gitignore`:
 - `BIBLIOTECA-DE-PROMPTS.md` — prompts de trabajo (ventaja competitiva)
 - `BRANDING.html` — mockup de referencia (Kontour Studios)
 - `CLAUDE.md` — instrucciones internas para el asistente
-- `stitch_3d_web_creation_hero/` — 12+ MB de referencias visuales de Stitch
 - `node_modules/`, `dist/`, `.astro/` — artefactos de build
 
 **Nunca commitear estos.** El `.gitignore` los blinda.
