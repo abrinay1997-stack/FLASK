@@ -1,141 +1,172 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import SceneBg from '../components/SceneBg.astro';
+import Reveal from '../components/Reveal.astro';
 import { contact, waLink, site } from '../data/site';
 import { planOptions } from '../data/plans';
+import { sobreVisuals } from '../data/images';
 import { routes } from '../data/links';
+
+/**
+ * Página de contacto rediseñada.
+ *
+ * Antes era un formulario sobre fondo plano. Ahora la escena la sostiene una
+ * imagen de fondo y el formulario flota encima como una tarjeta: lo mismo que
+ * hace el resto del sitio desde el rediseño de jerarquía.
+ *
+ * Se ofrecen dos vías con peso distinto a propósito. WhatsApp arriba, porque es
+ * la que de verdad usa la gente en Panamá y la que responde en minutos. El
+ * formulario debajo, para quien prefiere escribir sin dar su número.
+ */
 ---
 
 <BaseLayout
   title="Contacto"
-  description={`Cotiza tu sitio web con ${site.name}. Respuesta en menos de 24 horas. ${site.location}.`}
+  description={`Escríbenos por WhatsApp o déjanos tu mensaje. Respondemos en menos de 24 horas. ${site.name}, ${site.location}.`}
   activePath={routes.contacto}
 >
-  <!-- HERO -->
-  <section class="hero hero-short">
-    <div class="container hero-inner">
-      <span class="year">Cotización</span>
-      <span class="handle">Respuesta &lt; 24 h</span>
-      <h1>Cotiza tu <span class="muted">sitio.</span></h1>
-      <p class="lead">
-        Cuéntanos qué necesitas. Te respondemos con una propuesta escrita que incluye alcance,
-        cronograma y precio final. Sin sorpresas ni letra chica.
-      </p>
-    </div>
-  </section>
+  <section class="ct">
+    <SceneBg visual={sobreVisuals.interfaz} side="right" dim={0.4} eager />
 
-  <!-- FORMULARIO + PANEL LATERAL -->
-  <section style="padding-top:0;padding-bottom:60px;">
     <div class="container">
-      <div class="contact-wrap">
-        <!-- Formulario -->
-        <div class="contact-form-card">
-          <h2>Escríbenos</h2>
-          <p class="form-lead">
-            Los campos con <span style="color:var(--flash-orange);">*</span> son obligatorios. Al
-            enviar se abre WhatsApp con tu mensaje ya redactado; solo tienes que darle a enviar.
-            Nunca compartimos tus datos con terceros.
-          </p>
-
-          <!--
-            Doble camino a propósito:
-
-            · En Netlify, los atributos data-netlify hacen que el POST lo capture
-              Netlify Forms y redirija a /gracias.
-            · En GitHub Pages (el hosting actual) no hay backend que reciba el
-              POST, así que el script del final intercepta el submit y arma un
-              mensaje de WhatsApp con los datos del formulario.
-
-            El primero es el camino nativo; el segundo es lo que está vivo hoy.
-          -->
-          <form
-            name="contacto"
-            method="POST"
-            action={routes.gracias}
-            data-netlify="true"
-            data-netlify-honeypot="bot-field"
-            data-wa-fallback
-            data-wa-number={contact.whatsappRaw}
-            data-gracias={routes.gracias}
-          >
-            <input type="hidden" name="form-name" value="contacto" />
-            <p class="honeypot">
-              <label>No llenes este campo: <input name="bot-field" /></label>
+      <div class="ct-grid">
+        <!-- Columna izquierda: las vías rápidas -->
+        <div class="ct-intro">
+          <Reveal>
+            <span class="eyebrow">Contacto</span>
+            <h1>Hablemos de <span class="muted">tu proyecto.</span></h1>
+            <p class="ct-lead">
+              Te responde la misma persona que programaría tu sitio. Sin ejecutivos de cuenta y
+              sin llamadas de venta.
             </p>
+          </Reveal>
 
-            <div class="field">
-              <label for="nombre">Nombre <span class="req">*</span></label>
-              <input id="nombre" name="nombre" type="text" required autocomplete="name" placeholder="Cómo te llamas" />
-            </div>
-
-            <div class="field">
-              <label for="email">Correo <span class="req">*</span></label>
-              <input id="email" name="email" type="email" required autocomplete="email" placeholder="tunombre@correo.com" />
-            </div>
-
-            <div class="field">
-              <label for="whatsapp">WhatsApp</label>
-              <input id="whatsapp" name="whatsapp" type="tel" autocomplete="tel" placeholder="+507 6000 0000" />
-            </div>
-
-            <div class="field">
-              <label for="plan">Plan de interés <span class="req">*</span></label>
-              <select id="plan" name="plan" required>
-                <option value="">Elige uno…</option>
-                {planOptions.map((opt) => (
-                  <option value={opt.value}>{opt.label}</option>
-                ))}
-              </select>
-            </div>
-
-            <div class="field">
-              <label for="mensaje">Cuéntanos sobre tu proyecto <span class="req">*</span></label>
-              <textarea id="mensaje" name="mensaje" required placeholder="Qué haces, qué necesitas del sitio, si ya tienes uno actual, plazos…" />
-            </div>
-
-            <div class="form-actions">
-              <button type="submit" class="btn btn-primary">
-                <span class="dot"></span> Enviar por WhatsApp
-              </button>
-              <span class="form-note">
-                ¿Prefieres escribir tú mismo?{' '}
-                <a href={waLink()} target="_blank" rel="noopener">Abrir chat en blanco</a>
+          <Reveal delay={0.12}>
+            <a class="ct-wa" href={waLink()} target="_blank" rel="noopener">
+              <span class="ct-wa-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2Zm0 18.15h-.01a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.19 8.19 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.25-8.24 2.2 0 4.27.86 5.83 2.42a8.19 8.19 0 0 1 2.41 5.83c0 4.54-3.7 8.23-8.24 8.23Zm4.52-6.17c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.13-.16.24-.64.8-.78.97-.15.16-.29.18-.53.06-.25-.13-1.05-.39-1.99-1.23-.74-.65-1.23-1.46-1.38-1.71-.14-.24-.01-.38.11-.5.11-.11.25-.29.37-.44.13-.14.17-.24.25-.41.09-.16.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.4-.42-.56-.42h-.47c-.16 0-.43.06-.65.31-.22.24-.86.84-.86 2.05s.88 2.38 1 2.54c.13.17 1.73 2.63 4.19 3.69.59.25 1.04.4 1.4.52.59.18 1.12.16 1.55.1.47-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.15-1.18-.06-.11-.22-.17-.47-.29Z" />
+                </svg>
               </span>
-            </div>
-          </form>
+              <span class="ct-wa-body">
+                <span class="ct-wa-k">La vía rápida</span>
+                <span class="ct-wa-v">{contact.whatsapp}</span>
+                <span class="ct-wa-m">Respuesta en minutos, en horario laboral</span>
+              </span>
+              <span class="ct-wa-arrow" aria-hidden="true">→</span>
+            </a>
+          </Reveal>
+
+          <Reveal delay={0.2}>
+            <ul class="ct-facts">
+              <li>
+                <span class="ct-fact-k">Horario</span>
+                <span class="ct-fact-v">{contact.horario}</span>
+                <span class="ct-fact-m">{contact.timezone}</span>
+              </li>
+              <li>
+                <span class="ct-fact-k">Dónde estamos</span>
+                <span class="ct-fact-v">{site.location}</span>
+                <span class="ct-fact-m">100 % remoto, todo el país</span>
+              </li>
+              <li>
+                <span class="ct-fact-k">Qué recibes</span>
+                <span class="ct-fact-v">Propuesta escrita</span>
+                <span class="ct-fact-m">Alcance, fecha y precio cerrado</span>
+              </li>
+            </ul>
+
+            <p class="ct-alt">
+              ¿Prefieres ver el precio antes de hablar con nadie?
+              <a href={routes.cotizador}>El cotizador lo calcula en 4 preguntas →</a>
+            </p>
+          </Reveal>
         </div>
 
-        <!-- Panel lateral -->
-        <aside class="contact-side">
-          <h3>Contacto directo</h3>
-          <div class="prefer">Respuesta rápida por <span class="muted">WhatsApp.</span></div>
+        <!-- Columna derecha: el formulario -->
+        <Reveal delay={0.15}>
+          <div class="ct-card">
+            <h2>O déjanos tu mensaje</h2>
+            <p class="ct-card-lead">
+              Al enviar se abre WhatsApp con el mensaje ya redactado; solo tienes que darle a
+              enviar. Nunca compartimos tus datos con terceros.
+            </p>
 
-          <ul class="contact-list">
-            <li>
-              <span class="clabel">WhatsApp</span>
-              <div class="cvalue">
-                <a href={waLink()} target="_blank" rel="noopener">{contact.whatsapp}</a>
+            <!--
+              Doble camino a propósito:
+              · En Netlify, los atributos data-netlify capturan el POST.
+              · En GitHub Pages no hay backend, así que el script del final
+                compone un mensaje de WhatsApp con los campos.
+            -->
+            <form
+              name="contacto"
+              method="POST"
+              action={routes.gracias}
+              data-netlify="true"
+              data-netlify-honeypot="bot-field"
+              data-wa-fallback
+              data-wa-number={contact.whatsappRaw}
+              data-gracias={routes.gracias}
+            >
+              <input type="hidden" name="form-name" value="contacto" />
+              <p class="honeypot">
+                <label>No llenes este campo: <input name="bot-field" /></label>
+              </p>
+
+              <div class="ct-row">
+                <div class="field">
+                  <label for="nombre">Nombre <span class="req">*</span></label>
+                  <input id="nombre" name="nombre" type="text" required autocomplete="name" placeholder="Cómo te llamas" />
+                </div>
+                <div class="field">
+                  <label for="whatsapp">WhatsApp</label>
+                  <input id="whatsapp" name="whatsapp" type="tel" autocomplete="tel" placeholder="+507 6000 0000" />
+                </div>
               </div>
-              <div class="cmeta">Respondemos en horario laboral.</div>
-            </li>
-            <li>
-              <span class="clabel">Horario</span>
-              <div class="cvalue">{contact.horario}</div>
-              <div class="cmeta">{contact.timezone}</div>
-            </li>
-            <li>
-              <span class="clabel">Ubicación</span>
-              <div class="cvalue">{site.location}</div>
-              <div class="cmeta">Trabajamos 100 % en remoto para todo el país.</div>
-            </li>
-          </ul>
-        </aside>
+
+              <div class="field">
+                <label for="email">Correo <span class="req">*</span></label>
+                <input id="email" name="email" type="email" required autocomplete="email" placeholder="tunombre@correo.com" />
+              </div>
+
+              <div class="field">
+                <label for="plan">¿Qué te interesa? <span class="req">*</span></label>
+                <select id="plan" name="plan" required>
+                  <option value="">Elige uno…</option>
+                  {planOptions.map((opt) => (
+                    <option value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="mensaje">Cuéntanos de tu negocio <span class="req">*</span></label>
+                <textarea
+                  id="mensaje"
+                  name="mensaje"
+                  required
+                  placeholder="A qué te dedicas, qué necesitas del sitio, si ya tienes uno y para cuándo lo quieres."
+                />
+              </div>
+
+              <button type="submit" class="btn btn-primary ct-submit">
+                <span class="dot"></span> Enviar por WhatsApp
+              </button>
+
+              <p class="ct-note">
+                Respondemos en menos de 24 horas.
+                <a href={routes.privacidad}>Cómo tratamos tus datos</a>
+              </p>
+            </form>
+          </div>
+        </Reveal>
       </div>
     </div>
   </section>
 </BaseLayout>
 
 <script>
-  /** Prellena el <select> si la URL trae ?plan=… (los enlaces de /planes lo hacen). */
+  /** Prellena el <select> si la URL trae ?plan=… */
   function preselectPlan() {
     const plan = new URLSearchParams(location.search).get('plan');
     if (!plan) return;
@@ -144,12 +175,9 @@ import { routes } from '../data/links';
   }
 
   /**
-   * GitHub Pages sirve archivos estáticos: no hay nada que reciba el POST del
-   * formulario. En vez de dejarlo muerto, componemos un mensaje de WhatsApp con
-   * lo que escribió la persona y lo abrimos listo para enviar.
-   *
-   * En Netlify no hace falta: ahí Netlify Forms captura el POST de verdad, así
-   * que el handler se aparta y deja pasar el envío nativo.
+   * GitHub Pages sirve archivos estáticos: no hay nada que reciba el POST. En
+   * vez de dejarlo muerto, componemos un mensaje de WhatsApp con lo escrito.
+   * En Netlify el handler se aparta y deja pasar el envío nativo.
    */
   function isNetlifyHost() {
     return /(^|\.)netlify\.(app|com)$/.test(location.hostname);
@@ -169,7 +197,7 @@ import { routes } from '../data/links';
       `Correo: ${value('email')}`,
     ];
     if (value('whatsapp')) lines.push(`WhatsApp: ${value('whatsapp')}`);
-    lines.push(`Plan de interés: ${planLabel}`, '', 'Proyecto:', value('mensaje'));
+    lines.push(`Me interesa: ${planLabel}`, '', 'Mi negocio:', value('mensaje'));
     return lines.join('\n');
   }
 
@@ -195,14 +223,7 @@ import { routes } from '../data/links';
 
       const url = `https://wa.me/${number}?text=${encodeURIComponent(buildWhatsAppMessage(form))}`;
       const tab = window.open(url, '_blank', 'noopener');
-
-      if (tab) {
-        // WhatsApp ya está abierto en otra pestaña: aquí mostramos el acuse
-        location.href = form.dataset.gracias || '/';
-      } else {
-        // Bloqueador de pop-ups: navegamos en esta misma pestaña
-        location.href = url;
-      }
+      location.href = tab ? form.dataset.gracias || '/' : url;
     });
   }
 
@@ -218,3 +239,232 @@ import { routes } from '../data/links';
     init();
   }
 </script>
+
+<style>
+  .ct {
+    position: relative;
+    padding: 168px 0 120px;
+    overflow: hidden;
+  }
+  .ct .container {
+    position: relative;
+    z-index: 1;
+  }
+  .ct-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.05fr;
+    gap: 70px;
+    align-items: start;
+  }
+
+  /* ---------- IZQUIERDA ---------- */
+  .ct-intro h1 {
+    font-size: clamp(38px, 5.4vw, 68px);
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -0.025em;
+    text-transform: uppercase;
+    max-width: 14ch;
+    text-shadow: 0 4px 40px rgba(16, 1, 1, 0.85);
+  }
+  .ct-intro h1 .muted {
+    color: var(--studio-gray);
+  }
+  .ct-lead {
+    margin-top: 22px;
+    max-width: 44ch;
+    font-size: 18px;
+    font-weight: 300;
+    color: var(--studio-gray);
+    line-height: 1.6;
+    text-shadow: 0 2px 20px rgba(16, 1, 1, 0.9);
+  }
+
+  /* WhatsApp con peso de tarjeta: es la vía que de verdad usa la gente aquí */
+  .ct-wa {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-top: 36px;
+    padding: 22px 24px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 81, 0, 0.4);
+    background: linear-gradient(120deg, rgba(255, 81, 0, 0.14), rgba(238, 0, 0, 0.05));
+    transition: border-color 0.25s, transform 0.25s, background 0.25s;
+  }
+  .ct-wa:hover {
+    border-color: var(--flash-orange);
+    transform: translateY(-3px);
+    background: linear-gradient(120deg, rgba(255, 81, 0, 0.22), rgba(238, 0, 0, 0.08));
+  }
+  .ct-wa-icon {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: var(--flash-orange);
+    color: var(--deep-black);
+  }
+  .ct-wa-icon svg {
+    width: 24px;
+    height: 24px;
+  }
+  .ct-wa-body {
+    flex: 1;
+  }
+  .ct-wa-k {
+    display: block;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--flash-orange);
+    margin-bottom: 5px;
+  }
+  .ct-wa-v {
+    display: block;
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--soft-white);
+  }
+  .ct-wa-m {
+    display: block;
+    margin-top: 4px;
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--studio-gray);
+  }
+  .ct-wa-arrow {
+    flex-shrink: 0;
+    color: var(--flash-orange);
+    font-size: 20px;
+    transition: transform 0.25s;
+  }
+  .ct-wa:hover .ct-wa-arrow {
+    transform: translateX(4px);
+  }
+
+  .ct-facts {
+    list-style: none;
+    margin-top: 34px;
+    display: grid;
+    gap: 20px;
+  }
+  .ct-facts li {
+    padding-left: 18px;
+    border-left: 2px solid rgba(255, 81, 0, 0.5);
+  }
+  .ct-fact-k {
+    display: block;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--studio-gray);
+    margin-bottom: 6px;
+  }
+  .ct-fact-v {
+    display: block;
+    font-size: 17px;
+    font-weight: 500;
+    color: var(--soft-white);
+  }
+  .ct-fact-m {
+    display: block;
+    margin-top: 2px;
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--studio-gray);
+  }
+
+  .ct-alt {
+    margin-top: 32px;
+    font-size: 15px;
+    font-weight: 300;
+    color: var(--studio-gray);
+    line-height: 1.6;
+  }
+  .ct-alt a {
+    display: inline-block;
+    padding: 6px 0;
+    color: var(--flash-orange);
+  }
+
+  /* ---------- DERECHA ---------- */
+  .ct-card {
+    padding: 40px 40px 36px;
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(12, 2, 2, 0.86);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
+  }
+  .ct-card h2 {
+    font-size: 26px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin-bottom: 10px;
+  }
+  .ct-card-lead {
+    font-size: 15px;
+    font-weight: 300;
+    color: var(--studio-gray);
+    line-height: 1.6;
+    margin-bottom: 30px;
+  }
+  .ct-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .ct-submit {
+    width: 100%;
+    justify-content: center;
+    margin-top: 6px;
+  }
+  .ct-note {
+    margin-top: 16px;
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--studio-gray);
+    text-align: center;
+  }
+  .ct-note a {
+    color: var(--flash-orange);
+    display: inline-block;
+    padding: 4px 0;
+  }
+
+  @media (max-width: 980px) {
+    .ct {
+      padding-top: 140px;
+    }
+    .ct-grid {
+      grid-template-columns: 1fr;
+      gap: 44px;
+    }
+    .ct-intro h1 {
+      max-width: none;
+    }
+  }
+  @media (max-width: 560px) {
+    .ct-card {
+      padding: 28px 22px 26px;
+    }
+    .ct-row {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ct-wa:hover {
+      transform: none;
+    }
+    .ct-wa:hover .ct-wa-arrow {
+      transform: none;
+    }
+  }
+</style>

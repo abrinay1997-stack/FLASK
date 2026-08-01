@@ -4,7 +4,7 @@ import { site, contact } from '../data/site';
 import { plans, diagnostico } from '../data/plans';
 import { modules } from '../data/modules';
 import { carePlans, careNote } from '../data/care';
-import { faq } from '../data/faq';
+import { faqGroups } from '../data/faq';
 import { services, procesoSteps } from '../data/services';
 
 /**
@@ -149,7 +149,7 @@ export const GET: APIRoute = () => {
       id: `modulo-${m.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
       topic: 'capacidades',
       q: [`cuanto cuesta ${m.name}`, `precio ${m.name}`, m.name, `quiero ${m.name}`],
-      text: `La capacidad "${m.name}" cuesta ${m.price} y se construye con ${m.stack}. Se suma a cualquier plan.`,
+      text: `"${m.name}" cuesta ${m.price}. ${m.stack} Se suma a cualquier plan.`,
     });
   }
 
@@ -215,13 +215,15 @@ export const GET: APIRoute = () => {
   }
 
   /* ---------------- FAQ ---------------- */
-  for (const [i, item] of faq.entries()) {
-    add({
-      id: `faq-${i}`,
-      topic: 'faq',
-      q: [item.q],
-      text: item.a,
-    });
+  for (const group of faqGroups) {
+    for (const [i, item] of group.items.entries()) {
+      add({
+        id: `faq-${group.id}-${i}`,
+        topic: 'faq',
+        q: [item.q],
+        text: item.a,
+      });
+    }
   }
 
   /* ---------------- Negocio y contacto ---------------- */
@@ -270,9 +272,9 @@ export const GET: APIRoute = () => {
       'que es jamstack',
     ],
     text:
-      'FLASK no usa WordPress. Entrega sitios estáticos Jamstack sobre CDN: sin plugins que actualizar, ' +
-      'sin base de datos expuesta y sin panel público que hackear. Un WordPress barato suele cargar en cinco ' +
-      'segundos y necesita mantenimiento constante; estos sitios cargan en menos de uno.',
+      'FLASK no usa WordPress. Construye de otra forma: sin complementos que actualizar y sin panel público ' +
+      'por el que puedan entrar. Un WordPress barato suele abrir en cinco segundos y hay que mantenerlo cada ' +
+      'semana; estos sitios abren en menos de uno y puedes dejarlos solos un año.',
   });
 
   add({

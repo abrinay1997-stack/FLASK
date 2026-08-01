@@ -2,8 +2,8 @@ export const site = {
   name: 'FLASK',
   tagline: 'Sitios rápidos. Código tuyo.',
   description:
-    'Agencia web en Panamá. Sitios Jamstack que cargan en menos de un segundo, entregados en días, con el código en tu propio GitHub. Desde $295.',
-  descriptionShort: 'Sitios Jamstack en Panamá. Carga <1s, entrega en días, código 100% tuyo. Desde $295.',
+    'Agencia web en Panamá. Sitios que abren en menos de un segundo, entregados en días y que quedan a tu nombre. Desde $295.',
+  descriptionShort: 'Webs en Panamá. Abren en menos de 1 s, listas en días y quedan a tu nombre. Desde $295.',
   locale: 'es_PA',
   lang: 'es',
   themeColor: '#100101',

@@ -1,5 +1,14 @@
 import { routes } from './links';
 
+/**
+ * Copy de los tres pilares y del proceso.
+ *
+ * Regla de escritura de este archivo: **el dolor antes que la herramienta.**
+ * Nada de nombres de tecnología salvo los que el cliente ya reconoce (WordPress,
+ * Google, WhatsApp, GitHub). Si una frase solo la entiende un programador, está
+ * mal escrita para esta página.
+ */
+
 export interface Service {
   idx: string;
   title: string;
@@ -10,24 +19,24 @@ export interface Service {
 export const services: Service[] = [
   {
     idx: '01',
-    title: 'Velocidad como servicio',
-    desc: 'Arquitectura Jamstack sobre CDN. Sin plugins pesados, sin base de datos expuesta. PageSpeed ≥90 garantizado en móvil y escritorio.',
+    title: 'Rápido de verdad',
+    desc: 'Tu sitio abre antes de que a nadie le dé tiempo a arrepentirse. Menos de un segundo, en el celular y en la computadora.',
     longDesc:
-      'Los sitios FLASK se sirven desde una red de distribución global (CDN Netlify). No hay servidor PHP procesando cada visita, no hay base de datos consultada cada milisegundo, no hay treinta plugins compitiendo por CPU. El resultado: LCP por debajo de 1.8 segundos, INP por debajo de 150ms, CLS prácticamente cero. Un sitio que Google entiende como técnicamente sano y que sube en rankings sin más esfuerzo que existir.',
+      'Cuatro de cada diez personas se van de una página que tarda más de tres segundos en abrir. Se van antes de ver tu logo, tus precios o tu teléfono: para ellas tu negocio nunca existió. Y no vuelven. Nosotros construimos de una forma distinta a la habitual, sin todo el peso que arrastran los sitios corrientes, y el resultado es que el tuyo abre casi al instante. Google también lo nota, y a los sitios rápidos los muestra antes.',
   },
   {
     idx: '02',
-    title: 'Seguridad por diseño',
-    desc: 'Sitios headless con superficie de ataque mínima. Adiós a los hackeos crónicos de WordPress y sus plugins desactualizados.',
+    title: 'Que no se caiga ni te lo hackeen',
+    desc: 'Sin panel de administración expuesto y sin complementos que se rompen solos. Nada que actualizar cada semana.',
     longDesc:
-      'El 43 % de todos los sitios web del planeta corren WordPress y comparten el mismo dolor: un plugin desactualizado, una versión de PHP vieja, un backdoor en un tema pirata, y en cuestión de días el sitio termina redirigiendo a spam o directamente offline. FLASK entrega sitios estáticos sin panel de administración público expuesto, sin base de datos accesible, sin superficie que hackear. La única superficie de ataque real es tu cuenta de GitHub — y esa la proteges con 2FA.',
+      'La historia se repite: un negocio monta su web, pasan unos meses, y un día aparece caída, redirigiendo a una página de pastillas o pidiendo un rescate. Casi siempre es lo mismo: un complemento sin actualizar. Los sitios que hacemos no tienen esa puerta abierta — no hay complementos que mantener ni panel público por el que entrar. Es una web que puedes dejar sola durante un año y seguirá igual.',
   },
   {
     idx: '03',
-    title: 'Entrega en días',
-    desc: 'Metodología productizada con plantillas propias por vertical. Un Launch sale en 5 días, no en 4 semanas. El código llega a tu GitHub al pago final.',
+    title: 'Listo en días, no en meses',
+    desc: 'Un sitio sencillo sale en 72 horas. El más completo, en tres semanas. Y el código queda a tu nombre.',
     longDesc:
-      'Las agencias tradicionales cotizan 3-6 semanas porque su flujo es: reunión inicial, brief, wireframe, diseño en Figma, revisión, otro diseño, HTML manual, testing manual, deploy manual. FLASK ha productizado cada paso con plantillas verticales propias y flujo de trabajo automatizado. Un Launch de $450 se entrega en 4-5 días reales. Corporate en 8-12. Commerce en 15-20. Los plazos cuentan desde que recibimos tu contenido y el 50 % del pago.',
+      'Preguntas por una web y te dicen "un mes y medio". Pasan tres, y sigues mandando a tus clientes a un perfil de Instagram. Eso pasa porque cada proyecto se empieza desde cero. Nosotros ya tenemos resuelto lo que se repite en todos, así que el tiempo se va en lo tuyo y no en volver a inventar lo mismo. Los plazos cuentan desde que nos das tus textos e imágenes y el 50 % del pago.',
   },
 ];
 
@@ -41,24 +50,24 @@ export interface ProcesoStep {
 export const procesoSteps: ProcesoStep[] = [
   {
     num: '01',
-    title: '50 % adelanto',
-    desc: 'No arrancamos sin depósito. La factura y el alcance quedan por escrito antes de la primera línea de código.',
+    title: 'Sabes el precio antes de empezar',
+    desc: 'Te mandamos por escrito qué incluye, qué no incluye, cuánto cuesta y qué día lo tienes. Firmas, pagas la mitad y arrancamos.',
     longDesc:
-      'Antes de escribir una sola línea, te enviamos una propuesta escrita con el alcance exacto, el cronograma día por día y una cláusula clara de "qué NO incluye". Firmas, pagas el 50 %, y arrancamos. Sin esa firma y sin ese pago no hay proyecto — y eso te protege a ti también: garantiza que tomamos tu proyecto en serio y no lo dejamos a medias.',
+      'La frase que más caro sale en este negocio es "eso lo vemos después". Se empieza sin nada por escrito, aparecen cosas que nadie había hablado, y al final alguien queda molesto: o tú pagando de más, o nosotros trabajando gratis. Por eso todo va en papel antes de la primera línea de código, incluida la lista de lo que NO está incluido. Sin esa firma y sin ese pago no hay proyecto, y eso también te protege a ti: garantiza que tu trabajo entra en la agenda en serio.',
   },
   {
     num: '02',
-    title: 'El código es tuyo',
-    desc: 'Al pago final transferimos el repositorio a tu propio GitHub. Nada de rehenes tecnológicos: te vas cuando quieras.',
+    title: 'El sitio es tuyo, no nuestro',
+    desc: 'Al pagar el resto, el código pasa a tu cuenta y el dominio queda a tu nombre. Si mañana quieres irte, te vas con todo.',
     longDesc:
-      'La mayoría de agencias en Panamá te venden un sitio y se quedan con el código, el hosting y el dominio a su nombre. Cuando quieres irte, te cuesta más migrar que rehacer. Nosotros no. Al momento del pago final, el repositorio se transfiere a tu cuenta de GitHub y el dominio a tu nombre. Si mañana quieres irte con otra agencia o mover el sitio a tu sobrino que estudia sistemas, tu problema — tienes todo.',
+      'Aquí es normal que la agencia se quede con el código, con el alojamiento y con el dominio a su nombre. El día que quieres cambiar, descubres que no puedes: te toca empezar de cero con otro y pagar otra vez. Nosotros hacemos lo contrario. Cuando terminas de pagar, todo pasa a tu nombre. Si mañana te llevas el sitio a otra agencia o a tu sobrino que estudia sistemas, es tu problema — tienes todo lo que hace falta.',
   },
   {
     num: '03',
-    title: 'Revisiones claras',
-    desc: 'Cada paquete incluye rondas de revisión definidas. Si necesitas más, cada revisión extra cuesta $40. Punto.',
+    title: 'Los cambios tienen un número, no un "ya veremos"',
+    desc: 'Cada plan trae sus rondas de cambios incluidas. Si necesitas más, cada una cuesta $40. Sin discusión y sin mala cara.',
     longDesc:
-      'El scope creep — los "solo un cambio más" que no se acaban nunca — es lo que quiebra a quien cobra barato en Panamá. Nosotros lo cerramos por adelantado: cada paquete incluye rondas de revisión específicas (Launch: 2 rondas, Corporate: 3, Commerce: 4). Si necesitas otra ronda después de agotar las incluidas, cuesta $40 por revisión. Sin excepciones, sin regateos, sin resentimiento. Es justo para todos.',
+      'Los "solo un cambio más" son lo que arruina a quien cobra barato: se acumulan, no se acaban nunca, y acaban en una relación incómoda donde nadie quiere escribirle al otro. Se arregla poniéndoles número desde el principio. Cada plan incluye sus rondas (Launch 2, Corporate 3, Commerce 4). Si se agotan y necesitas otra, son $40. Se sabe de antemano, así que no hay nada que negociar ni nadie que quede mal.',
   },
 ];
 
@@ -68,8 +77,10 @@ export interface NavLink {
 }
 
 export const navLinks: NavLink[] = [
+  { href: routes.home, label: 'Inicio' },
   { href: routes.servicios, label: 'Servicios' },
   { href: routes.planes, label: 'Planes' },
   { href: routes.proceso, label: 'Proceso' },
-  { href: routes.sobre, label: 'Nosotros' },
+  { href: routes.ayuda, label: 'Ayuda' },
+  { href: routes.contacto, label: 'Contacto' },
 ];

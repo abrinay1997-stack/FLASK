@@ -2,47 +2,87 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Reveal from '../components/Reveal.astro';
 import SceneBg from '../components/SceneBg.astro';
+import CareCard from '../components/CareCard.astro';
 import { services } from '../data/services';
+import { carePlans, careNote } from '../data/care';
+import { diagnostico } from '../data/plans';
 import { serviceVisuals } from '../data/images';
 import { routes } from '../data/links';
+
+/**
+ * La página abre con Care y con el Diagnóstico, no con el discurso.
+ *
+ * Mismo criterio que en /planes: quien entra a "Servicios" viene a ver qué se
+ * contrata y cuánto cuesta. Los tres pilares son el porqué, y el porqué se lee
+ * después de lo que se compra, no antes.
+ */
 ---
 
 <BaseLayout
   title="Servicios"
-  description="Tres pilares: velocidad, seguridad y entrega en días. Así construye FLASK cada sitio web en Panamá."
+  description="Mantenimiento mensual desde $35, diagnóstico de tu sitio actual por $49 y las tres razones por las que un sitio FLASK rinde distinto."
   activePath={routes.servicios}
 >
-  <!-- HERO -->
-  <section class="hero hero-short">
-    <div class="container hero-inner">
-      <span class="year">Servicios</span>
-      <span class="handle">3 pilares</span>
-      <Reveal>
-        <h1>Tres ventajas <span class="muted">que la competencia no puede copiar.</span></h1>
-      </Reveal>
-      <Reveal delay={0.15}>
-        <p class="lead">
-          No vendemos "sitios bonitos". Vendemos velocidad medible, seguridad estructural y
-          entrega en días. Cada pilar es una decisión técnica que la mayoría de agencias en
-          Panamá no puede sostener.
+  <!-- CARE: lo primero que se ve -->
+  <section class="care-lead" id="care">
+    <div class="container">
+      <div class="care-head">
+        <span class="eyebrow">Servicios · FLASK Care</span>
+        <h1>Tu sitio, <span class="muted">cuidado todos los meses.</span></h1>
+        <p class="care-lead-text">
+          Puedes no contratarlo: tu sitio funciona igual y muchos clientes lo dejan así. Care es
+          para quien prefiere no acordarse nunca de que tiene una web.
         </p>
+      </div>
+
+      <div class="care-grid">
+        {carePlans.map((plan) => (
+          <Reveal>
+            <CareCard plan={plan} />
+          </Reveal>
+        ))}
+      </div>
+
+      <Reveal>
+        <div class="care-note">
+          <strong>Pago anual adelantado:</strong> {careNote.replace('Pago anual adelantado: ', '')}
+        </div>
       </Reveal>
     </div>
   </section>
 
-  <!--
-    ESCENAS: la imagen es el fondo de la sección, no una pieza al lado del texto.
-    El carril de lectura alterna de lado para que la página respire al bajar.
-  -->
+  <!-- DIAGNÓSTICO -->
+  <section class="diag" id="diagnostico">
+    <div class="container">
+      <Reveal>
+        <div class="diag-card">
+          <div class="diag-copy">
+            <span class="eyebrow">¿Ya tienes sitio?</span>
+            <h2>{diagnostico.name}</h2>
+            <p>{diagnostico.desc}</p>
+            <a class="btn btn-primary" href={`${routes.contacto}?plan=${diagnostico.slug}`}>
+              <span class="dot"></span> Pedir mi diagnóstico
+            </a>
+          </div>
+          <div class="diag-price">
+            <span class="diag-price-v">{diagnostico.price}</span>
+            <span class="diag-price-k">Pago único · 48 horas</span>
+          </div>
+        </div>
+      </Reveal>
+    </div>
+  </section>
+
+  <!-- LOS TRES PILARES -->
   {services.map((s, i) => {
     const side = i % 2 === 0 ? 'left' : 'right';
     return (
       <section class="service-scene" data-scene={s.idx} data-side={side}>
-        <SceneBg visual={serviceVisuals[s.idx]!} side={side} dim={0.4} eager={i === 0} />
+        <SceneBg visual={serviceVisuals[s.idx]!} side={side} dim={0.4} />
         <div class="container">
           <div class="service-copy">
             <Reveal>
-              <span class="service-idx">{s.idx} · Pilar</span>
+              <span class="service-idx">{s.idx} · Por qué</span>
               <h2>{s.title}</h2>
             </Reveal>
             <Reveal delay={0.12}>
@@ -56,25 +96,86 @@ import { routes } from '../data/links';
       </section>
     );
   })}
-
-  <!-- CTA -->
-  <section class="cta">
-    <div class="container cta-inner">
-      <Reveal>
-        <h2>¿Listo para arrancar?</h2>
-        <p>Elige el plan que se ajusta a tu negocio o cuéntanos qué necesitas y lo cotizamos.</p>
-        <div class="cta-actions">
-          <a class="btn btn-primary" href={routes.planes}>
-            <span class="dot"></span> Ver planes
-          </a>
-          <a class="btn btn-ghost" href={routes.contacto}>Escribirnos</a>
-        </div>
-      </Reveal>
-    </div>
-  </section>
 </BaseLayout>
 
 <style>
+  /* ---------- CARE ---------- */
+  .care-lead {
+    padding-top: 168px;
+    padding-bottom: 90px;
+  }
+  .care-head {
+    margin-bottom: 54px;
+  }
+  .care-head h1 {
+    font-size: clamp(38px, 5.6vw, 72px);
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -0.025em;
+    text-transform: uppercase;
+    max-width: 18ch;
+  }
+  .care-head h1 .muted {
+    color: var(--studio-gray);
+  }
+  .care-lead-text {
+    margin-top: 24px;
+    max-width: 54ch;
+    font-size: 18px;
+    font-weight: 300;
+    color: var(--studio-gray);
+    line-height: 1.6;
+  }
+
+  /* ---------- DIAGNÓSTICO ---------- */
+  .diag {
+    padding: 40px 0 100px;
+  }
+  .diag-card {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 44px;
+    align-items: center;
+    padding: 44px 46px;
+    border-radius: 24px;
+    background: linear-gradient(120deg, rgba(255, 81, 0, 0.16), rgba(238, 0, 0, 0.06));
+    border: 1px solid rgba(255, 81, 0, 0.4);
+  }
+  .diag-copy h2 {
+    font-size: clamp(28px, 3.6vw, 44px);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+    margin: 6px 0 16px;
+  }
+  .diag-copy p {
+    max-width: 58ch;
+    font-size: 16px;
+    font-weight: 300;
+    color: var(--soft-white);
+    line-height: 1.65;
+    margin-bottom: 28px;
+  }
+  .diag-price {
+    text-align: right;
+  }
+  .diag-price-v {
+    display: block;
+    font-size: clamp(48px, 6vw, 76px);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+  .diag-price-k {
+    display: block;
+    margin-top: 10px;
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--studio-gray);
+  }
+
+  /* ---------- PILARES ---------- */
   .service-scene {
     position: relative;
     min-height: 88vh;
@@ -87,8 +188,6 @@ import { routes } from '../data/links';
     position: relative;
     z-index: 1;
   }
-  /* El texto ocupa poco menos de la mitad: el resto de la escena queda
-     respirando con la imagen. */
   .service-copy {
     max-width: 46ch;
   }
@@ -127,14 +226,19 @@ import { routes } from '../data/links';
     line-height: 1.65;
     text-shadow: 0 2px 20px rgba(16, 1, 1, 0.9);
   }
-  .cta-actions {
-    display: flex;
-    gap: 14px;
-    justify-content: center;
-    flex-wrap: wrap;
-    margin-top: 12px;
-  }
+
   @media (max-width: 900px) {
+    .care-lead {
+      padding-top: 140px;
+    }
+    .diag-card {
+      grid-template-columns: 1fr;
+      gap: 26px;
+      padding: 32px 26px;
+    }
+    .diag-price {
+      text-align: left;
+    }
     .service-scene {
       min-height: 0;
       padding: 90px 0;

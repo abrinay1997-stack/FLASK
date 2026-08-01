@@ -2,15 +2,11 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PlanCard from '../components/PlanCard.astro';
 import ModuleCard from '../components/ModuleCard.astro';
-import CareCard from '../components/CareCard.astro';
-import DiagBand from '../components/DiagBand.astro';
 import Reveal from '../components/Reveal.astro';
 import SceneBg from '../components/SceneBg.astro';
 
 import { plans, diagnostico } from '../data/plans';
 import { modules } from '../data/modules';
-import { carePlans, careNote } from '../data/care';
-import { faq } from '../data/faq';
 import { planVisuals } from '../data/images';
 import { routes } from '../data/links';
 import { site } from '../data/site';
@@ -26,7 +22,7 @@ const serviceSchema = {
   '@context': 'https://schema.org',
   '@type': 'Service',
   name: `Diseño y desarrollo web — ${site.name}`,
-  serviceType: 'Diseño y desarrollo de sitios web Jamstack',
+  serviceType: 'Diseño y desarrollo de sitios web',
   description: site.description,
   areaServed: { '@type': 'Country', name: site.location },
   provider: {
@@ -53,22 +49,13 @@ const showcase = ['start', 'corporate']
   .map((slug) => ({ plan: plans.find((p) => p.slug === slug)!, visual: planVisuals[slug]! }))
   .filter((item) => item.plan && item.visual);
 
-const faqSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'FAQPage',
-  mainEntity: faq.map((item) => ({
-    '@type': 'Question',
-    name: item.q,
-    acceptedAnswer: { '@type': 'Answer', text: item.a },
-  })),
-};
 ---
 
 <BaseLayout
   title="Planes"
-  description="Cuatro planes fijos entre $295 y $1,200. Capacidades avanzadas por separado. Mantenimiento mensual con SLA. Cero letra chica."
+  description="Cuatro planes fijos entre $295 y $1,200, con precio y fecha cerrados antes de empezar. Capacidades avanzadas por separado. Cero letra chica."
   activePath={routes.planes}
-  jsonLd={[serviceSchema, faqSchema]}
+  jsonLd={[serviceSchema]}
 >
   <!--
     Los precios van primero, sin hero de por medio: quien entra aquí ya sabe qué
@@ -89,10 +76,6 @@ const faqSchema = {
           </Reveal>
         ))}
       </div>
-
-      <Reveal delay={0.15}>
-        <DiagBand />
-      </Reveal>
     </div>
   </section>
 
@@ -164,9 +147,9 @@ const faqSchema = {
       </h2>
       <Reveal>
         <p class="modules-intro">
-          Un sitio no tiene por qué quedarse en un sitio. Cada capacidad de abajo se enchufa a lo
-          que ya tienes, con precio cerrado y sin rehacer nada: activas la que necesitas, cuando la
-          necesitas. Puedes empezar con una y sumar el resto más adelante.
+          Tu web no tiene por qué quedarse en una web. Cada cosa de aquí abajo se le añade a lo
+          que ya tengas, con precio cerrado y sin rehacer nada: activas la que necesitas cuando la
+          necesitas. Puedes empezar por una y sumar el resto más adelante.
         </p>
       </Reveal>
 
@@ -180,56 +163,6 @@ const faqSchema = {
     </div>
   </section>
 
-  <!-- CARE -->
-  <section class="care" id="care">
-    <div class="container">
-      <span class="eyebrow">FLASK Care</span>
-      <h2 class="section-title">Tu sitio, <span class="muted">cuidado todos los meses.</span></h2>
-
-      <div class="care-grid">
-        {carePlans.map((plan) => (
-          <Reveal>
-            <CareCard plan={plan} />
-          </Reveal>
-        ))}
-      </div>
-
-      <Reveal>
-        <div class="care-note">
-          <strong>Pago anual adelantado:</strong> {careNote.replace('Pago anual adelantado: ', '')}
-        </div>
-      </Reveal>
-    </div>
-  </section>
-
-  <!-- FAQ -->
-  <section class="faq" id="faq">
-    <div class="container">
-      <span class="eyebrow">Preguntas</span>
-      <h2 class="section-title">Antes de <span class="muted">escribirnos.</span></h2>
-      {faq.map((item) => (
-        <Reveal>
-          <details>
-            <summary>{item.q}</summary>
-            <p>{item.a}</p>
-          </details>
-        </Reveal>
-      ))}
-    </div>
-  </section>
-
-  <!-- CTA -->
-  <section class="cta">
-    <div class="container cta-inner">
-      <Reveal>
-        <h2>¿Cuál te encaja?</h2>
-        <p>Cuéntanos qué necesitas. Te enviamos una propuesta escrita con alcance, cronograma y precio.</p>
-        <a class="btn btn-primary" href={routes.contacto}>
-          <span class="dot"></span> Escribir a FLASK
-        </a>
-      </Reveal>
-    </div>
-  </section>
 </BaseLayout>
 
 <style>

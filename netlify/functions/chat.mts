@@ -1,6 +1,6 @@
 import type { Config, Context } from '@netlify/functions';
 
-import { retrieve, invalidPrices, buildSystem, type Kb } from './_retrieval.mts';
+import { retrieve, invalidPrices, buildSystem, trimReply, type Kb } from './_retrieval.mts';
 
 /**
  * Endpoint del chat de FLASK.
@@ -69,8 +69,8 @@ function pickProvider(): Provider | null {
       },
       body: (system, msgs) => ({
         model: process.env.CHAT_MODEL || 'claude-haiku-4-5-20251001',
-        max_tokens: 400,
-        temperature: 0.2,
+        max_tokens: 260,
+        temperature: 0.3,
         system,
         messages: msgs,
       }),
@@ -84,8 +84,8 @@ function pickProvider(): Provider | null {
       headers: { 'content-type': 'application/json', authorization: `Bearer ${groq}` },
       body: (system, msgs) => ({
         model: process.env.CHAT_MODEL || 'llama-3.3-70b-versatile',
-        max_tokens: 400,
-        temperature: 0.2,
+        max_tokens: 260,
+        temperature: 0.3,
         messages: [{ role: 'system', content: system }, ...msgs],
       }),
       extract: (j) => j?.choices?.[0]?.message?.content ?? '',
@@ -179,7 +179,7 @@ export default async (req: Request, context: Context) => {
       signal: AbortSignal.timeout(20_000),
     });
     if (!res.ok) throw new Error(`proveedor devolvió ${res.status}`);
-    reply = provider.extract(await res.json()).trim();
+    reply = trimReply(provider.extract(await res.json()).trim());
   } catch {
     return json({
       reply: `Se me cayó la conexión. Escríbenos por WhatsApp al ${kb.site.whatsapp} y te respondemos al momento.`,

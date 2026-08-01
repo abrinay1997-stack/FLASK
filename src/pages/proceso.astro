@@ -3,13 +3,46 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Reveal from '../components/Reveal.astro';
 import SceneBg from '../components/SceneBg.astro';
 import { procesoSteps } from '../data/services';
-import { procesoVisual } from '../data/images';
+import { procesoVisual, sobreVisuals } from '../data/images';
 import { routes } from '../data/links';
+import { site, contact, waLink } from '../data/site';
+
+/**
+ * Proceso + Nosotros, fusionadas.
+ *
+ * Eran la misma conversación partida en dos: una explicaba cómo trabajamos y la
+ * otra por qué trabajamos así. Separadas, ninguna se sostenía sola. Juntas
+ * cuentan una sola cosa — cómo es trabajar con FLASK — y esta es la única página
+ * del sitio que conserva el bloque de cierre, porque es donde de verdad toca
+ * pedir el paso siguiente.
+ */
+const manifiesto = [
+  {
+    num: '01',
+    title: 'Cinco segundos de carga es dinero saliendo.',
+    line: 'Cuatro de cada diez visitas se van antes de ver tu sitio. No es un tema de estética.',
+  },
+  {
+    num: '02',
+    title: 'Tu sitio no debería ser rehén de nadie.',
+    line: 'El código pasa a tu nombre y el dominio también. Si te vas, te llevas todo.',
+  },
+  {
+    num: '03',
+    title: 'El precio va por escrito. Siempre.',
+    line: 'Nada de "consultar por interno". Alcance, fecha y cifra cerrada antes de empezar.',
+  },
+  {
+    num: '04',
+    title: 'WordPress no es obligatorio. Es una decisión.',
+    line: 'Y para un negocio que solo quiere una web que funcione, casi siempre es la equivocada.',
+  },
+];
 ---
 
 <BaseLayout
   title="Proceso"
-  description="Cómo trabajamos: 50% adelanto, el código es tuyo, revisiones claras. Sin sorpresas, sin scope creep."
+  description="Cómo trabajamos: precio cerrado antes de empezar, el código queda a tu nombre y los cambios tienen número. Sin sorpresas."
   activePath={routes.proceso}
 >
   <!-- HERO -->
@@ -18,18 +51,19 @@ import { routes } from '../data/links';
       <span class="year">Proceso</span>
       <span class="handle">3 reglas</span>
       <Reveal>
-        <h1>Sin sorpresas. <span class="muted">Sin scope creep.</span></h1>
+        <h1>Sin sorpresas <span class="muted">a mitad del camino.</span></h1>
       </Reveal>
       <Reveal delay={0.15}>
         <p class="lead">
-          El scope creep es lo que quiebra a quien cobra barato en Panamá. Nosotros lo cerramos
-          por adelantado con tres reglas simples que nos protegen a ambos.
+          Casi todos los problemas entre un negocio y quien le hace la web salen de lo mismo:
+          empezar sin tener por escrito qué se va a hacer, cuánto cuesta y hasta dónde llega.
+          Nosotros lo cerramos antes, con tres reglas que nos protegen a los dos.
         </p>
       </Reveal>
     </div>
   </section>
 
-  <!-- BANDA A SANGRE: separa el hero de los pasos y fija el tono -->
+  <!-- BANDA A SANGRE -->
   <section class="proceso-band">
     <SceneBg visual={procesoVisual} side="center" dim={0.5} />
     <div class="container">
@@ -41,7 +75,7 @@ import { routes } from '../data/links';
     </div>
   </section>
 
-  <!-- ESCENAS: una por paso -->
+  <!-- LOS TRES PASOS -->
   {procesoSteps.map((step) => (
     <section class="proceso-scene">
       <div class="container">
@@ -65,15 +99,83 @@ import { routes } from '../data/links';
     </section>
   ))}
 
-  <!-- CTA -->
+  <!-- MANIFIESTO (venía de la antigua /sobre) -->
+  <section class="manifest-scene">
+    <SceneBg visual={sobreVisuals.manifiesto} side="center" dim={0.32} />
+    <div class="container">
+      <div class="manifest-list">
+        <Reveal>
+          <span class="eyebrow">En qué creemos</span>
+          <h2 class="manifest-title">Por qué trabajamos <span class="muted">así.</span></h2>
+        </Reveal>
+        {manifiesto.map((item, i) => (
+          <Reveal delay={i * 0.08}>
+            <article class="manifest-row">
+              <span class="manifest-num">{item.num}</span>
+              <div>
+                <h3>{item.title}</h3>
+                <p>{item.line}</p>
+              </div>
+            </article>
+          </Reveal>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- QUIÉNES (venía de la antigua /sobre) -->
+  <section class="who-scene">
+    <SceneBg visual={sobreVisuals.interfaz} side="left" dim={0.44} />
+    <div class="container">
+      <div class="who-copy">
+        <Reveal>
+          <span class="eyebrow">Quiénes</span>
+          <h2 class="who-title">Hablas con <span class="muted">quien programa.</span></h2>
+        </Reveal>
+
+        <Reveal delay={0.12}>
+          <p class="who-lead">
+            Sin ejecutivos de cuenta. Sin nadie traduciendo lo que quieres. Sin esperar una semana
+            a que tu mensaje llegue a la persona correcta.
+          </p>
+
+          <!--
+            Pendiente de contenido del cliente: bio personal, foto y credenciales.
+            Hasta que existan, esto habla del estudio y de compromisos que ya
+            están por escrito más arriba en esta misma página. Nada inventado.
+          -->
+          <ul class="who-points">
+            <li><strong>Precio y fecha cerrados</strong> antes de arrancar, no a mitad del proyecto.</li>
+            <li><strong>Avances desde los primeros días</strong>, no una sorpresa al final.</li>
+            <li><strong>100 % remoto</strong> para todo {site.location}, por WhatsApp ({contact.horario}).</li>
+          </ul>
+        </Reveal>
+      </div>
+    </div>
+  </section>
+
+  <!--
+    ÚNICO cierre del sitio. Estaba repetido en cinco páginas con cinco titulares
+    distintos que decían lo mismo; repetir la misma petición cinco veces la
+    convierte en ruido. Aquí sí encaja: es el final del recorrido de "cómo
+    trabajamos".
+  -->
   <section class="cta">
     <div class="container cta-inner">
       <Reveal>
-        <h2>Reglas claras. <br />Trabajo tranquilo.</h2>
-        <p>Si te suena a cómo quieres trabajar, escríbenos. Te enviamos propuesta escrita en menos de 24 horas.</p>
-        <a class="btn btn-primary" href={routes.contacto}>
-          <span class="dot"></span> Empezar mi proyecto
-        </a>
+        <h2>¿Empezamos?</h2>
+        <p>
+          Cuéntanos qué necesitas y te mandamos una propuesta escrita con alcance, fecha y precio
+          cerrado. Sin compromiso y sin llamadas de venta.
+        </p>
+        <div class="cta-actions">
+          <a class="btn btn-primary" href={routes.cotizador}>
+            <span class="dot"></span> Ver mi precio en 4 preguntas
+          </a>
+          <a class="btn btn-ghost" href={waLink('Hola FLASK, quiero hablar de mi proyecto')} target="_blank" rel="noopener">
+            Escribir por WhatsApp
+          </a>
+        </div>
       </Reveal>
     </div>
   </section>
@@ -103,6 +205,7 @@ import { routes } from '../data/links';
   .band-line .muted {
     color: var(--studio-gray);
   }
+
   .proceso-scene {
     padding: 100px 0;
     border-top: 1px solid rgba(255, 255, 255, 0.06);
@@ -121,31 +224,186 @@ import { routes } from '../data/links';
     letter-spacing: -0.05em;
   }
   .proceso-content h2 {
-    font-size: clamp(36px, 5vw, 60px);
+    font-size: clamp(32px, 4.4vw, 54px);
     font-weight: 600;
     line-height: 1.02;
     letter-spacing: -0.02em;
-    text-transform: uppercase;
     margin-bottom: 24px;
+    max-width: 20ch;
   }
   .proceso-short {
     font-size: 20px;
     color: var(--soft-white);
-    line-height: 1.4;
-    max-width: 46ch;
+    line-height: 1.45;
+    max-width: 48ch;
     margin-bottom: 20px;
   }
   .proceso-long {
     font-size: 16px;
     color: var(--studio-gray);
     font-weight: 300;
-    line-height: 1.65;
+    line-height: 1.7;
     max-width: 62ch;
   }
+
+  /* ---------- MANIFIESTO ---------- */
+  .manifest-scene {
+    position: relative;
+    padding: 120px 0;
+    overflow: hidden;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+  }
+  .manifest-scene .container {
+    position: relative;
+    z-index: 1;
+  }
+  .manifest-list {
+    position: relative;
+    max-width: 78ch;
+    margin: 0 auto;
+  }
+  .manifest-list::before {
+    content: '';
+    position: absolute;
+    inset: -60px -80px;
+    z-index: -1;
+    background: radial-gradient(
+      ellipse 62% 58% at 50% 50%,
+      rgba(16, 1, 1, 0.9) 0%,
+      rgba(16, 1, 1, 0.72) 55%,
+      rgba(16, 1, 1, 0) 100%
+    );
+    pointer-events: none;
+  }
+  .manifest-title {
+    font-size: clamp(32px, 4.4vw, 56px);
+    font-weight: 600;
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+    margin-bottom: 40px;
+  }
+  .manifest-title .muted {
+    color: var(--studio-gray);
+  }
+  .manifest-row {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 28px;
+    align-items: baseline;
+    padding: 30px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .manifest-num {
+    font-size: 13px;
+    letter-spacing: 0.18em;
+    color: var(--flash-orange);
+  }
+  .manifest-row h3 {
+    font-size: clamp(23px, 3vw, 36px);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin-bottom: 10px;
+    text-shadow: 0 3px 30px rgba(16, 1, 1, 0.9);
+  }
+  .manifest-row p {
+    font-size: 17px;
+    font-weight: 300;
+    color: var(--studio-gray);
+    line-height: 1.6;
+    max-width: 62ch;
+    text-shadow: 0 2px 20px rgba(16, 1, 1, 0.9);
+  }
+
+  /* ---------- QUIÉNES ---------- */
+  .who-scene {
+    position: relative;
+    min-height: 76vh;
+    display: flex;
+    align-items: center;
+    padding: 110px 0;
+    overflow: hidden;
+  }
+  .who-scene .container {
+    position: relative;
+    z-index: 1;
+  }
+  .who-copy {
+    max-width: 48ch;
+  }
+  .who-title {
+    font-size: clamp(36px, 5.2vw, 66px);
+    font-weight: 700;
+    line-height: 0.98;
+    letter-spacing: -0.03em;
+    text-transform: uppercase;
+    margin-bottom: 26px;
+    text-shadow: 0 4px 40px rgba(16, 1, 1, 0.85);
+  }
+  .who-title .muted {
+    color: var(--studio-gray);
+  }
+  .who-lead {
+    font-size: 19px;
+    color: var(--soft-white);
+    line-height: 1.45;
+    text-shadow: 0 2px 24px rgba(16, 1, 1, 0.9);
+  }
+  .who-points {
+    list-style: none;
+    margin: 30px 0 0;
+    display: grid;
+    gap: 14px;
+  }
+  .who-points li {
+    position: relative;
+    padding-left: 22px;
+    font-size: 16px;
+    font-weight: 300;
+    color: var(--studio-gray);
+    line-height: 1.55;
+    text-shadow: 0 2px 20px rgba(16, 1, 1, 0.9);
+  }
+  .who-points li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 9px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--flash-orange);
+  }
+  .who-points strong {
+    color: var(--soft-white);
+    font-weight: 600;
+  }
+
+  .cta-actions {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 12px;
+  }
+
   @media (max-width: 900px) {
     .proceso-grid-detail {
       grid-template-columns: 1fr;
       gap: 20px;
+    }
+    .manifest-row {
+      grid-template-columns: 1fr;
+      gap: 10px;
+      padding: 26px 0;
+    }
+    .who-scene {
+      min-height: 0;
+      padding: 84px 0;
+    }
+    .who-copy {
+      max-width: none;
     }
   }
 </style>
