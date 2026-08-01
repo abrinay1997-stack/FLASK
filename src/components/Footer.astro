@@ -1,19 +1,317 @@
 ---
 import { site, contact, waLink } from '../data/site';
 import { routes } from '../data/links';
+import { footerColumns, socials, footerTrust } from '../data/footer';
 ---
 
-<footer>
-  <div class="container footer-row">
-    <a href={routes.home} class="brand" aria-label={`${site.name} — inicio`}>
-      {site.name}<span class="dot">.</span>
-    </a>
-    <div>© {site.year} {site.name} · {site.location} · Sitios web Jamstack</div>
-    <div>
-      WhatsApp{' '}
-      <a href={waLink()} target="_blank" rel="noopener" style="color:var(--flash-orange);">
-        {contact.whatsapp}
-      </a>
+<footer class="site-footer">
+  <div class="container">
+    <!-- Bloque superior: marca + último empujón -->
+    <div class="foot-top">
+      <div class="foot-brand">
+        <a href={routes.home} class="brand" aria-label={`${site.name} — inicio`}>
+          {site.name}<span class="dot">.</span>
+        </a>
+        <p class="foot-tagline">{site.tagline}</p>
+        <p class="foot-pitch">
+          Sitios Jamstack que cargan en menos de un segundo, entregados en días y con el código
+          en tu propio GitHub. Desde $295, en {site.location}.
+        </p>
+
+        <ul class="foot-trust">
+          {footerTrust.map((t) => <li>{t}</li>)}
+        </ul>
+
+        <a class="foot-cta" href={routes.cotizador}>
+          Cotizar mi sitio <span aria-hidden="true">→</span>
+        </a>
+      </div>
+
+      <nav class="foot-nav" aria-label="Pie de página">
+        {footerColumns.map((col) => (
+          <div class="foot-col">
+            <h2 class="foot-col-title">{col.title}</h2>
+            <ul>
+              {col.links.map((link) => (
+                <li><a href={link.href}>{link.label}</a></li>
+              ))}
+            </ul>
+          </div>
+        ))}
+
+        <div class="foot-col">
+          <h2 class="foot-col-title">Contacto</h2>
+          <ul>
+            <li>
+              <a href={waLink()} target="_blank" rel="noopener">{contact.whatsapp}</a>
+            </li>
+            <li><span class="foot-static">{contact.horario}</span></li>
+            <li><span class="foot-static">{contact.timezone}</span></li>
+            <li><span class="foot-static">{site.location} · 100 % remoto</span></li>
+          </ul>
+        </div>
+      </nav>
+    </div>
+
+    <!-- Bloque inferior -->
+    <div class="foot-bottom">
+      <p class="foot-copy">
+        © {site.year} {site.name}. Todos los derechos reservados.
+      </p>
+
+      <ul class="foot-social">
+        {socials.map((s) =>
+          s.href ? (
+            <li>
+              <a href={s.href} target="_blank" rel="noopener" aria-label={s.name}>
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <path d={s.icon} />
+                </svg>
+              </a>
+            </li>
+          ) : (
+            <li>
+              {/*
+                Sin cuenta todavía: se dibuja apagado y fuera del orden de foco.
+                Un icono que lleva a un 404 cuesta más credibilidad que un icono
+                que aún no está activo.
+              */}
+              <span class="is-off" title={`${s.name} — próximamente`} aria-hidden="true">
+                <svg viewBox="0 0 24 24" focusable="false">
+                  <path d={s.icon} />
+                </svg>
+              </span>
+            </li>
+          )
+        )}
+      </ul>
+
+      <ul class="foot-legal">
+        <li><a href={routes.privacidad}>Privacidad</a></li>
+        <li><a href={routes.terminos}>Términos</a></li>
+      </ul>
     </div>
   </div>
 </footer>
+
+<style>
+  .site-footer {
+    position: relative;
+    margin-top: 40px;
+    padding: 0 0 40px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    background:
+      radial-gradient(120% 100% at 50% 0%, rgba(255, 81, 0, 0.07), transparent 60%),
+      var(--deep-black);
+    color: var(--studio-gray);
+    font-size: 15px;
+  }
+
+  /* ---------- SUPERIOR ---------- */
+  .foot-top {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: 70px;
+    padding: 88px 0 72px;
+  }
+
+  .foot-brand .brand {
+    font-size: 22px;
+    /* Padding vertical para llegar al mínimo táctil de 24 px (WCAG 2.5.8):
+       el texto por sí solo mide 22. */
+    padding: 6px 0;
+    border: none;
+    color: var(--soft-white);
+  }
+  .foot-tagline {
+    margin-top: 18px;
+    font-size: 19px;
+    font-weight: 500;
+    color: var(--soft-white);
+    letter-spacing: -0.01em;
+  }
+  .foot-pitch {
+    margin-top: 14px;
+    max-width: 42ch;
+    font-weight: 300;
+    line-height: 1.65;
+  }
+  .foot-trust {
+    list-style: none;
+    margin-top: 28px;
+    display: grid;
+    gap: 10px;
+  }
+  .foot-trust li {
+    position: relative;
+    padding-left: 22px;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--soft-white);
+  }
+  .foot-trust li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 7px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--flash-orange);
+  }
+
+  .foot-nav {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 40px 30px;
+  }
+  .foot-col-title {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--soft-white);
+    margin-bottom: 20px;
+  }
+  .foot-col ul {
+    list-style: none;
+    display: grid;
+    gap: 2px;
+  }
+  .foot-col a,
+  .foot-static {
+    display: inline-block;
+    padding: 7px 0;
+    font-size: 15px;
+    font-weight: 300;
+    line-height: 1.4;
+    transition: color 0.2s;
+  }
+  .foot-col a:hover {
+    color: var(--flash-orange);
+  }
+  .foot-static {
+    color: rgba(186, 186, 186, 0.7);
+  }
+
+  /* Va en la columna de marca, después del pitch y las garantías: es la
+     secuencia natural (qué somos → por qué fiarte → qué hacer). En la columna
+     de contacto se desbordaba del ancho de rejilla. */
+  .foot-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 30px;
+    padding: 12px 20px;
+    border: 1px solid rgba(255, 81, 0, 0.45);
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--flash-orange);
+    transition: background 0.25s, border-color 0.25s, gap 0.25s;
+  }
+  .foot-cta:hover {
+    background: rgba(255, 81, 0, 0.1);
+    border-color: var(--flash-orange);
+    gap: 13px;
+  }
+
+  /* ---------- INFERIOR ---------- */
+  .foot-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 28px;
+    flex-wrap: wrap;
+    padding-top: 30px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .foot-copy {
+    font-size: 13px;
+    font-weight: 300;
+    color: rgba(186, 186, 186, 0.75);
+  }
+
+  .foot-social {
+    list-style: none;
+    display: flex;
+    gap: 8px;
+    order: 1;
+  }
+  .foot-social a,
+  .foot-social .is-off {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: border-color 0.25s, background 0.25s, color 0.25s;
+  }
+  .foot-social svg {
+    width: 17px;
+    height: 17px;
+    fill: currentColor;
+  }
+  .foot-social a {
+    color: var(--studio-gray);
+  }
+  .foot-social a:hover {
+    color: var(--deep-black);
+    background: var(--flash-orange);
+    border-color: var(--flash-orange);
+  }
+  .foot-social .is-off {
+    color: rgba(186, 186, 186, 0.28);
+    border-color: rgba(255, 255, 255, 0.06);
+    cursor: default;
+  }
+
+  .foot-legal {
+    list-style: none;
+    display: flex;
+    gap: 22px;
+    order: 2;
+  }
+  .foot-legal a {
+    display: inline-block;
+    padding: 6px 0;
+    font-size: 13px;
+    font-weight: 300;
+  }
+  .foot-legal a:hover {
+    color: var(--flash-orange);
+  }
+
+  @media (max-width: 1024px) {
+    .foot-top {
+      grid-template-columns: 1fr;
+      gap: 54px;
+      padding: 70px 0 56px;
+    }
+    .foot-nav {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 38px 24px;
+    }
+  }
+  @media (max-width: 560px) {
+    .foot-nav {
+      grid-template-columns: 1fr;
+      gap: 34px;
+    }
+    .foot-bottom {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 22px;
+    }
+    .foot-social {
+      order: 0;
+    }
+    .foot-copy {
+      order: 3;
+    }
+  }
+</style>

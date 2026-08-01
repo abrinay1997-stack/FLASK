@@ -25,7 +25,8 @@ import heroFallback from '../assets/hero/hero-fallback.png';
     sizes="100vw"
     format="webp"
     quality={72}
-    loading="lazy"
+    loading="eager"
+    fetchpriority="high"
     decoding="async"
   />
   <canvas class="hero-shader-canvas" data-hero-canvas aria-hidden="true"></canvas>
@@ -35,6 +36,16 @@ import heroFallback from '../assets/hero/hero-fallback.png';
 <script>
   function prefersReducedMotion() {
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
+  /**
+   * En pantallas verticales el shader no vale la pena: el patrón de ruido se
+   * calcula sobre un lienzo de proporción ~0.5 y las vetas salen estiradas en
+   * vertical. Además es el peor sitio para gastar batería y GPU. Debajo de este
+   * ancho mandamos la imagen fija, que es lo que se ve bien.
+   */
+  function isNarrow() {
+    return window.matchMedia('(max-width: 900px)').matches;
   }
 
   let cleanup: (() => void) | null = null;
@@ -51,7 +62,7 @@ import heroFallback from '../assets/hero/hero-fallback.png';
     if (!container || !canvas) return;
 
     // La imagen de respaldo solo aparece si de verdad no vamos a animar nada.
-    if (prefersReducedMotion()) {
+    if (prefersReducedMotion() || isNarrow()) {
       container.classList.add('is-fallback');
       return;
     }
@@ -115,9 +126,16 @@ float snoise(vec2 v){
 void main() {
   vec2 uv = v_texCoord;
   vec2 mouse = u_mouse / u_resolution;
+
+  // El ruido se muestrea en espacio corregido por proporción. Sin esto, en una
+  // ventana alta las vetas salen estiradas en vertical (el patrón se calcula
+  // sobre un cuadrado deformado). La viñeta sigue usando uv sin corregir.
+  float aspect = u_resolution.x / max(u_resolution.y, 1.0);
+  vec2 st = vec2(uv.x * aspect, uv.y);
+
   // Animacion autónoma muy sutil (casi estático); el mouse manda.
-  float noise1 = snoise(uv * 2.6 + u_time * 0.020 + mouse * 2.4);
-  float noise2 = snoise(uv * 4.2 - u_time * 0.014 + mouse * 1.6);
+  float noise1 = snoise(st * 2.6 + u_time * 0.020 + mouse * 2.4);
+  float noise2 = snoise(st * 4.2 - u_time * 0.014 + mouse * 1.6);
   float ribbons = 1.0 - smoothstep(0.09, 0.13, abs(noise1 - noise2));
   float glow = smoothstep(0.45, 0.0, abs(noise1 - noise2));
 
@@ -226,6 +244,15 @@ void main() {
     };
   }
 
+  // Al cruzar el umbral (rotar el móvil, redimensionar la ventana) hay que
+  // decidir de nuevo entre shader e imagen.
+  const narrowQuery = window.matchMedia('(max-width: 900px)');
+  const onBreakpoint = () => {
+    document.querySelector('[data-hero-shader]')?.classList.remove('is-fallback');
+    initHeroShader();
+  };
+  if (narrowQuery.addEventListener) narrowQuery.addEventListener('change', onBreakpoint);
+
   document.addEventListener('astro:page-load', initHeroShader);
   document.addEventListener('astro:before-swap', () => {
     if (cleanup) {
@@ -268,6 +295,14 @@ void main() {
   .hero-shader.is-fallback .hero-shader-fallback {
     opacity: 0.42;
   }
+  /* En móvil la imagen no es un respaldo, es EL fondo del hero: sube de
+     presencia y se recentra para que el sujeto no quede fuera del recorte. */
+  @media (max-width: 900px) {
+    .hero-shader.is-fallback .hero-shader-fallback {
+      opacity: 0.62;
+      object-position: 62% center;
+    }
+  }
   .hero-shader-canvas {
     opacity: 0;
     transition: opacity 0.8s ease;
@@ -282,5 +317,12 @@ void main() {
     background:
       radial-gradient(ellipse at 50% 45%, transparent 30%, rgba(16, 1, 1, 0.55) 78%, rgba(16, 1, 1, 0.9) 100%),
       linear-gradient(to bottom, rgba(16, 1, 1, 0.55) 0%, transparent 32%, transparent 55%, rgba(16, 1, 1, 0.92) 100%);
+  }
+  /* Con imagen detrás el titular necesita más cama que con el shader */
+  @media (max-width: 900px) {
+    .hero-shader-vignette {
+      background:
+        linear-gradient(to bottom, rgba(16, 1, 1, 0.82) 0%, rgba(16, 1, 1, 0.5) 34%, rgba(16, 1, 1, 0.72) 72%, var(--deep-black) 100%);
+    }
   }
 </style>

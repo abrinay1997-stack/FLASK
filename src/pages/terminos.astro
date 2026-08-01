@@ -1,0 +1,145 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site, contact, waLink } from '../data/site';
+import { routes } from '../data/links';
+import { diagnostico } from '../data/plans';
+
+/**
+ * Los términos recogen lo que el sitio ya promete en /proceso y /planes: 50 %
+ * de adelanto, rondas de revisión por plan, transferencia del repositorio y
+ * revisiones extra a $40. Si cambian esas condiciones comerciales, hay que
+ * cambiarlas aquí también — es el documento que las hace exigibles.
+ */
+const actualizado = '1 de agosto de 2026';
+---
+
+<BaseLayout
+  title="Términos del servicio"
+  description={`Condiciones bajo las que ${site.name} presta sus servicios de diseño y desarrollo web.`}
+>
+  <section class="legal">
+    <div class="container">
+      <header class="legal-head">
+        <span class="eyebrow">Legal</span>
+        <h1>Términos del <span class="muted">servicio.</span></h1>
+        <p class="legal-updated">Última actualización: {actualizado}</p>
+      </header>
+
+      <div class="legal-body">
+        <p class="legal-lead">
+          Estas condiciones aplican a los servicios de diseño y desarrollo web de {site.name}.
+          No sustituyen a la propuesta escrita de cada proyecto: si algo difiere, manda lo que
+          diga la propuesta firmada.
+        </p>
+
+        <h2>1. Alcance y propuesta</h2>
+        <p>
+          Antes de empezar cualquier proyecto entregamos una propuesta escrita con el alcance
+          exacto, el cronograma y el precio cerrado, además de una cláusula explícita de qué
+          <em>no</em> incluye. El trabajo arranca cuando esa propuesta está aceptada.
+        </p>
+        <p>
+          Los precios publicados en este sitio son reales y vinculantes para el alcance descrito
+          en cada plan. Cualquier estimación generada por el cotizador es orientativa: la cifra
+          firme es la de la propuesta.
+        </p>
+
+        <h2>2. Pagos</h2>
+        <ul>
+          <li>Se abona el <strong>50 % por adelantado</strong> para reservar el cupo y comenzar.</li>
+          <li>El 50 % restante se abona a la entrega, antes de la publicación definitiva y de la transferencia del repositorio.</li>
+          <li>Los precios están expresados en dólares estadounidenses (USD).</li>
+          <li>El <strong>{diagnostico.name}</strong> ({diagnostico.price}) se abona íntegro por adelantado.</li>
+        </ul>
+
+        <h2>3. Plazos</h2>
+        <p>
+          Los plazos de cada plan cuentan desde que se cumplen dos condiciones: hemos recibido el
+          adelanto y hemos recibido tu contenido final (textos, imágenes y logotipos). Los
+          retrasos en la entrega de contenido desplazan la fecha de entrega en la misma medida.
+        </p>
+
+        <h2>4. Revisiones y cambios de alcance</h2>
+        <p>
+          Cada plan incluye un número definido de rondas de revisión, especificado en la
+          propuesta. Agotadas las incluidas, cada ronda adicional se factura a <strong>$40</strong>.
+        </p>
+        <p>
+          Las funcionalidades no contempladas en la propuesta se cotizan aparte antes de
+          ejecutarse. Nunca añadimos trabajo sin tu aprobación previa por escrito.
+        </p>
+
+        <h2>5. Propiedad del trabajo</h2>
+        <p>
+          Al recibir el pago final, la propiedad del código pasa a ti: transferimos el
+          repositorio a tu cuenta de GitHub y el dominio queda registrado a tu nombre. No
+          retenemos accesos, ni credenciales, ni el control del alojamiento.
+        </p>
+        <p>
+          Conservamos el derecho de mostrar el trabajo en nuestro portafolio salvo que nos pidas
+          lo contrario por escrito.
+        </p>
+        <p>
+          Tú garantizas que tienes derecho a usar el contenido que nos entregas —textos,
+          imágenes, marcas— y respondes por ese uso.
+        </p>
+
+        <h2>6. Componentes de terceros</h2>
+        <p>
+          Los sitios se apoyan en servicios y librerías de terceros (alojamiento, base de datos,
+          pasarelas de pago, fuentes). Cada uno se rige por su propia licencia y sus propias
+          condiciones, y su disponibilidad no depende de nosotros. Las cuotas de esos servicios,
+          cuando existan, corren por tu cuenta salvo que la propuesta diga otra cosa.
+        </p>
+
+        <h2>7. Mantenimiento</h2>
+        <p>
+          Entregado el proyecto, la relación termina salvo que contrates un plan FLASK Care. Sin
+          plan de mantenimiento activo no monitorizamos el sitio ni respondemos incidencias, y
+          cualquier intervención posterior se cotiza aparte.
+        </p>
+        <p>
+          Los planes Care se facturan por mes adelantado y pueden cancelarse en cualquier momento
+          con aviso antes del siguiente ciclo. No hay permanencia forzada.
+        </p>
+
+        <h2>8. Cancelación</h2>
+        <p>
+          Si cancelas después de iniciado el trabajo, el adelanto cubre lo ya ejecutado y no es
+          reembolsable. Si somos nosotros quienes no podemos continuar, devolvemos la parte
+          proporcional del adelanto correspondiente al trabajo no realizado y te entregamos lo
+          que exista hasta ese momento.
+        </p>
+
+        <h2>9. Límite de responsabilidad</h2>
+        <p>
+          Nuestra responsabilidad por cualquier reclamación relacionada con un proyecto se limita
+          al importe efectivamente pagado por ese proyecto. No respondemos por lucro cesante ni
+          por daños indirectos derivados del uso del sitio entregado.
+        </p>
+
+        <h2>10. Ley aplicable</h2>
+        <p>
+          Estas condiciones se rigen por las leyes de la República de Panamá.
+        </p>
+
+        <h2>11. Contacto</h2>
+        <p>
+          Para cualquier duda sobre estos términos, escríbenos por WhatsApp al
+          <a href={waLink('Hola FLASK, tengo una consulta sobre los términos')} target="_blank" rel="noopener">{contact.whatsapp}</a>
+          en horario {contact.horario}.
+        </p>
+
+        <aside class="legal-note">
+          <strong>Nota:</strong> este documento recoge fielmente las condiciones comerciales que
+          el sitio ya publica, pero no es asesoría legal. Antes de usarlo como contrato conviene
+          que un abogado lo revise y lo adapte a tu situación concreta.
+        </aside>
+
+        <p class="legal-back">
+          <a href={routes.home}>← Volver al inicio</a>
+        </p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

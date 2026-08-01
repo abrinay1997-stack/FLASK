@@ -29,6 +29,8 @@ export const routes = {
   cotizador: withBase('cotizador.html'),
   contacto: withBase('contacto.html'),
   gracias: withBase('gracias.html'),
+  privacidad: withBase('privacidad.html'),
+  terminos: withBase('terminos.html'),
 };
 
 /** Ancla dentro de una ruta. */
