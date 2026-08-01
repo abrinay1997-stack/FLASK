@@ -21,12 +21,16 @@ export function withBase(path: string): string {
 
 /** Rutas internas nombradas — punto único de verdad. */
 export const routes = {
-  home: BASE, // termina con '/', p. ej. '/FLASK/' o '/'
+  home: BASE,
+  servicios: withBase('servicios.html'),
+  planes: withBase('planes.html'),
+  proceso: withBase('proceso.html'),
+  sobre: withBase('sobre.html'),
   contacto: withBase('contacto.html'),
   gracias: withBase('gracias.html'),
 };
 
-/** Ancla dentro de la home (usa # solo si estás EN la home; si no, prefija con home). */
-export function homeAnchor(hash: string): string {
-  return `${BASE}${hash}`;
+/** Ancla dentro de una ruta. */
+export function anchor(route: string, hash: string): string {
+  return `${route}${hash}`;
 }

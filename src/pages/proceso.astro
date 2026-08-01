@@ -1,0 +1,118 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Reveal from '../components/Reveal.astro';
+import { procesoSteps } from '../data/services';
+import { routes } from '../data/links';
+---
+
+<BaseLayout
+  title="Proceso"
+  description="Cómo trabajamos: 50% adelanto, el código es tuyo, revisiones claras. Sin sorpresas, sin scope creep."
+  activePath={routes.proceso}
+>
+  <!-- HERO -->
+  <section class="hero hero-short">
+    <div class="container hero-inner">
+      <span class="year">Proceso</span>
+      <span class="handle">3 reglas</span>
+      <Reveal>
+        <h1>Sin sorpresas. <span class="muted">Sin scope creep.</span></h1>
+      </Reveal>
+      <Reveal delay={0.15}>
+        <p class="lead">
+          El scope creep es lo que quiebra a quien cobra barato en Panamá. Nosotros lo cerramos
+          por adelantado con tres reglas simples que nos protegen a ambos.
+        </p>
+      </Reveal>
+    </div>
+  </section>
+
+  <!-- ESCENAS: una por paso -->
+  {procesoSteps.map((step) => (
+    <section class="proceso-scene">
+      <div class="container">
+        <div class="proceso-grid-detail">
+          <Reveal>
+            <div class="proceso-number-big">{step.num}</div>
+          </Reveal>
+          <div class="proceso-content">
+            <Reveal>
+              <h2>{step.title}</h2>
+            </Reveal>
+            <Reveal delay={0.1}>
+              <p class="proceso-short">{step.desc}</p>
+            </Reveal>
+            <Reveal delay={0.2}>
+              <p class="proceso-long">{step.longDesc}</p>
+            </Reveal>
+          </div>
+        </div>
+      </div>
+    </section>
+  ))}
+
+  <!-- CTA -->
+  <section class="cta">
+    <div class="container cta-inner">
+      <Reveal>
+        <h2>Reglas claras. <br />Trabajo tranquilo.</h2>
+        <p>Si te suena a cómo quieres trabajar, escríbenos. Te enviamos propuesta escrita en menos de 24 horas.</p>
+        <a class="btn btn-primary" href={routes.contacto}>
+          <span class="dot"></span> Empezar mi proyecto
+        </a>
+      </Reveal>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .proceso-scene {
+    padding: 100px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+  }
+  .proceso-scene:first-of-type {
+    padding-top: 60px;
+    border-top: none;
+  }
+  .proceso-grid-detail {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 60px;
+    align-items: start;
+  }
+  .proceso-number-big {
+    font-size: clamp(80px, 12vw, 180px);
+    font-weight: 600;
+    color: var(--flash-orange);
+    line-height: 0.85;
+    letter-spacing: -0.05em;
+  }
+  .proceso-content h2 {
+    font-size: clamp(36px, 5vw, 60px);
+    font-weight: 600;
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+  .proceso-short {
+    font-size: 20px;
+    color: var(--soft-white);
+    line-height: 1.4;
+    max-width: 46ch;
+    margin-bottom: 20px;
+  }
+  .proceso-long {
+    font-size: 16px;
+    color: var(--studio-gray);
+    font-weight: 300;
+    line-height: 1.65;
+    max-width: 62ch;
+  }
+  @media (max-width: 900px) {
+    .proceso-grid-detail {
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+  }
+</style>

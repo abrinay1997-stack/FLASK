@@ -9,20 +9,55 @@ interface Props {
 const { activePath = '' } = Astro.props;
 ---
 
-<header>
-  <div class="container nav">
+<header class="floating-nav">
+  <div class="nav-pill">
     <a href={routes.home} class="brand" aria-label="FLASK — inicio">FLASK<span class="dot">.</span></a>
-    <ul class="nav-links">
-      {navLinks.map((link) => (
-        <li>
-          <a
-            href={link.href}
-            aria-current={activePath === link.href ? 'page' : undefined}
-          >
-            {link.label}
-          </a>
-        </li>
-      ))}
-    </ul>
+
+    <nav aria-label="Navegación principal">
+      <ul class="nav-links">
+        {navLinks.map((link) => (
+          <li>
+            <a
+              href={link.href}
+              aria-current={activePath === link.href ? 'page' : undefined}
+            >
+              {link.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+
+    <a href={routes.contacto} class="nav-cta" aria-current={activePath === routes.contacto ? 'page' : undefined}>
+      Cotizar
+    </a>
+
+    <button class="nav-toggle" type="button" aria-label="Abrir menú" aria-expanded="false">
+      <span></span>
+      <span></span>
+    </button>
   </div>
 </header>
+
+<script>
+  function initNavToggle() {
+    const toggle = document.querySelector<HTMLButtonElement>('.nav-toggle');
+    const pill = document.querySelector<HTMLElement>('.nav-pill');
+    if (!toggle || !pill) return;
+
+    toggle.addEventListener('click', () => {
+      const open = pill.classList.toggle('is-open');
+      toggle.setAttribute('aria-expanded', String(open));
+      toggle.setAttribute('aria-label', open ? 'Cerrar menú' : 'Abrir menú');
+    });
+
+    // Cerrar al navegar
+    document.querySelectorAll('.nav-links a, .nav-cta').forEach((a) => {
+      a.addEventListener('click', () => {
+        pill.classList.remove('is-open');
+        toggle.setAttribute('aria-expanded', 'false');
+      });
+    });
+  }
+  document.addEventListener('astro:page-load', initNavToggle);
+</script>

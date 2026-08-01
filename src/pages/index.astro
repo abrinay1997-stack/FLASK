@@ -1,16 +1,10 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import PlanCard from '../components/PlanCard.astro';
-import ModuleCard from '../components/ModuleCard.astro';
-import CareCard from '../components/CareCard.astro';
-import DiagBand from '../components/DiagBand.astro';
+import Reveal from '../components/Reveal.astro';
 
 import { site, waLink } from '../data/site';
 import { plans } from '../data/plans';
-import { modules } from '../data/modules';
-import { carePlans, careNote } from '../data/care';
-import { faq } from '../data/faq';
-import { services, procesoSteps } from '../data/services';
+import { services } from '../data/services';
 import { routes } from '../data/links';
 ---
 
@@ -24,147 +18,237 @@ import { routes } from '../data/links';
     <div class="container hero-inner">
       <span class="year">{site.year}</span>
       <span class="handle">{site.location}</span>
-      <h1>Sitios rápidos. <span class="muted">Código</span> tuyo.</h1>
-      <p class="lead">
-        Diseñamos y programamos sitios Jamstack que cargan en menos de un segundo, entregados en
-        días, con el código 100 % en tu propio GitHub. Desde $295.
-      </p>
-      <div class="hero-actions">
-        <a class="btn btn-primary" href={waLink()} target="_blank" rel="noopener">
-          <span class="dot"></span> Hablar por WhatsApp
-        </a>
-        <a class="btn btn-ghost" href="#planes">Ver planes</a>
-      </div>
+      <Reveal y={40}>
+        <h1>Sitios rápidos. <span class="muted">Código</span> tuyo.</h1>
+      </Reveal>
+      <Reveal delay={0.15}>
+        <p class="lead">
+          Diseñamos y programamos sitios Jamstack que cargan en menos de un segundo, entregados
+          en días, con el código 100 % en tu propio GitHub. Desde $295.
+        </p>
+      </Reveal>
+      <Reveal delay={0.25}>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href={routes.planes}>
+            <span class="dot"></span> Ver planes
+          </a>
+          <a class="btn btn-ghost" href={waLink()} target="_blank" rel="noopener">
+            Hablar por WhatsApp
+          </a>
+        </div>
+      </Reveal>
 
-      <div class="stats">
-        <div class="stat"><div class="num">&lt;1s</div><div class="label">Tiempo de carga</div></div>
-        <div class="stat"><div class="num accent">≥90</div><div class="label">PageSpeed garantizado</div></div>
-        <div class="stat"><div class="num">5</div><div class="label">Días de entrega</div></div>
-      </div>
+      <Reveal delay={0.35}>
+        <div class="stats">
+          <div class="stat"><div class="num">&lt;1s</div><div class="label">Tiempo de carga</div></div>
+          <div class="stat"><div class="num accent">≥90</div><div class="label">PageSpeed garantizado</div></div>
+          <div class="stat"><div class="num">5</div><div class="label">Días de entrega</div></div>
+        </div>
+      </Reveal>
     </div>
   </section>
 
-  <!-- QUOTE -->
-  <section class="quote">
-    <div class="container">
-      <blockquote>
-        El de $199 te entrega un WordPress <span class="muted">que carga en 5 segundos y que Google castiga.</span>
-        Nosotros te entregamos un sitio que carga en menos de 1 segundo,
-        <span class="muted">con el código en tu propio GitHub, en 5 días.</span>
-      </blockquote>
-      <div class="cite">— Argumento comercial, {site.name}</div>
-    </div>
-  </section>
-
-  <!-- SERVICIOS -->
+  <!-- PREVIEW SERVICIOS -->
   <section class="services" id="servicios">
     <div class="container">
-      <span class="eyebrow">Por qué {site.name}</span>
-      <h2 class="section-title">
-        Tres ventajas <span class="muted">que la competencia no puede copiar.</span>
-      </h2>
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">Servicios</span>
+          <Reveal>
+            <h2 class="section-title">Tres pilares. <span class="muted">Cero atajos.</span></h2>
+          </Reveal>
+        </div>
+        <Reveal delay={0.15}>
+          <a class="section-link" href={routes.servicios}>
+            Ver todo <span aria-hidden="true">→</span>
+          </a>
+        </Reveal>
+      </div>
       <div class="service-list">
         {services.map((s) => (
-          <div class="service-card">
-            <span class="idx">{s.idx}</span>
-            <h3>{s.title}</h3>
-            <p>{s.desc}</p>
-          </div>
+          <Reveal>
+            <a class="service-card" href={routes.servicios}>
+              <span class="idx">{s.idx}</span>
+              <h3>{s.title}</h3>
+              <p>{s.desc}</p>
+            </a>
+          </Reveal>
         ))}
       </div>
     </div>
   </section>
 
-  <!-- PLANES -->
-  <section class="planes" id="planes">
+  <!-- PREVIEW PLANES -->
+  <section class="planes-preview">
     <div class="container">
-      <span class="eyebrow">Catálogo</span>
-      <h2 class="section-title">Cuatro planes. <span class="muted">Cero letra chica.</span></h2>
-
-      <div class="plans-grid">
-        {plans.map((plan) => <PlanCard plan={plan} />)}
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">Planes</span>
+          <Reveal>
+            <h2 class="section-title">Precios fijos. <span class="muted">Cero letra chica.</span></h2>
+          </Reveal>
+        </div>
+        <Reveal delay={0.15}>
+          <a class="section-link" href={routes.planes}>
+            Ver planes en detalle <span aria-hidden="true">→</span>
+          </a>
+        </Reveal>
       </div>
-
-      <DiagBand />
-    </div>
-  </section>
-
-  <!-- MÓDULOS -->
-  <section class="modulos" id="modulos">
-    <div class="container">
-      <span class="eyebrow">Proyectos grandes</span>
-      <h2 class="section-title">
-        ¿Necesitas un sistema? <span class="muted">Se vende por módulos.</span>
-      </h2>
-      <p class="modules-intro">
-        Un sistema completo no se cotiza en una sola factura. Se arma con módulos combinables:
-        pagas y recibes por partes, sin riesgo y sin esperar meses para ver el primer entregable.
-      </p>
-
-      <div class="modules-grid">
-        {modules.map((mod) => <ModuleCard module={mod} />)}
-      </div>
-    </div>
-  </section>
-
-  <!-- CARE -->
-  <section class="care" id="care">
-    <div class="container">
-      <span class="eyebrow">{site.name} Care</span>
-      <h2 class="section-title">Tu sitio, <span class="muted">cuidado todos los meses.</span></h2>
-
-      <div class="care-grid">
-        {carePlans.map((plan) => <CareCard plan={plan} />)}
-      </div>
-
-      <div class="care-note">
-        <strong>Pago anual adelantado:</strong> {careNote.replace('Pago anual adelantado: ', '')}
-      </div>
-    </div>
-  </section>
-
-  <!-- PROCESO -->
-  <section class="proceso">
-    <div class="container">
-      <span class="eyebrow">Cómo trabajamos</span>
-      <h2 class="section-title">Sin sorpresas. <span class="muted">Sin scope creep.</span></h2>
-      <div class="proceso-grid">
-        {procesoSteps.map((step) => (
-          <div class="proceso-card">
-            <div class="proceso-num">{step.num}</div>
-            <h3>{step.title}</h3>
-            <p>{step.desc}</p>
-          </div>
+      <div class="plans-preview-grid">
+        {plans.map((plan) => (
+          <Reveal>
+            <a class="plan-mini" href={routes.planes} data-featured={plan.featured}>
+              {plan.featured && <span class="plan-mini-badge">Recomendado</span>}
+              <div class="plan-mini-name">{plan.name.replace('Flask ', '')}</div>
+              <div class="plan-mini-price">{plan.price}</div>
+              <div class="plan-mini-delivery">{plan.delivery}</div>
+            </a>
+          </Reveal>
         ))}
       </div>
     </div>
   </section>
 
-  <!-- FAQ -->
-  <section class="faq">
+  <!-- ARGUMENTO -->
+  <section class="quote">
     <div class="container">
-      <span class="eyebrow">Preguntas</span>
-      <h2 class="section-title">Antes de <span class="muted">escribirnos.</span></h2>
-      {faq.map((item) => (
-        <details>
-          <summary>{item.q}</summary>
-          <p>{item.a}</p>
-        </details>
-      ))}
+      <Reveal>
+        <blockquote>
+          El de $199 te entrega un WordPress <span class="muted">que carga en 5 segundos y que Google castiga.</span>
+          Nosotros te entregamos un sitio que carga en menos de 1 segundo,
+          <span class="muted">con el código en tu propio GitHub, en 5 días.</span>
+        </blockquote>
+        <div class="cite">— Argumento comercial, {site.name}</div>
+      </Reveal>
     </div>
   </section>
 
   <!-- CTA FINAL -->
   <section class="cta">
     <div class="container cta-inner">
-      <h2>Tu sitio en 5 días.</h2>
-      <p>
-        Cuéntanos qué necesitas. Te enviamos un reporte PageSpeed de tu sitio actual y una
-        propuesta escrita con alcance, cronograma y precio.
-      </p>
-      <a class="btn btn-primary" href={routes.contacto}>
-        <span class="dot"></span> Ir al formulario
-      </a>
+      <Reveal>
+        <h2>Tu sitio en 5 días.</h2>
+        <p>
+          Cuéntanos qué necesitas. Te enviamos un reporte PageSpeed de tu sitio actual y una
+          propuesta escrita con alcance, cronograma y precio.
+        </p>
+        <a class="btn btn-primary" href={routes.contacto}>
+          <span class="dot"></span> Ir al formulario
+        </a>
+      </Reveal>
     </div>
   </section>
 </BaseLayout>
+
+<style>
+  .section-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 32px;
+    margin-bottom: 60px;
+    flex-wrap: wrap;
+  }
+  .section-head h2.section-title {
+    margin-bottom: 0;
+  }
+  .section-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--flash-orange);
+    padding: 12px 20px;
+    border: 1px solid rgba(255, 81, 0, 0.4);
+    border-radius: 999px;
+    transition: background 0.25s, border-color 0.25s;
+    white-space: nowrap;
+  }
+  .section-link:hover {
+    background: rgba(255, 81, 0, 0.1);
+    border-color: var(--flash-orange);
+  }
+  .service-card {
+    display: block;
+    cursor: pointer;
+  }
+
+  /* Preview planes: mini-cards horizontales */
+  .planes-preview {
+    padding: 120px 0;
+  }
+  .plans-preview-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+  }
+  .plan-mini {
+    display: flex;
+    flex-direction: column;
+    padding: 28px 24px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.02);
+    transition: border-color 0.25s, transform 0.25s, background 0.25s;
+    position: relative;
+  }
+  .plan-mini:hover {
+    border-color: var(--flash-orange);
+    transform: translateY(-4px);
+    background: rgba(255, 81, 0, 0.04);
+  }
+  .plan-mini[data-featured='true'] {
+    border-color: var(--flash-orange);
+    background: linear-gradient(180deg, rgba(255, 81, 0, 0.1), rgba(255, 81, 0, 0) 60%);
+  }
+  .plan-mini-badge {
+    position: absolute;
+    top: -12px;
+    left: 20px;
+    background: var(--flash-orange);
+    color: var(--deep-black);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border-radius: 20px;
+  }
+  .plan-mini-name {
+    font-size: 13px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--studio-gray);
+    margin-bottom: 12px;
+  }
+  .plan-mini-price {
+    font-size: 40px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .plan-mini-delivery {
+    font-size: 12px;
+    color: var(--flash-orange);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  @media (max-width: 900px) {
+    .plans-preview-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .section-head {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 20px;
+    }
+  }
+  @media (max-width: 640px) {
+    .plans-preview-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
