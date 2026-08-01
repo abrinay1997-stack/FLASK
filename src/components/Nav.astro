@@ -71,6 +71,8 @@ const { activePath = '' } = Astro.props;
     if (!toggle.dataset.bound) {
       toggle.dataset.bound = 'true';
 
+      bindShrinkOnScroll();
+
       toggle.addEventListener('click', () => {
         const open = pill.classList.toggle('is-open');
         toggle.setAttribute('aria-expanded', String(open));
@@ -93,6 +95,39 @@ const { activePath = '' } = Astro.props;
 
     closeMenu(pill, toggle);
     syncCurrent();
+    // Tras una navegación con View Transitions el scroll vuelve a 0 pero el nav
+    // persiste, así que hay que reevaluar su tamaño en cada page-load.
+    syncShrink();
+  }
+
+  /**
+   * Encoge el nav al bajar y lo devuelve a su tamaño al volver al tope.
+   * La histéresis (40 px para encoger, 12 px para volver) evita el parpadeo
+   * cuando el scroll se queda oscilando justo en el umbral.
+   */
+  function syncShrink() {
+    const header = document.querySelector<HTMLElement>('.floating-nav');
+    if (!header) return;
+    const y = window.scrollY;
+    const shrunk = header.classList.contains('is-scrolled');
+    if (!shrunk && y > 40) header.classList.add('is-scrolled');
+    else if (shrunk && y < 12) header.classList.remove('is-scrolled');
+  }
+
+  function bindShrinkOnScroll() {
+    let ticking = false;
+    window.addEventListener(
+      'scroll',
+      () => {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(() => {
+          ticking = false;
+          syncShrink();
+        });
+      },
+      { passive: true }
+    );
   }
 
   /** Marca el enlace de la página actual comparando pathname (sin .html). */

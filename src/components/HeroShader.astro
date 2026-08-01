@@ -4,8 +4,11 @@
  * ribbons rojos sobre negro, respondiendo a la posición del mouse.
  *
  * - Colores adaptados a --ember-red del branding híbrido FLASK.
- * - Fallback: imagen estática si WebGL no está disponible.
- * - Respeta prefers-reduced-motion: no anima, deja fallback.
+ * - Fallback: imagen estática SOLO si WebGL no está disponible o hay reduce-motion.
+ *   Arranca invisible a propósito: antes se veía un destello del cohete en el
+ *   primer paint, hasta que el canvas tomaba el relevo.
+ * - El shader va deliberadamente apagado: el elemento más brillante del hero
+ *   tiene que ser el titular, no el fondo.
  * - Se re-inicializa en astro:page-load (compatibilidad View Transitions).
  */
 import { Image } from 'astro:assets';
@@ -22,8 +25,8 @@ import heroFallback from '../assets/hero/hero-fallback.png';
     sizes="100vw"
     format="webp"
     quality={72}
-    loading="eager"
-    fetchpriority="high"
+    loading="lazy"
+    decoding="async"
   />
   <canvas class="hero-shader-canvas" data-hero-canvas aria-hidden="true"></canvas>
   <div class="hero-shader-vignette" aria-hidden="true"></div>
@@ -46,10 +49,18 @@ import heroFallback from '../assets/hero/hero-fallback.png';
     const container = document.querySelector<HTMLElement>('[data-hero-shader]');
     const canvas = document.querySelector<HTMLCanvasElement>('[data-hero-canvas]');
     if (!container || !canvas) return;
-    if (prefersReducedMotion()) return; // dejar la imagen fallback
+
+    // La imagen de respaldo solo aparece si de verdad no vamos a animar nada.
+    if (prefersReducedMotion()) {
+      container.classList.add('is-fallback');
+      return;
+    }
 
     const gl = canvas.getContext('webgl', { antialias: false, alpha: false });
-    if (!gl) return; // sin webgl: dejar la imagen fallback
+    if (!gl) {
+      container.classList.add('is-fallback');
+      return;
+    }
 
     // Sincronizar tamaño del drawing buffer con el layout
     let dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -114,13 +125,17 @@ void main() {
   vec3 ember    = vec3(1.0, 0.12, 0.12);
 
   vec3 color = obsidian;
-  color = mix(color, ember, ribbons * 0.85);
-  color += ember * glow * 0.32;
+  color = mix(color, ember, ribbons * 0.52);
+  color += ember * glow * 0.14;
   float structures = smoothstep(0.45, 0.55, noise1);
-  color += vec3(0.05) * structures;
+  color += vec3(0.03) * structures;
 
   float d = distance(uv, vec2(0.5));
   color *= smoothstep(0.95, 0.15, d);
+
+  // El fondo se queda deliberadamente por debajo del titular: sin este freno,
+  // las vetas de lava compiten con el H1 y ganan.
+  color *= 0.62;
   gl_FragColor = vec4(color, 1.0);
 }`;
 
@@ -189,9 +204,10 @@ void main() {
       if (!running) return;
       raf = requestAnimationFrame(render);
       if (!visible) return; // no renderiza si no está en pantalla
-      // Interpolación suave del mouse: lerp bajo = movimiento más "pesado" y cinemático
-      mouseX += (targetX - mouseX) * 0.045;
-      mouseY += (targetY - mouseY) * 0.045;
+      // Lerp muy bajo: el fondo persigue al cursor con retardo, sin tirones.
+      // Subirlo hace que el giro "salte" al mover el mouse rápido.
+      mouseX += (targetX - mouseX) * 0.018;
+      mouseY += (targetY - mouseY) * 0.018;
       gl!.viewport(0, 0, canvas!.width, canvas!.height);
       if (uTime) gl!.uniform1f(uTime, t * 0.001);
       if (uRes) gl!.uniform2f(uRes, canvas!.width, canvas!.height);
@@ -242,27 +258,29 @@ void main() {
     height: 100%;
     display: block;
   }
+  /* Invisible por defecto: solo entra si el JS confirma que no habrá shader.
+     Antes arrancaba visible y se veía un destello de la imagen en cada carga. */
   .hero-shader-fallback {
     object-fit: cover;
-    opacity: 0.85;
+    opacity: 0;
     transition: opacity 0.5s ease;
+  }
+  .hero-shader.is-fallback .hero-shader-fallback {
+    opacity: 0.42;
   }
   .hero-shader-canvas {
     opacity: 0;
-    transition: opacity 0.6s ease;
+    transition: opacity 0.8s ease;
   }
   .hero-shader.is-active .hero-shader-canvas {
     opacity: 1;
-  }
-  .hero-shader.is-active .hero-shader-fallback {
-    opacity: 0;
   }
   .hero-shader-vignette {
     position: absolute;
     inset: 0;
     pointer-events: none;
     background:
-      radial-gradient(ellipse at center, transparent 40%, rgba(16, 1, 1, 0.6) 100%),
-      linear-gradient(to bottom, transparent 60%, rgba(16, 1, 1, 0.85) 100%);
+      radial-gradient(ellipse at 50% 45%, transparent 30%, rgba(16, 1, 1, 0.55) 78%, rgba(16, 1, 1, 0.9) 100%),
+      linear-gradient(to bottom, rgba(16, 1, 1, 0.55) 0%, transparent 32%, transparent 55%, rgba(16, 1, 1, 0.92) 100%);
   }
 </style>

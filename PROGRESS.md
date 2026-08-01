@@ -45,7 +45,7 @@ FLASK/
 │   │   ├── CareCard.astro
 │   │   ├── DiagBand.astro
 │   │   ├── HeroShader.astro       # fondo WebGL animado (mouse-reactivo)
-│   │   ├── CineFrame.astro        # marco de imagen cinemática (recorte + baño de marca)
+│   │   ├── SceneBg.astro          # imagen a sangre como FONDO de sección + velo
 │   │   ├── SmoothScroll.astro     # Lenis global
 │   │   └── Reveal.astro           # fade-up por scroll (CSS transitions)
 │   ├── data/                      # UNICA fuente de verdad de contenido
@@ -60,9 +60,9 @@ FLASK/
 │   ├── pages/
 │   │   ├── index.astro            # home aliviada (hero + previews + CTA)
 │   │   ├── servicios.astro        # 3 escenas grandes (una por pilar)
-│   │   ├── planes.astro           # planes + vitrina + módulos + care + FAQ
-│   │   ├── proceso.astro          # banda cinemática + 3 escenas con número gigante
-│   │   ├── sobre.astro            # manifiesto + "Detrás de FLASK" (bio personal pendiente)
+│   │   ├── planes.astro           # precios → respaldo → vitrina → capacidades → care → FAQ
+│   │   ├── proceso.astro          # banda a sangre + 3 escenas con número gigante
+│   │   ├── sobre.astro            # manifiesto + "Hablas con quien programa" (bio pendiente)
 │   │   ├── contacto.astro         # form → WhatsApp (o Netlify Forms) + panel lateral
 │   │   ├── gracias.astro          # post-envío (noindex)
 │   │   └── 404.astro              # error (noindex)
@@ -85,6 +85,7 @@ FLASK/
 │   └── images/README.md           # instrucciones para subir mockups
 ├── scripts/
 │   └── generate-brand-assets.mjs  # `npm run brand` → favicons + og.png
+├── AUDITORIA.md                   # auditoría medida: jerarquía, a11y, conversión, animación, marca
 ├── stitch_3d_web_creation_hero/   # VERSIONADO — referencias visuales del equipo (ver su README)
 ├── .github/workflows/deploy.yml   # deploy a Pages
 ├── astro.config.mjs               # site + base + sitemap + compressHTML
@@ -102,7 +103,8 @@ FLASK/
 4. **Cero placeholders** en producción: nada de `#`, `lorem`, `G-XXXXXXXXXX`.
 5. **Solo animar `transform` y `opacity`** — regla del CLAUDE.md original.
 6. **Máx 2 secciones con `pin` por página**, ningún `pin` en móvil sin adaptar.
-7. **Un solo acento cromático:** naranja `--flash-orange #FF5100` para UI; rojo `--ember-red #FF1E1E` reservado al hero shader.
+7. **Un solo acento cromático:** naranja `--flash-orange #FF5100` para UI **y para los acentos de texto**; rojo `--ember-red #FF1E1E` reservado a fondos (shader del hero, vetas de las imágenes). Verificado: el ember no aparece en ningún texto del sitio.
+9. **Las imágenes van de fondo, nunca como pieza de producto.** Se montan con `<SceneBg>`: a sangre, apagadas y bajo un velo que abre carril al texto. Lo que brilla es el titular.
 8. **`prefers-reduced-motion: reduce`** debe desactivar todas las animaciones. Ya implementado en Reveal, SmoothScroll, HeroShader.
 
 ---
@@ -147,6 +149,49 @@ Sitio inicial en HTML puro. Deprecado.
   y guard `dataset.bound` para no duplicar listeners
 - **Skip link** "Saltar al contenido" + `<main id="contenido">` en el layout
 - `npm run check` (astro check) en verde: 0 errores
+
+### Fase H — Rediseño de jerarquía y auditoría ✅
+
+Ronda pedida por el cliente sobre el resultado de la Fase C. Ver `AUDITORIA.md`
+para los números completos.
+
+**Navbar**
+- Rejilla de tres zonas (`1fr auto 1fr`): marca a la izquierda, enlaces centrados
+  sobre el eje del viewport, CTA a la derecha. Con flex nunca quedaron centrados
+  de verdad porque marca y CTA no miden lo mismo.
+- Más ancho (980 px), más oscuro (`rgba(9,1,1,.88)`) y enlaces más juntos.
+- Encoge al bajar (980×60 → 820×48) y vuelve al tope, con histéresis 40/12 px
+  para que no parpadee en el umbral.
+
+**Hero**
+- **Bug del destello del cohete corregido**: la imagen de respaldo arrancaba
+  visible y solo se ocultaba cuando el JS confirmaba WebGL. Ahora arranca
+  invisible y solo entra si de verdad no habrá shader. Además pasó a `lazy`: en
+  el caso normal ni se descarga.
+- Seguimiento del cursor de lerp 0.045 → 0.018 (más pesado, sin tirones).
+- Lava atenuada (vetas 0.85→0.52, brillo 0.32→0.14, factor global 0.62) para que
+  el elemento más brillante sea el titular.
+- Fuera el descriptor "Agencia web · Panamá"; los acentos del H1 pasan de
+  `--ember-red` a `--flash-orange`.
+
+**Imágenes como fondo** — nuevo `<SceneBg>` en `/servicios`, `/planes`, `/sobre`,
+`/proceso` y la cita de la home (textura líquida).
+
+**Contenido**
+- `/planes` abre con los precios; "Cuatro planes. Cero letra chica." pasa debajo
+  como respaldo, con tres garantías desarrolladas.
+- Los "módulos" pasan a **capacidades avanzadas** ("¿Tu negocio necesita más?
+  Súmale potencia"), con tarjetas rediseñadas.
+- `/sobre` recortado a titular + una línea por punto.
+
+**Bugs de maqueta encontrados midiendo**
+1. **`.container` se encogía dentro de cualquier sección flex o grid**, y su
+   `margin:0 auto` centraba el texto en vez de alinearlo al carril. Rompía la
+   alternancia izquierda/derecha de las escenas. Corregido con `width:100%`.
+2. **Áreas táctiles bajo el mínimo WCAG** (marca del nav y del footer a 14 px de
+   alto, teléfono a 15, enlaces de `/contacto` a 14–20). Corregidas con padding
+   vertical; el barrido a 390 px ya no encuentra ninguna por debajo de 24 px.
+3. **Salto de encabezado `h1 → h3` en `/planes`** por el `h3` de `DiagBand`.
 
 ### Fase B parte 2 — Fixes y ajustes
 - **Bug crítico de Reveal invisible corregido** (los `<script type="module">` son diferidos; `astro:page-load` se disparaba antes del listener → contenido en `opacity: 0` para siempre). Solución: bootstrap directo + CSS transitions puros + fallback triple.
@@ -199,28 +244,46 @@ un endpoint externo (Formspree, Web3Forms): cambiar el `action` del form y quita
 
 ## Pendientes
 
-### Fase D — Contenido pendiente del cliente
+> Lista única y ordenada por impacto. Si retomas el proyecto, empieza por P1.
+> El porqué de los puntos de auditoría está desarrollado en `AUDITORIA.md`.
 
-Bloqueado por contenido real. NO inventar (regla CLAUDE.md original).
+### P1 — Bloquea lanzar de verdad
 
-- **`/sobre`** — bio real, foto profesional y credenciales técnicas. El bloque "Detrás de FLASK"
-  ya no muestra la nota interna: habla del estudio y de compromisos que ya están por escrito en
-  `/planes` y `/proceso`. Cuando llegue la bio, sustituir el `<dl class="who-facts">` y añadir la
-  foto en `src/assets/sobre/`. Hay un comentario en la página marcando el punto exacto.
-- **`/proyectos`** — 3 demos verticales en vivo (inmobiliaria, clínica, restaurante) con casos de
-  estudio. Página aún no creada; cuando existan las demos se crea.
-- **`/blog`** — solo si van a existir posts reales. Cero blogs vacíos.
+| # | Pendiente | Quién lo desbloquea | Nota |
+|---|---|---|---|
+| 1 | **El formulario solo sale por WhatsApp.** Único punto donde se pierde un lead: en escritorio sin WhatsApp Web el flujo se corta. | Decisión tuya + cuenta externa | Si eliges correo: crear cuenta en Formspree o Web3Forms, poner el endpoint en el `action` del form de `contacto.astro` y borrar el interceptor `data-wa-fallback`. Ver "El formulario de contacto, explicado". |
+| 2 | **Cero prueba social.** Ni testimonios, ni logos, ni casos. Contra WordPress barato la objeción real no es el precio, es "¿y este quién es?". | Contenido tuyo | Lo que más movería la aguja de todo lo que queda. |
+| 3 | **Analítica.** No hay ninguna instalada. Sin datos, las decisiones de conversión son opinión. | Decisión tuya | Decidir antes de anunciar el sitio, no después. |
 
-### Fase G — Medición y decisiones abiertas
+### P2 — Contenido tuyo que no se puede inventar
 
-- **Lighthouse pass en el sitio en vivo** → LCP, INP y CLS reales. Es lo único que no se puede
-  cerrar desde el repo: hay que medirlo en Pages con el CDN real.
-- **Search Console** — sitemap y canonical ya se emiten bien; falta darlos de alta y verificar.
-- **Analytics** — todavía no hay ninguno instalado. Decidir si va (y cuál) antes de anunciar el sitio.
-- **URLs limpias sin `.html`** (`trailingSlash:'always'` + `format:'directory'`). Cambiaría todas
-  las rutas de `links.ts`; hacerlo antes de que el sitio tenga enlaces externos apuntándole, no después.
-- **Dominio propio** — al comprarlo: cambiar `site` en `astro.config.mjs`, borrar `base`, y volver a
-  correr `npm run brand` no hace falta (los assets no llevan dominio dentro).
+Regla del CLAUDE.md original: **no inventar contenido del cliente.**
+
+| # | Pendiente | Dónde tocar |
+|---|---|---|
+| 4 | **Bio real de `/sobre`** — historia, foto profesional, credenciales. | Sustituir el bloque `.who-copy` de `sobre.astro`. Hay un comentario en la página marcando el punto exacto. La foto va a `src/assets/sobre/` y se registra en `src/data/images.ts`. |
+| 5 | **`/proyectos`** — 3 demos verticales en vivo (inmobiliaria, clínica, restaurante) con casos de estudio. | Página aún no creada; se crea cuando existan las demos. |
+| 6 | **`/blog`** — solo si van a existir posts reales. Cero blogs vacíos. | — |
+
+### P3 — Mejoras de conversión y navegación
+
+| # | Pendiente | Nota |
+|---|---|---|
+| 7 | **`/planes` tiene 16 CTA compitiendo.** | Las 7 tarjetas de capacidad no deberían ser enlaces individuales, sino una lista con un solo CTA al cierre del bloque. |
+| 8 | **Sin señal de progreso en páginas largas** (`/planes` mide ~7000 px). | Barato: una fila de anclas bajo el titular (`Planes · Capacidades · Care · FAQ`). Caro: índice lateral pegajoso. |
+| 9 | **El hero de la home no dice qué hace FLASK hasta la bajada.** | Apuesta consciente por tono sobre claridad (el descriptor se quitó a petición). Revisable si algún día llega tráfico frío de búsqueda. |
+
+### P4 — Técnico y de marca
+
+| # | Pendiente | Nota |
+|---|---|---|
+| 10 | **Lighthouse en el sitio en vivo** → LCP, INP y CLS reales. | Lo único que no se puede cerrar desde el repo: hay que medirlo en Pages con el CDN real. |
+| 11 | **Search Console.** | Sitemap y canonical ya se emiten bien; falta darlos de alta y verificar. |
+| 12 | **Prueba con lector de pantalla real** (NVDA/VoiceOver). | Lo auditado es estructura, no experiencia. Es el único hueco de accesibilidad que queda. |
+| 13 | **La marca es solo tipográfica.** | El rayo del favicon no aparece en el nav, ni en el footer, ni en la imagen social. Tampoco hay versión sobre fondo claro para facturas o propuestas en PDF. |
+| 14 | **URLs limpias sin `.html`** (`trailingSlash:'always'` + `format:'directory'`). | Cambiaría todas las rutas de `links.ts`. Hacerlo **antes** de que el sitio tenga enlaces externos apuntándole, no después. |
+| 15 | **Dominio propio.** | Al comprarlo: cambiar `site` en `astro.config.mjs` y borrar `base`. No hace falta volver a correr `npm run brand` (los assets no llevan dominio dentro). |
+| 16 | **El shader es un `requestAnimationFrame` permanente** mientras el hero está en pantalla. | Ya se pausa fuera del viewport y no arranca con reduce-motion. Si algún día importa la batería, se puede bajar a 30 fps sin que se note. |
 
 ---
 
@@ -267,5 +330,7 @@ Estos archivos existen en tu disco local y están bloqueados por `.gitignore`:
 **"El formulario no envía nada"** → Es lo esperado en GitHub Pages: no hay backend. Ver la sección "El formulario de contacto, explicado" más arriba. El envío real hoy va por WhatsApp.
 
 **"Cambié el logo / los colores y el favicon sigue igual"** → Los favicons y `og.png` son archivos generados, no se recalculan en el build. Corre `npm run brand` y commitea lo que cambie en `public/`.
+
+**"El texto de una sección se me fue al centro en vez de al carril izquierdo"** → Esa sección es `display:flex` o `grid` y `.container` se convirtió en item. Ya está blindado con `width:100%` en `global.css`; si aparece otra vez, es que alguien lo quitó.
 
 **"Toqué un `padding` en `global.css` y se rompió otra cosa"** → `.container` usa el shorthand `padding` y aparece dos veces (base y media query de 640 px). Cualquier otra regla con la misma especificidad que use `padding` sobre un `.container` va a perder por orden de aparición. Usa longhands (`padding-block`) y sube la especificidad, como hace `.hero .hero-inner`.

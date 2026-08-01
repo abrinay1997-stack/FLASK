@@ -1,15 +1,163 @@
 ---
+/**
+ * Tarjeta de capacidad avanzada.
+ *
+ * No es un "módulo de catálogo": se presenta como una pieza de potencia que se
+ * enchufa al sitio. De ahí el signo "+", el precio como dato principal y el
+ * stack relegado a etiqueta técnica.
+ */
 import type { Module } from '../data/modules';
+import { routes } from '../data/links';
 
 interface Props {
   module: Module;
+  idx: number;
 }
 
-const { module: mod } = Astro.props;
+const { module: mod, idx } = Astro.props;
+const num = String(idx + 1).padStart(2, '0');
 ---
 
-<div class="module">
-  <span class="mod-name">{mod.name}</span>
-  <span class="mod-price">{mod.price}</span>
-  <span class="mod-stack">{mod.stack}</span>
-</div>
+<a class="module" href={`${routes.contacto}?plan=modulos`}>
+  <div class="mod-head">
+    <span class="mod-num">{num}</span>
+    <span class="mod-plus" aria-hidden="true">+</span>
+  </div>
+
+  <h3 class="mod-name">{mod.name}</h3>
+
+  <div class="mod-foot">
+    <span class="mod-price">{mod.price}</span>
+    <span class="mod-stack">{mod.stack}</span>
+  </div>
+
+  <span class="mod-cta">
+    Añadir <span aria-hidden="true">→</span>
+  </span>
+</a>
+
+<style>
+  .module {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 26px 26px 24px;
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 18px;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.045) 0%, rgba(255, 255, 255, 0.012) 100%);
+    overflow: hidden;
+    transition: border-color 0.28s, transform 0.28s, background 0.28s;
+  }
+  /* Filo naranja que se enciende al pasar por encima: la única animación de la
+     tarjeta que no es transform/opacity vive aquí y es un scaleX, no un width. */
+  .module::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--flash-orange), var(--ember-red));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .module:hover {
+    border-color: rgba(255, 81, 0, 0.55);
+    transform: translateY(-4px);
+    background: linear-gradient(180deg, rgba(255, 81, 0, 0.07) 0%, rgba(255, 81, 0, 0.015) 100%);
+  }
+  .module:hover::before,
+  .module:focus-visible::before {
+    transform: scaleX(1);
+  }
+
+  .mod-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+  }
+  .mod-num {
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    color: var(--studio-gray);
+    opacity: 0.65;
+  }
+  .mod-plus {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 81, 0, 0.4);
+    color: var(--flash-orange);
+    font-size: 17px;
+    line-height: 1;
+    transition: background 0.28s, color 0.28s;
+  }
+  .module:hover .mod-plus {
+    background: var(--flash-orange);
+    color: var(--deep-black);
+  }
+
+  .mod-name {
+    font-size: 19px;
+    font-weight: 600;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+    margin-bottom: 20px;
+    flex: 1;
+  }
+
+  .mod-foot {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 14px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .mod-price {
+    font-size: 26px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--flash-orange);
+    white-space: nowrap;
+  }
+  .mod-stack {
+    font-size: 12px;
+    font-weight: 300;
+    color: var(--studio-gray);
+    text-align: right;
+    line-height: 1.4;
+  }
+
+  .mod-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 16px;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--studio-gray);
+    transition: color 0.28s, gap 0.28s;
+  }
+  .module:hover .mod-cta {
+    color: var(--flash-orange);
+    gap: 12px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .module:hover {
+      transform: none;
+    }
+    .module:hover .mod-cta {
+      gap: 7px;
+    }
+  }
+</style>

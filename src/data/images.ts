@@ -24,6 +24,12 @@ export interface Visual {
   alt: string;
   /** `object-position` cuando el recorte no es 16:9 y el sujeto no va centrado. */
   focus?: string;
+  /**
+   * Opacidad por defecto de esta imagen como fondo de escena. No todas parten
+   * del mismo brillo: las muy oscuras se pierden con el valor genérico y las
+   * muy luminosas se comen el texto. Si se omite, manda el `dim` de <SceneBg>.
+   */
+  dim?: number;
 }
 
 /** Visual de cada pilar de /servicios, indexado por `Service.idx`. */
@@ -72,6 +78,9 @@ export const planVisuals: Record<string, Visual> = {
     src: start,
     alt: 'Esfera de roca incandescente flotando sola en una cámara oscura.',
     focus: 'center center',
+    // Casi toda la imagen es negro con una esfera pequeña: con el dim genérico
+    // desaparecía del todo.
+    dim: 0.85,
   },
   corporate: {
     src: corporate,
