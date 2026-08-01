@@ -43,6 +43,6 @@ BRANDING.html
 # Instrucciones internas para Claude
 CLAUDE.md
 
-# Bundle de referencias visuales de Stitch (>12 MB, uso interno)
-# Las imagenes usadas se mueven a src/assets/ o public/images/
-stitch_3d_web_creation_hero/
+# Nota: stitch_3d_web_creation_hero/ SÍ se versiona como carpeta de referencias
+# visuales para el resto del equipo. Las imagenes ACTIVAS del sitio se mueven
+# a src/assets/... y se importan con Astro Image.

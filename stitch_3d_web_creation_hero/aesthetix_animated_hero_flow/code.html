@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AESTHETIX | Digital Experiences That Transcend Reality</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&amp;family=Hanken+Grotesk:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<!-- Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-fixed": "#410001",
+                        "on-surface": "#e5e2e1",
+                        "on-surface-variant": "#e9bcb6",
+                        "background": "#131313",
+                        "tertiary-container": "#929090",
+                        "secondary-fixed": "#e2e2e2",
+                        "primary-fixed": "#ffdad5",
+                        "surface-tint": "#ffb4aa",
+                        "surface-variant": "#353534",
+                        "on-secondary-container": "#b4b5b5",
+                        "on-primary": "#690003",
+                        "tertiary-fixed-dim": "#c8c6c5",
+                        "on-secondary-fixed": "#1a1c1c",
+                        "secondary": "#c6c6c7",
+                        "secondary-container": "#454747",
+                        "surface-container-low": "#1c1b1b",
+                        "error-container": "#93000a",
+                        "inverse-surface": "#e5e2e1",
+                        "on-tertiary-fixed-variant": "#474746",
+                        "inverse-on-surface": "#313030",
+                        "on-tertiary-container": "#2a2a2a",
+                        "on-secondary": "#2f3131",
+                        "surface-dim": "#131313",
+                        "primary": "#ffb4aa",
+                        "primary-container": "#ff5546",
+                        "surface-container-high": "#2a2a2a",
+                        "tertiary": "#c8c6c5",
+                        "error": "#ffb4ab",
+                        "surface": "#131313",
+                        "surface-container-highest": "#353534",
+                        "on-secondary-fixed-variant": "#454747",
+                        "surface-bright": "#3a3939",
+                        "on-error-container": "#ffdad6",
+                        "outline-variant": "#5f3f3a",
+                        "secondary-fixed-dim": "#c6c6c7",
+                        "on-error": "#690005",
+                        "on-background": "#e5e2e1",
+                        "surface-container-lowest": "#0e0e0e",
+                        "on-tertiary": "#313030",
+                        "on-primary-container": "#5c0002",
+                        "on-tertiary-fixed": "#1c1b1b",
+                        "inverse-primary": "#c0000b",
+                        "primary-fixed-dim": "#ffb4aa",
+                        "on-primary-fixed-variant": "#930006",
+                        "surface-container": "#201f1f",
+                        "outline": "#b08782",
+                        "tertiary-fixed": "#e5e2e1",
+                        "neon-red": "#ff1e1e"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "container-max": "1440px",
+                        "margin-mobile": "24px",
+                        "gutter": "24px",
+                        "margin-desktop": "80px",
+                        "section-gap": "160px"
+                    },
+                    "fontFamily": {
+                        "display-xl": ["Plus Jakarta Sans"],
+                        "label-caps": ["Hanken Grotesk"],
+                        "body-md": ["Hanken Grotesk"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "headline-lg-mobile": ["Plus Jakarta Sans"],
+                        "body-lg": ["Hanken Grotesk"]
+                    },
+                    "fontSize": {
+                        "display-xl": ["96px", { "lineHeight": "100px", "letterSpacing": "-0.04em", "fontWeight": "800" }],
+                        "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.1em", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["64px", { "lineHeight": "72px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-md": ["32px", { "lineHeight": "40px", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #131313;
+            color: #e5e2e1;
+            overflow-x: hidden;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .glow-hover:hover {
+            box-shadow: 0 0 20px rgba(255, 30, 30, 0.4);
+        }
+        .text-glow {
+            text-shadow: 0 0 10px rgba(255, 30, 30, 0.2);
+        }
+        .glass-card {
+            background: rgba(26, 26, 26, 0.4);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #131313;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #353534;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ff1e1e;
+        }
+    </style>
+</head>
+<body class="font-body-md selection:bg-neon-red selection:text-white">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-xl border-b border-surface-variant/10">
+<div class="flex justify-between items-center px-margin-mobile md:px-margin-desktop py-6 max-w-container-max mx-auto">
+<div class="font-display-xl text-body-lg tracking-tighter text-on-surface">AESTHETIX</div>
+<div class="hidden md:flex items-center gap-8">
+<a class="font-label-caps text-label-caps text-primary relative after:content-[''] after:absolute after:-bottom-2 after:left-1/2 after:-translate-x-1/2 after:w-1 after:h-1 after:bg-primary after:rounded-full hover:text-primary transition-colors duration-300" href="#">Work</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors duration-300" href="#">Services</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors duration-300" href="#">Studio</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors duration-300" href="#">Contact</a>
+</div>
+<button class="bg-neon-red px-6 py-3 rounded-full font-label-caps text-label-caps text-white transition-all duration-300 hover:scale-105 glow-hover">
+                Start a Project
+            </button>
+</div>
+</nav>
+<main>
+<!-- Hero Section -->
+<section class="relative h-screen min-h-[700px] flex items-center justify-center overflow-hidden pt-20">
+<!-- Full-screen WebGL Shader Background -->
+<!-- STITCH_SHADER_START:ANIMATION_27 class="absolute inset-0 w-full h-full" -->
+<div class="absolute inset-0 w-full h-full" style="display:block;">
+<canvas id="shader-canvas-ANIMATION_27" style="display:block;width:100%;height:100%"></canvas>
+<script>
+(function() {
+  const canvas = document.getElementById('shader-canvas-ANIMATION_27');
+
+  // Sync the WebGL drawing-buffer size with the CSS-driven layout size.
+  // This fires on initial layout and whenever the element is resized.
+  function syncSize() {
+    const w = canvas.clientWidth  || 1280;
+    const h = canvas.clientHeight || 720;
+    if (canvas.width !== w || canvas.height !== h) {
+      canvas.width  = w;
+      canvas.height = h;
+    }
+  }
+  if (typeof ResizeObserver !== 'undefined') {
+    new ResizeObserver(syncSize).observe(canvas);
+  }
+  syncSize();
+
+  const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+  if (!gl) return;
+  const vs = `attribute vec2 a_position;
+varying vec2 v_texCoord;
+void main() {
+  v_texCoord = a_position * 0.5 + 0.5;
+  gl_Position = vec4(a_position, 0.0, 1.0);
+}`;
+  const fs = `precision highp float;
+
+varying vec2 v_texCoord;
+uniform float u_time;
+uniform vec2 u_resolution;
+uniform vec2 u_mouse;
+
+// Simplex 2D noise
+vec3 permute(vec3 x) { return mod(((x*34.0)+1.0)*x, 289.0); }
+float snoise(vec2 v){
+  const vec4 C = vec4(0.211324865405187, 0.366025403784439,
+           -0.577350269189626, 0.024390243902439);
+  vec2 i  = floor(v + dot(v, C.yy) );
+  vec2 x0 = v -   i + dot(i, C.xx);
+  vec2 i1;
+  i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
+  vec4 x12 = x0.xyxy + C.xxzz;
+  x12.xy -= i1;
+  i  = mod(i, 289.0);
+  vec3 p = permute( permute( i.y + vec3(0.0, i1.y, 1.0 ))
+  + i.x + vec3(0.0, i1.x, 1.0 ));
+  vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy),
+    dot(x12.zw,x12.zw)), 0.0);
+  m = m*m ;
+  m = m*m ;
+  vec3 x = 2.0 * fract(p * C.www) - 1.0;
+  vec3 h = abs(x) - 0.5;
+  vec3 a0 = x - floor(x + 0.5);
+  m *= 1.79284291400159 - 0.85373472095314 * ( a0*a0 + h*h );
+  vec3 g;
+  g.x  = a0.x  * x0.x  + h.x  * x0.y;
+  g.yz = a0.yz * x12.xz + h.yz * x12.yw;
+  return 130.0 * dot(m, g);
+}
+
+void main() {
+    vec2 uv = v_texCoord;
+    vec2 mouse = u_mouse / u_resolution;
+    
+    // Create multiple "ribbons" of energy
+    float noise1 = snoise(uv * 3.0 + u_time * 0.2 + mouse * 0.5);
+    float noise2 = snoise(uv * 5.0 - u_time * 0.15 + mouse * 0.2);
+    
+    // High contrast fluid shapes
+    float ribbons = smoothstep(0.1, 0.12, abs(noise1 - noise2));
+    ribbons = 1.0 - ribbons; // Invert to get thin lines
+    
+    // Add glowing effect
+    float glow = smoothstep(0.4, 0.0, abs(noise1 - noise2));
+    
+    // Colors from Obsidian & Ember
+    vec3 obsidian = vec3(0.02, 0.02, 0.02); // Deep surface
+    vec3 ember = vec3(1.0, 0.12, 0.12);     // Vibrant red #ff1e1e
+    
+    // Layering the flow
+    vec3 color = obsidian;
+    
+    // Add primary red flow
+    color = mix(color, ember, ribbons * 0.8);
+    
+    // Add glow
+    color += ember * glow * 0.4;
+    
+    // Add some "obsidian" structure highlights
+    float structures = smoothstep(0.4, 0.5, noise1);
+    color += vec3(0.1) * structures;
+    
+    // Vignette
+    float d = distance(uv, vec2(0.5));
+    color *= smoothstep(0.8, 0.2, d);
+
+    gl_FragColor = vec4(color, 1.0);
+}`;
+  function cs(type, src) {
+    const s = gl.createShader(type);
+    gl.shaderSource(s, src);
+    gl.compileShader(s);
+    return s;
+  }
+  const prog = gl.createProgram();
+  gl.attachShader(prog, cs(gl.VERTEX_SHADER, vs));
+  gl.attachShader(prog, cs(gl.FRAGMENT_SHADER, fs));
+  gl.linkProgram(prog);
+  gl.useProgram(prog);
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+  const pos = gl.getAttribLocation(prog, 'a_position');
+  gl.enableVertexAttribArray(pos);
+  gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
+  const uTime = gl.getUniformLocation(prog, 'u_time');
+  const uRes = gl.getUniformLocation(prog, 'u_resolution');
+  const uMouse = gl.getUniformLocation(prog, 'u_mouse');
+
+  // u_mouse is in pixel coordinates matching u_resolution (ShaderToy convention).
+  // Shaders that need normalized coords should use: u_mouse / u_resolution.
+  let mouse = { x: canvas.width / 2, y: canvas.height / 2 };
+  window.addEventListener('mousemove', (event) => {
+    const rect = canvas.getBoundingClientRect();
+    if (rect.width && rect.height) {
+      const nx = (event.clientX - rect.left) / rect.width;
+      const ny = 1.0 - (event.clientY - rect.top) / rect.height;
+      mouse.x = nx * canvas.width;
+      mouse.y = ny * canvas.height;
+    }
+  });
+
+  function render(t) {
+    if (typeof ResizeObserver === 'undefined') syncSize();
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    if (uTime) gl.uniform1f(uTime, t * 0.001);
+    if (uRes) gl.uniform2f(uRes, canvas.width, canvas.height);
+    if (uMouse) gl.uniform2f(uMouse, mouse.x, mouse.y);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    requestAnimationFrame(render);
+  }
+  render(0);
+})();
+</script>
+</div>
+<!-- STITCH_SHADER_END:ANIMATION_27 -->
+<!-- Overlay for legibility -->
+<div class="absolute inset-0 bg-background/30 z-0"></div>
+<div class="relative z-10 px-margin-mobile md:px-margin-desktop text-center max-w-5xl mx-auto">
+<span class="font-label-caps text-label-caps text-neon-red tracking-[0.3em] uppercase mb-6 block" data-aos="fade-up">Cinematic Agency</span>
+<h1 class="font-display-xl text-headline-lg-mobile md:text-display-xl mb-8 leading-tight drop-shadow-2xl">
+                    Digital Experiences That <span class="text-neon-red">Transcend</span> Reality.
+                </h1>
+<p class="font-body-lg text-on-surface max-w-2xl mx-auto mb-12 drop-shadow-md">
+                    We design and build high-performance websites for visionary brands. Bridging the gap between storytelling and technical excellence.
+                </p>
+<div class="flex flex-col sm:flex-row gap-6 justify-center items-center">
+<a class="bg-neon-red px-10 py-5 rounded-full font-label-caps text-label-caps text-white transition-all duration-300 hover:scale-105 glow-hover flex items-center gap-2" href="#">
+                        Start a Project
+                        <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</a>
+<a class="border border-white/20 bg-background/10 backdrop-blur-md px-10 py-5 rounded-full font-label-caps text-label-caps text-white transition-all duration-300 hover:bg-white/5" href="#">
+                        View Work
+                    </a>
+</div>
+</div>
+<!-- Scroll Indicator -->
+<div class="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-70 z-10">
+<span class="font-label-caps text-[10px] tracking-widest uppercase">Scroll</span>
+<div class="w-px h-12 bg-gradient-to-b from-neon-red to-transparent"></div>
+</div>
+</section>
+<!-- Services Section -->
+<section class="py-section-gap px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
+<div class="flex flex-col md:flex-row justify-between items-end mb-24 gap-8">
+<div class="max-w-2xl">
+<span class="font-label-caps text-label-caps text-neon-red tracking-widest uppercase mb-4 block">Our Expertise</span>
+<h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg">Crafting the Future of Web.</h2>
+</div>
+<p class="font-body-lg text-on-surface-variant max-w-sm">
+                    A holistic approach to digital excellence, from high-concept strategy to pixel-perfect execution.
+                </p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+<!-- Service 1 -->
+<div class="glass-card p-12 flex flex-col gap-8 group hover:border-neon-red/30 transition-all duration-500">
+<div class="w-12 h-12 flex items-center justify-center bg-neon-red/10 rounded-lg group-hover:bg-neon-red transition-colors duration-500">
+<span class="material-symbols-outlined text-neon-red group-hover:text-white" style="font-variation-settings: 'FILL' 1;">pentagon</span>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md mb-4">Design</h3>
+<p class="text-on-surface-variant leading-relaxed">
+                            Bespoke visual identities and UI/UX systems that prioritize narrative impact and brand authority.
+                        </p>
+</div>
+<ul class="mt-auto flex flex-wrap gap-2">
+<li class="bg-surface-container-highest px-3 py-1 rounded-full font-label-caps text-[10px] text-on-surface-variant uppercase">Creative Direction</li>
+<li class="bg-surface-container-highest px-3 py-1 rounded-full font-label-caps text-[10px] text-on-surface-variant uppercase">UI/UX</li>
+</ul>
+</div>
+<!-- Service 2 -->
+<div class="glass-card p-12 flex flex-col gap-8 group hover:border-neon-red/30 transition-all duration-500">
+<div class="w-12 h-12 flex items-center justify-center bg-neon-red/10 rounded-lg group-hover:bg-neon-red transition-colors duration-500">
+<span class="material-symbols-outlined text-neon-red group-hover:text-white" style="font-variation-settings: 'FILL' 1;">terminal</span>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md mb-4">Development</h3>
+<p class="text-on-surface-variant leading-relaxed">
+                            Cutting-edge front-end engineering with fluid animations and robust backend architectures.
+                        </p>
+</div>
+<ul class="mt-auto flex flex-wrap gap-2">
+<li class="bg-surface-container-highest px-3 py-1 rounded-full font-label-caps text-[10px] text-on-surface-variant uppercase">Web3</li>
+<li class="bg-surface-container-highest px-3 py-1 rounded-full font-label-caps text-[10px] text-on-surface-variant uppercase">Headless E-com</li>
+</ul>
+</div>
+<!-- Service 3 -->
+<div class="glass-card p-12 flex flex-col gap-8 group hover:border-neon-red/30 transition-all duration-500">
+<div class="w-12 h-12 flex items-center justify-center bg-neon-red/10 rounded-lg group-hover:bg-neon-red transition-colors duration-500">
+<span class="material-symbols-outlined text-neon-red group-hover:text-white" style="font-variation-settings: 'FILL' 1;">explore</span>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md mb-4">Strategy</h3>
+<p class="text-on-surface-variant leading-relaxed">
+                            Data-driven digital strategy that maps your brand vision to measurable business outcomes.
+                        </p>
+</div>
+<ul class="mt-auto flex flex-wrap gap-2">
+<li class="bg-surface-container-highest px-3 py-1 rounded-full font-label-caps text-[10px] text-on-surface-variant uppercase">Market Analysis</li>
+<li class="bg-surface-container-highest px-3 py-1 rounded-full font-label-caps text-[10px] text-on-surface-variant uppercase">SEO</li>
+</ul>
+</div>
+</div>
+</section>
+<!-- Portfolio Teaser (Bento Grid) -->
+<section class="py-section-gap bg-surface-container-lowest">
+<div class="px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
+<div class="text-center mb-24">
+<span class="font-label-caps text-label-caps text-neon-red tracking-widest uppercase mb-4 block">Selected Works</span>
+<h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg">Digital Showcases</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-12 grid-rows-2 gap-gutter h-full md:h-[1000px]">
+<!-- Project 1 -->
+<div class="md:col-span-8 md:row-span-1 relative overflow-hidden group cursor-pointer rounded-xl">
+<div class="absolute inset-0 bg-gradient-to-t from-background to-transparent z-10 opacity-80"></div>
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" data-alt="A cinematic, high-contrast photograph of a sleek architectural masterpiece at twilight." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBZZ-ZgDs0QwrdrBnVEw1qCTUV3DpftCqULp93RsnwrEsnPcWHEowrFfgNI27vUuabDZpmBRnbN7XIlo4E8iE7mx2uTl0D2NjZC9em_q_Qcq09a8kFCrgnX19cimLjrZn89WNitGbITNuqbmt6NLIqhg5bYr9eSG3vF_GO2Bl4MSeL7ohAuC-QXmDHN_Tj1pKmsVp4RPXDUhc-GspV4bHtqSxRlZ0iQB4IBC5WJ2TvSbdUCqDk8EuKB')"></div>
+<div class="absolute bottom-0 left-0 p-12 z-20">
+<span class="font-label-caps text-label-caps text-neon-red mb-2 block">Fintech / 2024</span>
+<h3 class="font-headline-md text-headline-md text-white group-hover:translate-x-2 transition-transform duration-300">Nova Capital Systems</h3>
+</div>
+</div>
+<!-- Project 2 -->
+<div class="md:col-span-4 md:row-span-2 relative overflow-hidden group cursor-pointer rounded-xl">
+<div class="absolute inset-0 bg-gradient-to-t from-background to-transparent z-10 opacity-80"></div>
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" data-alt="Close-up macro photography of a sophisticated digital interface with glowing red particle effects." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBlFIxYwYqgiDiDs29gqn0UymXG6_cdkNaZkAfkpFBnIo-cB2fNsSORmBY-F-hXipKGrmIFvJnOSxPZ6mmPmQ91X5wSQv5S_Ec-JgdgKhWTtjGbBc-yNLcQUk22cp74VeI_EAjcfrNtLrhUwTUn2ORs48-H0rEyJ8Z7OX5YrmaGE58qeFabA2uV7FJbtez4EIxpeFIq5iTM7tro1w3EStsHjBmYefu-QQxHDMQ0ShUIYFPvCwhlC4sr')"></div>
+<div class="absolute bottom-0 left-0 p-12 z-20">
+<span class="font-label-caps text-label-caps text-neon-red mb-2 block">Lifestyle / 2023</span>
+<h3 class="font-headline-md text-headline-md text-white group-hover:translate-x-2 transition-transform duration-300">LUMINA Wear</h3>
+</div>
+</div>
+<!-- Project 3 -->
+<div class="md:col-span-4 md:row-span-1 relative overflow-hidden group cursor-pointer rounded-xl">
+<div class="absolute inset-0 bg-gradient-to-t from-background to-transparent z-10 opacity-80"></div>
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" data-alt="An abstract 3D render of flowing liquid metal in deep black." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAks2t17sco65yhYFfl_aAqRtUOsVdPiEen4lOvE6a79WYTgLO9WEVtTlVMI1Qyc8YKvBDJAlTGC51EhrzbgIupIREVPviZjtwcxADEoxKZDA6W9SgLRKSiFxmMkA8rkpKo7EWNvdKeMnmNGgLLdMzonU8GXam-TdA5h1Z-HRhSRlzRVYI4230uBAg2mtguM1Ngw3QM29kJ4aIgUyWfMo4zm51XzLXHVB0Beacwz0co3nOxvIGUfR_l')"></div>
+<div class="absolute bottom-0 left-0 p-12 z-20">
+<span class="font-label-caps text-label-caps text-neon-red mb-2 block">SaaS / 2024</span>
+<h3 class="font-headline-md text-headline-md text-white group-hover:translate-x-2 transition-transform duration-300">Velocity OS</h3>
+</div>
+</div>
+<!-- Project 4 -->
+<div class="md:col-span-4 md:row-span-1 relative overflow-hidden group cursor-pointer rounded-xl">
+<div class="absolute inset-0 bg-gradient-to-t from-background to-transparent z-10 opacity-80"></div>
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" data-alt="A wide-angle, atmospheric shot of a futuristic data center." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCjlB6vNiW0pMl3g8v38EixHSovUCz3b_SoHZjJs3VwidLgfyKdOb_WZojroi9T2a8tG6_Mam5WY0HMvLYIXVTKb7nPp47FUuMRObwBO8Ra1u6Hnh-9-KmjCMYE6OC1nDs4hBplCf_Yrbcw2GVZqJtd5u2-Een0jFHkhxODrITrOsuLjUE7Xqa_Onj2d5AjCw1mUgQx1x_j_qh8tfKuGhLbXvPrjGbvJslQRrQgenD1qo6W2Aukg417')"></div>
+<div class="absolute bottom-0 left-0 p-12 z-20">
+<span class="font-label-caps text-label-caps text-neon-red mb-2 block">Art / 2024</span>
+<h3 class="font-headline-md text-headline-md text-white group-hover:translate-x-2 transition-transform duration-300">Etherium Gallery</h3>
+</div>
+</div>
+</div>
+<div class="mt-16 flex justify-center">
+<a class="group flex items-center gap-4 text-white font-label-caps text-label-caps tracking-widest uppercase hover:text-neon-red transition-colors duration-300" href="#">
+                        View All Projects
+                        <div class="w-12 h-px bg-white group-hover:bg-neon-red group-hover:w-20 transition-all duration-300"></div>
+</a>
+</div>
+</div>
+</section>
+<!-- CTA Section -->
+<section class="py-section-gap relative overflow-hidden">
+<div class="absolute inset-0 bg-neon-red/5 pointer-events-none"></div>
+<div class="px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto text-center relative z-10">
+<h2 class="font-display-xl text-headline-lg-mobile md:text-headline-lg mb-12">Let's Create the <span class="text-neon-red">Unthinkable</span>.</h2>
+<div class="flex flex-col md:flex-row gap-6 justify-center">
+<button class="bg-neon-red px-12 py-6 rounded-full font-label-caps text-label-caps text-white transition-all duration-300 hover:scale-105 glow-hover">
+                        Start a Project
+                    </button>
+<button class="border border-white/20 px-12 py-6 rounded-full font-label-caps text-label-caps text-white transition-all duration-300 hover:bg-white/5">
+                        Talk to an Expert
+                    </button>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="w-full py-section-gap bg-background border-t border-surface-variant/10">
+<div class="flex flex-col md:flex-row justify-between items-center px-margin-desktop w-full max-w-container-max mx-auto gap-gutter">
+<div class="flex flex-col gap-4 text-center md:text-left">
+<div class="font-display-xl text-headline-md text-on-surface">AESTHETIX</div>
+<div class="font-label-caps text-label-caps text-on-surface-variant tracking-wider opacity-80">© 2024 AESTHETIX. ALL RIGHTS RESERVED.</div>
+</div>
+<div class="flex gap-8 items-center">
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors duration-300 opacity-80 hover:opacity-100" href="#">Instagram</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors duration-300 opacity-80 hover:opacity-100" href="#">LinkedIn</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors duration-300 opacity-80 hover:opacity-100" href="#">Behance</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors duration-300 opacity-80 hover:opacity-100" href="#">Privacy</a>
+</div>
+</div>
+</footer>
+<!-- Simple atmospheric mouse interaction script -->
+<script>
+        document.addEventListener('mousemove', (e) => {
+            const glow = document.getElementById('mouse-glow');
+            if (glow) {
+                glow.style.left = e.clientX + 'px';
+                glow.style.top = e.clientY + 'px';
+            }
+        });
+    </script>
+<div class="fixed w-[400px] h-[400px] bg-neon-red/5 rounded-full blur-[100px] pointer-events-none -translate-x-1/2 -translate-y-1/2 z-0 opacity-50" id="mouse-glow"></div>
+</body></html>
