@@ -104,22 +104,23 @@ float snoise(vec2 v){
 void main() {
   vec2 uv = v_texCoord;
   vec2 mouse = u_mouse / u_resolution;
-  float noise1 = snoise(uv * 3.0 + u_time * 0.18 + mouse * 0.5);
-  float noise2 = snoise(uv * 5.0 - u_time * 0.14 + mouse * 0.2);
-  float ribbons = 1.0 - smoothstep(0.1, 0.12, abs(noise1 - noise2));
-  float glow = smoothstep(0.4, 0.0, abs(noise1 - noise2));
+  // Animacion autónoma muy sutil (casi estático); el mouse manda.
+  float noise1 = snoise(uv * 2.6 + u_time * 0.020 + mouse * 2.4);
+  float noise2 = snoise(uv * 4.2 - u_time * 0.014 + mouse * 1.6);
+  float ribbons = 1.0 - smoothstep(0.09, 0.13, abs(noise1 - noise2));
+  float glow = smoothstep(0.45, 0.0, abs(noise1 - noise2));
 
   vec3 obsidian = vec3(0.02, 0.005, 0.005);
   vec3 ember    = vec3(1.0, 0.12, 0.12);
 
   vec3 color = obsidian;
   color = mix(color, ember, ribbons * 0.85);
-  color += ember * glow * 0.35;
+  color += ember * glow * 0.32;
   float structures = smoothstep(0.45, 0.55, noise1);
   color += vec3(0.05) * structures;
 
   float d = distance(uv, vec2(0.5));
-  color *= smoothstep(0.9, 0.15, d);
+  color *= smoothstep(0.95, 0.15, d);
   gl_FragColor = vec4(color, 1.0);
 }`;
 
@@ -188,9 +189,9 @@ void main() {
       if (!running) return;
       raf = requestAnimationFrame(render);
       if (!visible) return; // no renderiza si no está en pantalla
-      // Interpolación suave del mouse
-      mouseX += (targetX - mouseX) * 0.08;
-      mouseY += (targetY - mouseY) * 0.08;
+      // Interpolación suave del mouse: lerp bajo = movimiento más "pesado" y cinemático
+      mouseX += (targetX - mouseX) * 0.045;
+      mouseY += (targetY - mouseY) * 0.045;
       gl!.viewport(0, 0, canvas!.width, canvas!.height);
       if (uTime) gl!.uniform1f(uTime, t * 0.001);
       if (uRes) gl!.uniform2f(uRes, canvas!.width, canvas!.height);
@@ -216,6 +217,13 @@ void main() {
       cleanup = null;
     }
   });
+
+  // Bootstrap para el primer render (module scripts llegan después de astro:page-load)
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initHeroShader, { once: true });
+  } else {
+    initHeroShader();
+  }
 </script>
 
 <style>

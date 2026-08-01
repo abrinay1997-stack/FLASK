@@ -1,16 +1,12 @@
 ---
 /**
- * Envuelve contenido y lo revela al entrar en viewport.
+ * Reveal por scroll con estrategia robusta.
  *
- * Uso:
- *   <Reveal>...</Reveal>
- *   <Reveal delay={0.15} y={40}>...</Reveal>
- *   <Reveal as="section" stagger>...</Reveal>
- *
- * Notas:
- * - Respeta prefers-reduced-motion (aparece instantáneo).
- * - Cero JS si el navegador no soporta IntersectionObserver (fallback: visible).
- * - Solo anima transform y opacity (regla del CLAUDE.md).
+ * - CSS transitions puros (más confiables que animations en browsers pausados).
+ * - Above-the-fold: se revela inmediatamente al cargar.
+ * - Below-the-fold: ScrollTrigger de GSAP + fallback IntersectionObserver.
+ * - Fallback CSS con animation-fill si nada dispara (1.5s).
+ * - Respeta prefers-reduced-motion.
  */
 
 interface Props {
@@ -32,85 +28,110 @@ const {
 } = Astro.props;
 
 const classes = ['reveal', stagger ? 'reveal--stagger' : '', className].filter(Boolean).join(' ');
+const styleVars = `--reveal-delay:${delay}s;--reveal-duration:${duration}s;--reveal-y:${y}px;`;
 ---
 
 <Tag
   class={classes}
   data-reveal
-  data-reveal-delay={delay}
-  data-reveal-y={y}
-  data-reveal-duration={duration}
+  style={styleVars}
 >
   <slot />
 </Tag>
 
 <script>
-  import { gsap, prefersReducedMotion, registerPlugins, ScrollTrigger } from '../scripts/motion';
+  import { prefersReducedMotion, registerPlugins, ScrollTrigger } from '../scripts/motion';
+
+  function markDone(el: HTMLElement) {
+    el.setAttribute('data-reveal-done', '');
+  }
 
   function initReveals() {
     const nodes = document.querySelectorAll<HTMLElement>('[data-reveal]:not([data-reveal-done])');
     if (!nodes.length) return;
 
-    // Si el usuario prefiere reducir movimiento: aparecer instantáneo
     if (prefersReducedMotion()) {
-      nodes.forEach((n) => {
-        n.setAttribute('data-reveal-done', '');
-        n.style.opacity = '1';
-        n.style.transform = 'none';
-      });
+      nodes.forEach(markDone);
       return;
     }
 
-    registerPlugins();
+    let gsapReady = false;
+    try {
+      registerPlugins();
+      gsapReady = true;
+    } catch {}
+
+    const vh = window.innerHeight || document.documentElement.clientHeight || 720;
 
     nodes.forEach((el) => {
-      const delay = parseFloat(el.dataset.revealDelay || '0');
-      const y = parseFloat(el.dataset.revealY || '24');
-      const duration = parseFloat(el.dataset.revealDuration || '0.9');
-      const isStagger = el.classList.contains('reveal--stagger');
+      const rect = el.getBoundingClientRect();
+      const aboveTheFold = rect.top < vh * 0.9 && rect.bottom > 0;
 
-      const targets = isStagger ? el.children : el;
-
-      gsap.fromTo(
-        targets,
-        { opacity: 0, y },
-        {
-          opacity: 1,
-          y: 0,
-          duration,
-          delay,
-          ease: 'power3.out',
-          stagger: isStagger ? 0.08 : 0,
-          scrollTrigger: {
-            trigger: el,
-            start: 'top 82%',
-            once: true,
+      if (aboveTheFold) {
+        // Marcar done ya — transition CSS anima suavemente
+        markDone(el);
+      } else if (gsapReady) {
+        ScrollTrigger.create({
+          trigger: el,
+          start: 'top 88%',
+          once: true,
+          onEnter: () => markDone(el),
+        });
+      } else {
+        // Fallback: IntersectionObserver puro
+        const io = new IntersectionObserver(
+          (entries) => {
+            if (entries[0]?.isIntersecting) {
+              markDone(el);
+              io.disconnect();
+            }
           },
-        }
-      );
-
-      el.setAttribute('data-reveal-done', '');
+          { rootMargin: '0px 0px -12% 0px' }
+        );
+        io.observe(el);
+      }
     });
   }
 
   document.addEventListener('astro:page-load', initReveals);
+  document.addEventListener('astro:after-swap', initReveals);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initReveals, { once: true });
+  } else {
+    initReveals();
+  }
 </script>
 
 <style is:global>
-  /* Estado inicial: si JS no corre o tarda, el CSS mantiene el elemento oculto pero accesible */
-  [data-reveal]:not([data-reveal-done]) {
+  /* Transitions puros: valores finales se aplican SIEMPRE, animación es enhancement */
+  [data-reveal] {
     opacity: 0;
-    transform: translate3d(0, 24px, 0);
+    transform: translate3d(0, var(--reveal-y, 24px), 0);
+    transition:
+      opacity var(--reveal-duration, 0.9s) cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0s),
+      transform var(--reveal-duration, 0.9s) cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0s);
     will-change: transform, opacity;
+    /* Fallback duro: si nada dispara en 1.5s, forzar visible via CSS animation */
+    animation: reveal-fallback 0.7s ease-out 1.5s forwards;
   }
   [data-reveal-done] {
+    opacity: 1;
+    transform: none;
     will-change: auto;
+    animation: none;
   }
-  /* Fallback duro: si el navegador no soporta IntersectionObserver / JS falla, mostrar */
+  @keyframes reveal-fallback {
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
   @media (prefers-reduced-motion: reduce) {
     [data-reveal] {
       opacity: 1 !important;
       transform: none !important;
+      animation: none !important;
+      transition: none !important;
     }
   }
 </style>

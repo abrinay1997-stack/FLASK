@@ -49,15 +49,20 @@
     killAllTriggers();
   }
 
-  // Inicial + cada navegación de View Transitions
-  document.addEventListener('astro:page-load', () => {
+  function boot() {
     destroyLenis();
     initLenis();
     refreshTriggers();
-  });
+  }
 
-  // Limpieza al desmontar
-  document.addEventListener('astro:before-swap', () => {
-    destroyLenis();
-  });
+  // Inicial + cada navegación de View Transitions
+  document.addEventListener('astro:page-load', boot);
+  document.addEventListener('astro:before-swap', destroyLenis);
+
+  // Bootstrap: si astro:page-load ya se disparó (module scripts son diferidos), arrancar igual
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot, { once: true });
+  } else {
+    boot();
+  }
 </script>
