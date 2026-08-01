@@ -1,6 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { steps, parsePrice } from '../data/quote';
+import { steps, parsePrice, optionPriceLabel, CAPABILITIES } from '../data/quote';
 import { plans, diagnostico } from '../data/plans';
 import { modules } from '../data/modules';
 import { routes } from '../data/links';
@@ -29,6 +29,7 @@ const engine = {
     desc: p.desc,
   })),
   modules: modules.map((m) => ({ name: m.name, money: parsePrice(m.price), stack: m.stack })),
+  capabilities: CAPABILITIES,
   routes: { contacto: routes.contacto, planes: routes.planes },
   whatsapp: contact.whatsappRaw,
 };
@@ -50,10 +51,16 @@ const engine = {
         </p>
       </header>
 
-      <!-- Progreso -->
+      <!-- Progreso + total corriendo -->
       <div class="cot-progress" role="group" aria-label="Progreso del cotizador">
         <div class="cot-bar"><span data-bar></span></div>
-        <p class="cot-count" aria-live="polite" data-count>Paso 1 de {steps.length}</p>
+        <div class="cot-meta">
+          <p class="cot-count" aria-live="polite" data-count>Paso 1 de {steps.length}</p>
+          <p class="cot-running" data-running hidden>
+            <span class="cot-running-k">Va por</span>
+            <span class="cot-running-v" data-running-total aria-live="polite">—</span>
+          </p>
+        </div>
       </div>
 
       <form class="cot-form" data-quote novalidate>
@@ -76,6 +83,15 @@ const engine = {
                     <span class="cot-opt-label">{opt.label}</span>
                     <span class="cot-opt-hint">{opt.hint}</span>
                   </span>
+                  {optionPriceLabel(step.id, opt.value) && (
+                    <span
+                      class="cot-opt-price"
+                      data-opt-price={opt.value}
+                      data-base={optionPriceLabel(step.id, opt.value)}
+                    >
+                      {optionPriceLabel(step.id, opt.value)}
+                    </span>
+                  )}
                   <span class="cot-tick" aria-hidden="true"></span>
                 </label>
               ))}
@@ -169,6 +185,7 @@ const engine = {
     steps: Step[];
     plans: { slug: string; name: string; price: string; money: Money; delivery: string; desc: string }[];
     modules: { name: string; money: Money; stack: string }[];
+    capabilities: Record<string, { includedFrom?: string; moduleName?: string }>;
     routes: { contacto: string; planes: string };
     whatsapp: string;
   }
@@ -176,24 +193,11 @@ const engine = {
   const ORDER = ['start', 'launch', 'corporate', 'commerce'];
 
   /**
-   * Mismas reglas que `computeQuote` en src/data/quote.ts. Se duplican aquí
-   * porque el cálculo tiene que ocurrir en el navegador sin backend; los DATOS
-   * (precios, planes, módulos) no se duplican: llegan serializados del build.
+   * El algoritmo replica `computeQuote` de src/data/quote.ts porque el cálculo
+   * tiene que ocurrir en el navegador sin backend. Los DATOS no se duplican:
+   * precios, planes, módulos y reglas de capacidad llegan serializados del
+   * build en `engine`. Si cambia una regla, cambia en los dos sitios a la vez.
    */
-  const CAPS: Record<string, { includedFrom?: string; moduleName?: string }> = {
-    form: { includedFrom: 'start' },
-    blog: { includedFrom: 'corporate' },
-    cms: { includedFrom: 'corporate' },
-    cobros: { includedFrom: 'commerce' },
-    inventario: { includedFrom: 'commerce', moduleName: 'Inventario avanzado' },
-    reservas: { moduleName: 'Sistema de reservas / citas' },
-    login: { moduleName: 'Login + roles + usuarios' },
-    panel: { moduleName: 'Panel administrativo / dashboard' },
-    portal: { moduleName: 'Portal de clientes' },
-    api: { moduleName: 'Integración de API externa' },
-    ia: { moduleName: 'Automatización con IA / WhatsApp' },
-  };
-
   const money = (m: Money) => {
     const f = (n: number) => `$${n.toLocaleString('en-US')}`;
     return m.min === m.max ? f(m.min) : `${f(m.min)} – ${f(m.max)}`;
@@ -225,6 +229,41 @@ const engine = {
       return out;
     };
 
+    /**
+     * Reetiqueta las capacidades según el plan que llevan las respuestas
+     * actuales, y actualiza el total corriendo.
+     *
+     * Es contextual a propósito: "Blog y SEO" cuesta o no cuesta según el plan
+     * al que hayan llevado las respuestas anteriores. Enseñar un precio fijo
+     * cuando en realidad viene incluido sería cobrar de mentira.
+     */
+    function refreshPrices() {
+      const q = compute();
+
+      document.querySelectorAll<HTMLElement>('[data-opt-price]').forEach((el) => {
+        const value = el.dataset.optPrice!;
+        const rule = engine.capabilities[value];
+        if (!rule) return; // pasos de plan: su etiqueta no cambia
+
+        if (rule.includedFrom && ORDER.indexOf(q.plan.slug) >= ORDER.indexOf(rule.includedFrom)) {
+          el.textContent = 'Incluido';
+          el.classList.add('is-free');
+        } else {
+          el.textContent = el.dataset.base!;
+          el.classList.remove('is-free');
+        }
+      });
+
+      // El total aparece en cuanto hay plan, no al final: ver la cifra subir es
+      // lo que evita llegar al resultado con una sorpresa de cuatro dígitos.
+      const running = document.querySelector<HTMLElement>('[data-running]')!;
+      const hasPlan = (answers().objetivo?.length ?? 0) > 0 && (answers().alcance?.length ?? 0) > 0;
+      running.hidden = !hasPlan;
+      if (hasPlan) {
+        document.querySelector('[data-running-total]')!.textContent = money(q.total);
+      }
+    }
+
     function paint() {
       stepEls.forEach((el, i) => (el.hidden = i !== current));
       const pct = ((current + 1) / stepEls.length) * 100;
@@ -235,6 +274,7 @@ const engine = {
       const chosen = root.querySelectorAll(`input[name="${step.id}"]:checked`).length;
       const next = stepEls[current]!.querySelector<HTMLButtonElement>('button[data-next]:not(.cot-skip)')!;
       next.disabled = !step.multiple && chosen === 0;
+      refreshPrices();
     }
 
     function go(to: number) {
@@ -267,7 +307,7 @@ const engine = {
       ];
 
       for (const cap of a.capacidades ?? []) {
-        const rule = CAPS[cap];
+        const rule = engine.capabilities[cap];
         const opt = capStep.options.find((o) => o.value === cap);
         if (!rule || !opt) continue;
         if (rule.includedFrom && ORDER.indexOf(slug) >= ORDER.indexOf(rule.includedFrom)) {
@@ -437,12 +477,36 @@ const engine = {
     transform: scaleX(0);
     transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
   }
-  .cot-count {
+  .cot-meta {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 20px;
     margin-top: 12px;
+  }
+  .cot-count {
     font-size: 12px;
     letter-spacing: 0.16em;
     text-transform: uppercase;
     color: var(--studio-gray);
+  }
+  .cot-running {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .cot-running-k {
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--studio-gray);
+  }
+  .cot-running-v {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--flash-orange);
+    white-space: nowrap;
   }
 
   /* ---------- PASOS ---------- */
@@ -528,6 +592,26 @@ const engine = {
     font-weight: 300;
     color: var(--studio-gray);
     line-height: 1.4;
+  }
+  .cot-opt-price {
+    flex-shrink: 0;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--soft-white);
+    white-space: nowrap;
+    text-align: right;
+  }
+  .cot-opt-price.is-free,
+  .cot-opt-price:not([data-base^='+']):not([data-base^='D']) {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--flash-orange);
+    white-space: normal;
+    max-width: 12ch;
+    line-height: 1.3;
   }
   .cot-tick {
     flex-shrink: 0;

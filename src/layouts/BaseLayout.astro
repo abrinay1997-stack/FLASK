@@ -16,6 +16,7 @@ import { ClientRouter } from 'astro:transitions';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
 import SmoothScroll from '../components/SmoothScroll.astro';
+import ChatWidget from '../components/ChatWidget.astro';
 
 import { site, contact } from '../data/site';
 import { withBase, routes } from '../data/links';
@@ -125,5 +126,6 @@ const schemas = isHome ? [orgSchema, ...jsonLd] : jsonLd;
 
     <!-- Sistemas globales de motion. Se auto-inicializan y respetan reduce-motion. -->
     <SmoothScroll />
+    <ChatWidget />
   </body>
 </html>

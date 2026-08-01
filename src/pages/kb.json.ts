@@ -1,0 +1,388 @@
+import type { APIRoute } from 'astro';
+
+import { site, contact } from '../data/site';
+import { plans, diagnostico } from '../data/plans';
+import { modules } from '../data/modules';
+import { carePlans, careNote } from '../data/care';
+import { faq } from '../data/faq';
+import { services, procesoSteps } from '../data/services';
+
+/**
+ * Base de conocimiento del chatbot, generada en el build desde los MISMOS
+ * archivos de datos que renderizan el sitio.
+ *
+ * Por qué generada y no escrita a mano: una base copiada a mano se desincroniza
+ * el primer día que alguien cambia un precio. Aquí no puede pasar — si cambias
+ * $850 en plans.ts, cambia en /planes, en el cotizador y en lo que responde el
+ * bot, en el mismo build.
+ *
+ * Diseño pensado para modelos pequeños (Groq, Haiku). Tres decisiones:
+ *
+ *  1. Hechos ATÓMICOS y autocontenidos. Cada entrada se entiende sola, sin
+ *     necesitar otra. Un modelo pequeño no tiene que reconstruir nada.
+ *  2. Cada hecho trae sus propias `q` (formas en que la gente pregunta eso).
+ *     La recuperación es léxica, así que las variantes las ponemos nosotros en
+ *     vez de esperar que el modelo las infiera.
+ *  3. `prices` es la lista blanca de cifras. La función la usa para BLOQUEAR
+ *     cualquier importe que el modelo se invente. Es la única defensa que no
+ *     depende de que el modelo se porte bien.
+ */
+
+export interface KbFact {
+  id: string;
+  topic: string;
+  /** Formas naturales de preguntar por esto. Alimentan la recuperación. */
+  q: string[];
+  /** La respuesta, ya redactada. El modelo la parafrasea, no la deduce. */
+  text: string;
+}
+
+export const GET: APIRoute = () => {
+  const facts: KbFact[] = [];
+  const add = (f: KbFact) => facts.push(f);
+
+  /* ---------------- Planes ---------------- */
+
+  /**
+   * Vocabulario de intención por plan.
+   *
+   * La recuperación es léxica: solo encuentra lo que está escrito. Nadie
+   * pregunta "cuánto cuesta Flask Commerce", preguntan "quiero vender en
+   * línea". Estas frases son el puente entre cómo habla la gente y cómo se
+   * llaman los productos, y es aquí donde se arregla un fallo de recuperación
+   * — no tocando el prompt ni cambiando de modelo.
+   */
+  const intencionPorPlan: Record<string, string[]> = {
+    start: [
+      'una sola pagina',
+      'algo sencillo y rapido',
+      'para un evento',
+      'para una campaña',
+      'lo mas barato',
+      'presupuesto ajustado',
+      'soy emprendedor',
+    ],
+    launch: [
+      'landing page',
+      'pagina de aterrizaje',
+      'hago publicidad y necesito donde caer',
+      'pauta en redes',
+      'quiero que convierta',
+      'una pagina a medida',
+    ],
+    corporate: [
+      'sitio corporativo',
+      'varias paginas',
+      'quiero un blog',
+      'poder editarlo yo mismo',
+      'necesito seo',
+      'pagina de empresa',
+      'reemplazar mi wordpress',
+    ],
+    commerce: [
+      'vender en linea',
+      'tienda en linea',
+      'ecommerce',
+      'comercio electronico',
+      'vender productos',
+      'catalogo con carrito',
+      'cobrar con tarjeta',
+      'yappy',
+      'quiero vender',
+    ],
+  };
+
+  for (const p of plans) {
+    add({
+      id: `plan-${p.slug}`,
+      topic: 'planes',
+      q: [
+        `cuanto cuesta ${p.name}`,
+        `precio ${p.name}`,
+        `que incluye ${p.name}`,
+        `${p.slug}`,
+        p.name,
+        ...(intencionPorPlan[p.slug] ?? []),
+      ],
+      text:
+        `${p.name} cuesta ${p.price}. ${p.delivery}. ${p.desc} ` +
+        `Incluye: ${p.features.join('; ')}.`,
+    });
+  }
+
+  add({
+    id: 'planes-rango',
+    topic: 'planes',
+    q: [
+      'cuanto cuestan los sitios',
+      'que precios manejan',
+      'cuanto vale una pagina web',
+      'presupuesto',
+      'tarifas',
+      'es caro',
+      'cual es el mas barato',
+    ],
+    text:
+      `Los sitios van de ${plans.find((p) => p.slug === 'start')!.price} a ` +
+      `${plans.find((p) => p.slug === 'commerce')!.price}: ` +
+      plans.map((p) => `${p.name} ${p.price}`).join(', ') +
+      `. Todos los precios son fijos y públicos. Para una cifra exacta según lo que necesitas, ` +
+      `el cotizador la calcula en cuatro preguntas.`,
+  });
+
+  add({
+    id: 'diagnostico',
+    topic: 'planes',
+    q: [
+      'diagnostico',
+      'revisar mi sitio actual',
+      'auditoria de mi web',
+      'que tan lento esta mi sitio',
+      'algo mas barato para empezar',
+    ],
+    text: `${diagnostico.name} cuesta ${diagnostico.price}. ${diagnostico.desc}`,
+  });
+
+  /* ---------------- Capacidades ---------------- */
+  for (const m of modules) {
+    add({
+      id: `modulo-${m.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
+      topic: 'capacidades',
+      q: [`cuanto cuesta ${m.name}`, `precio ${m.name}`, m.name, `quiero ${m.name}`],
+      text: `La capacidad "${m.name}" cuesta ${m.price} y se construye con ${m.stack}. Se suma a cualquier plan.`,
+    });
+  }
+
+  add({
+    id: 'capacidades-que-son',
+    topic: 'capacidades',
+    q: [
+      'que capacidades tienen',
+      'hacen sistemas',
+      'hacen aplicaciones a medida',
+      'se puede agregar despues',
+      'modulos',
+    ],
+    text:
+      'Además de los planes hay capacidades que se enchufan a lo que ya tengas, con precio cerrado y sin rehacer el sitio: ' +
+      modules.map((m) => `${m.name} (${m.price})`).join(', ') +
+      '. Puedes empezar con una y sumar el resto más adelante.',
+  });
+
+  /* ---------------- Care ---------------- */
+  for (const c of carePlans) {
+    add({
+      id: `care-${c.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
+      topic: 'mantenimiento',
+      q: [`${c.name}`, `cuanto cuesta ${c.name}`, 'mantenimiento mensual', 'soporte'],
+      text: `${c.name} cuesta ${c.price}${c.suffix}. Incluye: ${c.features.join('; ')}.`,
+    });
+  }
+
+  add({
+    id: 'care-general',
+    topic: 'mantenimiento',
+    q: [
+      'hay mantenimiento',
+      'quien mantiene el sitio despues',
+      'soporte mensual',
+      'que pasa despues de la entrega',
+      'permanencia',
+    ],
+    text:
+      'FLASK Care es el mantenimiento mensual: ' +
+      carePlans.map((c) => `${c.name} ${c.price}${c.suffix}`).join(', ') +
+      `. ${careNote} Sin plan Care activo no monitorizamos el sitio ni respondemos incidencias.`,
+  });
+
+  /* ---------------- Servicios y proceso ---------------- */
+  for (const s of services) {
+    add({
+      id: `pilar-${s.idx}`,
+      topic: 'servicios',
+      q: [s.title, `por que ${s.title}`, 'que los diferencia', 'por que ustedes'],
+      text: `${s.title}: ${s.desc}`,
+    });
+  }
+
+  for (const step of procesoSteps) {
+    add({
+      id: `proceso-${step.num}`,
+      topic: 'proceso',
+      q: [step.title, 'como trabajan', 'como es el proceso', 'que necesito para empezar'],
+      text: `${step.title}: ${step.desc}`,
+    });
+  }
+
+  /* ---------------- FAQ ---------------- */
+  for (const [i, item] of faq.entries()) {
+    add({
+      id: `faq-${i}`,
+      topic: 'faq',
+      q: [item.q],
+      text: item.a,
+    });
+  }
+
+  /* ---------------- Negocio y contacto ---------------- */
+  add({
+    id: 'contacto',
+    topic: 'contacto',
+    q: [
+      'como los contacto',
+      'telefono',
+      'whatsapp',
+      'horario',
+      'donde estan',
+      'atienden fuera de panama',
+      'quiero hablar con alguien',
+    ],
+    text:
+      `Se habla directo con quien programa, por WhatsApp al ${contact.whatsapp}, ` +
+      `en horario ${contact.horario} (${contact.timezone}). ` +
+      `${site.name} opera desde ${site.location}, 100 % en remoto para todo el país.`,
+  });
+
+  add({
+    id: 'cotizador',
+    topic: 'contacto',
+    q: [
+      'como cotizo',
+      'quiero un presupuesto',
+      'cuanto me saldria lo mio',
+      'necesito una cotizacion',
+      'cotizador',
+    ],
+    text:
+      'El cotizador del sitio da un precio en cuatro preguntas, sin dejar datos primero: ' +
+      'qué necesitas, de qué tamaño, qué tiene que hacer y para cuándo. Al final muestra el desglose y el total.',
+  });
+
+  add({
+    id: 'wordpress',
+    topic: 'servicios',
+    q: [
+      'usan wordpress',
+      'por que no wordpress',
+      'es mejor que wordpress',
+      'me ofrecen uno de 199',
+      'por que tan caro comparado',
+      'que es jamstack',
+    ],
+    text:
+      'FLASK no usa WordPress. Entrega sitios estáticos Jamstack sobre CDN: sin plugins que actualizar, ' +
+      'sin base de datos expuesta y sin panel público que hackear. Un WordPress barato suele cargar en cinco ' +
+      'segundos y necesita mantenimiento constante; estos sitios cargan en menos de uno.',
+  });
+
+  add({
+    id: 'propiedad',
+    topic: 'proceso',
+    q: [
+      'de quien es el codigo',
+      'me dan el codigo',
+      'puedo irme con otra agencia',
+      'quien es dueño del dominio',
+      'me quedo atrapado',
+    ],
+    text:
+      'El código es tuyo. Al pago final el repositorio se transfiere a tu cuenta de GitHub y el dominio queda ' +
+      'a tu nombre. Si mañana quieres irte con otra agencia, te llevas todo.',
+  });
+
+  add({
+    id: 'pagos',
+    topic: 'proceso',
+    q: [
+      'como se paga',
+      'formas de pago',
+      'hay que pagar por adelantado',
+      'se puede pagar en cuotas',
+      'anticipo',
+    ],
+    text:
+      'Se paga 50 % por adelantado para reservar el cupo y arrancar, y el 50 % restante a la entrega, ' +
+      'antes de publicar y de transferir el repositorio. Los precios están en dólares. ' +
+      `El ${diagnostico.name} se paga íntegro por adelantado.`,
+  });
+
+  add({
+    id: 'revisiones',
+    topic: 'proceso',
+    q: [
+      'cuantos cambios puedo pedir',
+      'revisiones incluidas',
+      'y si no me gusta',
+      'cuanto cuesta un cambio extra',
+    ],
+    text:
+      'Cada plan incluye un número definido de rondas de revisión, especificado en la propuesta. ' +
+      'Agotadas las incluidas, cada ronda adicional cuesta $40.',
+  });
+
+  add({
+    id: 'plazos',
+    topic: 'proceso',
+    q: [
+      'cuanto tardan',
+      'en cuanto tiempo esta listo',
+      'lo necesito urgente',
+      'para cuando lo tienen',
+    ],
+    text:
+      plans.map((p) => `${p.name}: ${p.delivery.replace('Entrega ', '')}`).join('; ') +
+      '. Los plazos cuentan desde que recibimos el contenido final y el 50 % del pago.',
+  });
+
+  add({
+    id: 'privacidad',
+    topic: 'legal',
+    q: ['que hacen con mis datos', 'privacidad', 'usan cookies', 'me van a spamear'],
+    text:
+      'El sitio no usa cookies propias ni tiene analítica instalada. Los formularios no envían nada a ningún ' +
+      'servidor: redactan un mensaje de WhatsApp en tu navegador que tú decides enviar. Los datos solo se usan ' +
+      'para responderte y preparar tu propuesta.',
+  });
+
+  add({
+    id: 'no-incluye',
+    topic: 'faq',
+    q: [
+      'que no incluye',
+      'incluye contenido',
+      'hacen las fotos',
+      'escriben los textos',
+      'incluye logo',
+    ],
+    text:
+      'El precio del paquete cubre diseño, desarrollo, despliegue y las revisiones del plan. No cubre redacción ' +
+      'de contenido, sesión de fotografía ni licencias de imágenes premium: eso se cotiza aparte solo si lo necesitas.',
+  });
+
+  /* ---------------- Lista blanca de importes ---------------- */
+  // Toda cifra que el modelo escriba y no esté aquí se considera inventada.
+  const prices = [
+    ...plans.map((p) => p.price),
+    diagnostico.price,
+    ...modules.flatMap((m) => m.price.split(/[–-]/).map((s) => s.trim())),
+    ...carePlans.flatMap((c) => c.price.split(/[–-]/).map((s) => s.trim())),
+    '$40',
+    '$15',
+  ]
+    .map((p) => p.replace(/[^0-9,]/g, ''))
+    .filter(Boolean);
+
+  return new Response(
+    JSON.stringify(
+      {
+        generatedAt: new Date().toISOString(),
+        site: { name: site.name, location: site.location, whatsapp: contact.whatsapp },
+        prices: [...new Set(prices)],
+        facts,
+      },
+      null,
+      0
+    ),
+    { headers: { 'Content-Type': 'application/json; charset=utf-8' } }
+  );
+};

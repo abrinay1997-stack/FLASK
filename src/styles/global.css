@@ -9,6 +9,10 @@
   --font:'Archivo',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
+/* El atributo `hidden` solo aplica `display:none` con especificidad de user
+   agent: cualquier `display:flex` o `display:grid` propio lo anula y el
+   elemento sigue ahí, invisible pero interceptando clics. Esto lo blinda. */
+[hidden]{display:none !important;}
 html{scroll-behavior:smooth;}
 /* Cuando Lenis toma control, desactivar el smooth nativo (Lenis lo hace) */
 html.lenis-smooth{scroll-behavior:auto;}
@@ -437,16 +441,8 @@ h2.section-title .muted{color:var(--studio-gray);}
 .cta p{margin:24px auto 0;max-width:48ch;color:var(--studio-gray);font-weight:300;}
 .cta .btn{margin-top:40px;}
 
-/* ---------- FOOTER ---------- */
-footer{
-  border-top:1px solid rgba(255,255,255,.08);
-  padding:50px 0;font-size:14px;color:var(--studio-gray);
-}
-.footer-row{display:flex;justify-content:space-between;flex-wrap:wrap;gap:20px;align-items:center;}
-.footer-row a.brand{color:var(--soft-white);padding:12px 0;}
-/* Cualquier enlace suelto del footer necesita altura táctil propia: en línea de
-   texto se queda en ~15 px y no se puede tocar con el pulgar. */
-.footer-row a:not(.brand){display:inline-block;padding:6px 0;}
+/* ---------- FOOTER ----------
+   El footer vive entero en Footer.astro con estilos propios. */
 
 /* ============================================================
    CONTACTO
@@ -520,6 +516,56 @@ footer{
 .contact-list .cvalue a{display:inline-block;padding:4px 0;}
 .contact-list .cvalue a:hover{color:var(--flash-orange);}
 .contact-list .cmeta{font-size:13px;color:var(--studio-gray);font-weight:300;margin-top:4px;}
+
+/* ============================================================
+   PÁGINAS LEGALES
+   ============================================================ */
+.legal{padding-top:168px;padding-bottom:110px;}
+.legal-head{margin-bottom:56px;}
+.legal-head h1{
+  font-size:clamp(38px,5.4vw,68px);font-weight:600;line-height:1;
+  letter-spacing:-.025em;text-transform:uppercase;max-width:18ch;
+}
+.legal-head h1 .muted{color:var(--studio-gray);}
+.legal-updated{
+  margin-top:20px;font-size:13px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--studio-gray);
+}
+/* Medida de lectura corta a propósito: es texto denso que nadie quiere leer,
+   así que al menos que no cueste seguir el renglón. */
+.legal-body{max-width:70ch;}
+.legal-lead{
+  font-size:19px;font-weight:300;color:var(--soft-white);
+  line-height:1.6;padding-bottom:36px;margin-bottom:8px;
+  border-bottom:1px solid rgba(255,255,255,.1);
+}
+.legal-body h2{
+  font-size:20px;font-weight:600;letter-spacing:-.01em;
+  color:var(--soft-white);margin:44px 0 14px;
+}
+.legal-body p{
+  font-size:16px;font-weight:300;color:var(--studio-gray);
+  line-height:1.75;margin-bottom:14px;
+}
+.legal-body ul{list-style:none;margin:6px 0 14px;display:grid;gap:12px;}
+.legal-body li{
+  position:relative;padding-left:22px;
+  font-size:16px;font-weight:300;color:var(--studio-gray);line-height:1.7;
+}
+.legal-body li::before{
+  content:"";position:absolute;left:0;top:11px;
+  width:7px;height:7px;border-radius:50%;background:var(--flash-orange);
+}
+.legal-body strong{color:var(--soft-white);font-weight:600;}
+.legal-body a{color:var(--flash-orange);text-decoration:underline;text-underline-offset:3px;}
+.legal-note{
+  margin-top:52px;padding:24px 26px;border-radius:16px;
+  border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.03);
+  font-size:15px;font-weight:300;line-height:1.65;color:var(--studio-gray);
+}
+.legal-back{margin-top:44px;}
+.legal-back a{color:var(--flash-orange);text-decoration:none;display:inline-block;padding:8px 0;}
+@media(max-width:900px){.legal{padding-top:140px;}}
 
 /* ============================================================
    PÁGINA CORTA (gracias / 404)

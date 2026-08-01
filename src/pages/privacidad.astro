@@ -1,0 +1,119 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site, contact, waLink } from '../data/site';
+import { routes } from '../data/links';
+
+/**
+ * Esta política describe lo que el sitio hace HOY, no una plantilla genérica:
+ * no hay analítica, no hay cookies propias y los formularios no guardan nada en
+ * ningún servidor — componen un mensaje de WhatsApp en el navegador.
+ *
+ * Si algún día se instala analítica, se conecta un endpoint de correo o se
+ * activan cookies, hay que actualizar este archivo EN EL MISMO commit.
+ */
+const actualizado = '1 de agosto de 2026';
+---
+
+<BaseLayout
+  title="Política de privacidad"
+  description={`Cómo trata ${site.name} los datos de quienes visitan el sitio y escriben por el formulario.`}
+>
+  <section class="legal">
+    <div class="container">
+      <header class="legal-head">
+        <span class="eyebrow">Legal</span>
+        <h1>Política de <span class="muted">privacidad.</span></h1>
+        <p class="legal-updated">Última actualización: {actualizado}</p>
+      </header>
+
+      <div class="legal-body">
+        <p class="legal-lead">
+          Esta política explica qué datos recogemos, para qué los usamos y qué control tienes
+          sobre ellos. Está escrita para describir lo que este sitio hace de verdad, no para
+          cubrir supuestos que no aplican.
+        </p>
+
+        <h2>1. Quién es responsable</h2>
+        <p>
+          {site.name}, estudio de diseño y desarrollo web con operación en {site.location}.
+          Para cualquier asunto relacionado con esta política puedes escribirnos por WhatsApp al
+          <a href={waLink('Hola FLASK, tengo una consulta sobre privacidad')} target="_blank" rel="noopener">{contact.whatsapp}</a>.
+        </p>
+
+        <h2>2. Qué datos recogemos</h2>
+        <p>
+          <strong>Del sitio web: ninguno.</strong> No usamos cookies propias, no hay herramientas
+          de analítica instaladas y no creamos perfiles de navegación. Puedes recorrer todas las
+          páginas sin que quede registro nuestro de tu visita.
+        </p>
+        <p>
+          <strong>De los formularios:</strong> el formulario de contacto y el cotizador
+          <em>no envían tus datos a ningún servidor nuestro</em>. Lo que escribes se usa en tu
+          propio navegador para redactar un mensaje de WhatsApp que tú decides enviar o no. Hasta
+          que pulsas enviar en WhatsApp, esos datos no salen de tu dispositivo.
+        </p>
+        <p>
+          Cuando envías ese mensaje, recibimos lo que contenga: normalmente tu nombre, tu forma
+          de contacto y la descripción de tu proyecto.
+        </p>
+
+        <h2>3. Para qué los usamos</h2>
+        <p>
+          Solo para responderte y preparar tu propuesta. No vendemos, alquilamos ni cedemos datos
+          a terceros, y no los usamos para enviarte comunicaciones que no hayas pedido.
+        </p>
+
+        <h2>4. Terceros que intervienen</h2>
+        <ul>
+          <li>
+            <strong>El proveedor de alojamiento</strong> sirve las páginas y, como cualquier
+            servidor web, puede registrar direcciones IP y peticiones en sus propios registros
+            técnicos. Ese tratamiento se rige por la política del proveedor, no por la nuestra.
+          </li>
+          <li>
+            <strong>WhatsApp (Meta)</strong> transporta los mensajes que nos envías. Al usar ese
+            canal, tu conversación queda sujeta también a las condiciones de WhatsApp.
+          </li>
+        </ul>
+
+        <h2>5. Cuánto tiempo los conservamos</h2>
+        <p>
+          Las conversaciones de proyectos que no llegan a contratarse se conservan mientras
+          puedan ser útiles para retomar el contacto, y se eliminan a petición tuya. Las de
+          proyectos contratados se conservan mientras dure la relación y el plazo legal que
+          corresponda a la documentación comercial.
+        </p>
+
+        <h2>6. Tus derechos</h2>
+        <p>
+          Puedes pedirnos en cualquier momento acceder a lo que tengamos sobre ti, corregirlo o
+          eliminarlo. Escríbenos por WhatsApp y lo resolvemos; no hace falta ningún formulario
+          especial ni justificar el motivo.
+        </p>
+
+        <h2>7. Menores</h2>
+        <p>
+          Este sitio se dirige a negocios y personas adultas. No solicitamos ni recogemos datos
+          de menores de edad de forma consciente.
+        </p>
+
+        <h2>8. Cambios en esta política</h2>
+        <p>
+          Si en el futuro instalamos analítica, activamos cookies o conectamos el formulario a un
+          servicio de correo, actualizaremos esta página y su fecha antes de que ese cambio entre
+          en funcionamiento.
+        </p>
+
+        <aside class="legal-note">
+          <strong>Nota:</strong> este texto describe con precisión el funcionamiento técnico del
+          sitio, pero no sustituye la revisión de un abogado. Antes de operar comercialmente
+          conviene que un profesional lo valide frente a la normativa panameña aplicable.
+        </aside>
+
+        <p class="legal-back">
+          <a href={routes.home}>← Volver al inicio</a>
+        </p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

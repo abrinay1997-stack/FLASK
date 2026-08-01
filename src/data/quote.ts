@@ -126,12 +126,12 @@ export const steps: QuoteStep[] = [
  *  - `moduleName`: se cobra aparte, con el precio literal de `modules.ts`.
  * Una capacidad puede tener ambas: incluida en planes altos, módulo en bajos.
  */
-interface CapabilityRule {
+export interface CapabilityRule {
   includedFrom?: PlanSlug;
   moduleName?: string;
 }
 
-const CAPABILITIES: Record<string, CapabilityRule> = {
+export const CAPABILITIES: Record<string, CapabilityRule> = {
   form: { includedFrom: 'start' }, // los cuatro planes lo traen
   blog: { includedFrom: 'corporate' },
   cms: { includedFrom: 'corporate' },
@@ -144,6 +144,44 @@ const CAPABILITIES: Record<string, CapabilityRule> = {
   api: { moduleName: 'Integración de API externa' },
   ia: { moduleName: 'Automatización con IA / WhatsApp' },
 };
+
+/* ------------------------------------------------------------------ *
+ * Etiquetas de precio para las opciones
+ * ------------------------------------------------------------------ */
+
+/**
+ * Cada opción enseña lo que cuesta ANTES de marcarla.
+ *
+ * Sin esto el cotizador se comporta como un carrito sin precios: marcar sale
+ * gratis, el entusiasmo no encuentra freno y el total aparece de golpe al
+ * final. Una cifra de cuatro dígitos sin aviso previo no se lee como
+ * presupuesto, se lee como sorpresa — y la sorpresa mata la venta.
+ */
+export function optionPriceLabel(stepId: string, value: string): string | null {
+  if (stepId === 'urgencia') return null;
+
+  const opt = steps.find((s) => s.id === stepId)?.options.find((o) => o.value === value);
+  if (!opt) return null;
+
+  if (stepId === 'capacidades') {
+    const rule = CAPABILITIES[value];
+    if (!rule) return null;
+    if (rule.moduleName) {
+      const mod = modules.find((m) => m.name === rule.moduleName);
+      if (mod) return `+${formatMoney(parsePrice(mod.price))}`;
+    }
+    if (rule.includedFrom) {
+      const plan = plans.find((p) => p.slug === rule.includedFrom);
+      return plan ? `Incluido en ${plan.name.replace('Flask ', '')}` : null;
+    }
+    return null;
+  }
+
+  // Pasos que fijan el plan: enseñamos desde cuánto arranca esa elección
+  if (!opt.requiresPlan) return null;
+  const plan = plans.find((p) => p.slug === opt.requiresPlan);
+  return plan ? `Desde ${plan.price}` : null;
+}
 
 /* ------------------------------------------------------------------ *
  * Cálculo
