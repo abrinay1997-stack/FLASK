@@ -1,6 +1,6 @@
 # Imágenes de CuatroNodos
 
-Esta carpeta se sirve como `/FLASK/images/*` en producción (y `/images/*` en dev).
+Esta carpeta se sirve como `/images/*` (tanto en dev como en producción con Netlify).
 
 Ejemplo de uso desde un `.astro`:
 
