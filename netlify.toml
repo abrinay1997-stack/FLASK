@@ -7,6 +7,21 @@
 [build.environment]
   NODE_VERSION = "22"
 
+# ---------- FUNCIONES ----------
+# El chat vive en netlify/functions/chat.mts y se publica en /api/chat (la ruta
+# se declara con `export const config` dentro de la propia función).
+#
+# Variables de entorno a configurar en el panel de Netlify — NUNCA en el repo:
+#   ANTHROPIC_API_KEY  clave de Claude (si está, tiene prioridad)
+#   GROQ_API_KEY       clave de Groq (alternativa más barata)
+#   CHAT_MODEL         opcional, para fijar el modelo
+#
+# Sin ninguna clave el endpoint sigue respondiendo: deriva a WhatsApp en vez de
+# fallar. Las claves solo existen en el servidor; el navegador nunca las ve.
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
 # ---------- HEADERS ----------
 [[headers]]
   for = "/*"

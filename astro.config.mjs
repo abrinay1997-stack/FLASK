@@ -16,5 +16,11 @@ export default defineConfig({
     inlineStylesheets: 'auto', // CSS pequeño se inlinea; el grande queda como <link>
   },
   compressHTML: true,
-  integrations: [sitemap()],
+  integrations: [
+    sitemap({
+      // Fuera del sitemap lo que ya va con noindex: pedirle a Google que
+      // rastree una página que le decimos que no indexe es contradictorio.
+      filter: (page) => !/\/(gracias|404)\/?$/.test(page),
+    }),
+  ],
 });

@@ -26,6 +26,9 @@ npm run check     # astro check — tipos de TS + diagnósticos de .astro
 npm run brand     # regenera favicons + og.png en public/ (solo al cambiar branding)
 ```
 
+El chat necesita Netlify (funciones). En GitHub Pages el widget lo detecta y
+degrada a WhatsApp — ver `CHATBOT.md`.
+
 Deploy automático: `git push origin main` → GitHub Actions build → Pages en ~90s.
 
 ---
@@ -46,6 +49,7 @@ FLASK/
 │   │   ├── DiagBand.astro
 │   │   ├── HeroShader.astro       # fondo WebGL animado (mouse-reactivo)
 │   │   ├── SceneBg.astro          # imagen a sangre como FONDO de sección + velo
+│   │   ├── ChatWidget.astro       # burbuja de chat (degrada a WhatsApp sin backend)
 │   │   ├── SmoothScroll.astro     # Lenis global
 │   │   └── Reveal.astro           # fade-up por scroll (CSS transitions)
 │   ├── data/                      # UNICA fuente de verdad de contenido
@@ -57,6 +61,7 @@ FLASK/
 │   │   ├── services.ts            # 3 servicios + procesoSteps + navLinks
 │   │   ├── images.ts              # mapeo imagen ↔ sección + alt + encuadre
 │   │   ├── quote.ts               # motor del cotizador (compone precios, no los inventa)
+│   │   ├── footer.ts              # columnas, redes y garantías del pie
 │   │   └── links.ts               # helper withBase() + routes.*
 │   ├── pages/
 │   │   ├── index.astro            # home aliviada (hero + previews + CTA)
@@ -66,6 +71,9 @@ FLASK/
 │   │   ├── sobre.astro            # manifiesto + "Hablas con quien programa" (bio pendiente)
 │   │   ├── cotizador.astro        # 4 preguntas → precio → datos. Destino del CTA del nav
 │   │   ├── contacto.astro         # form → WhatsApp (o Netlify Forms) + panel lateral
+│   │   ├── privacidad.astro       # política de privacidad
+│   │   ├── terminos.astro         # términos del servicio
+│   │   ├── kb.json.ts             # base de conocimiento del chat, generada en el build
 │   │   ├── gracias.astro          # post-envío (noindex)
 │   │   └── 404.astro              # error (noindex)
 │   ├── assets/                    # imágenes que Astro optimiza a WebP responsive
@@ -85,10 +93,14 @@ FLASK/
 │   ├── apple-touch-icon.png
 │   ├── og.png                     # 1200×630, imagen social
 │   └── images/README.md           # instrucciones para subir mockups
+├── netlify/functions/
+│   ├── chat.mts                   # endpoint /api/chat (claves solo en servidor)
+│   └── _retrieval.mts             # recuperación léxica + barandilla de precios
 ├── scripts/
 │   └── generate-brand-assets.mjs  # `npm run brand` → favicons + og.png
 ├── AUDITORIA.md                   # auditoría medida: jerarquía, a11y, intuitividad, animación, marca
-├── AUDITORIA-CONVERSION.md        # auditoría de venta + por qué cotizador y no chatbot
+├── AUDITORIA-CONVERSION.md        # auditoría de venta + diseño del cotizador
+├── CHATBOT.md                     # arquitectura del chat y puesta en marcha
 ├── stitch_3d_web_creation_hero/   # VERSIONADO — referencias visuales del equipo (ver su README)
 ├── .github/workflows/deploy.yml   # deploy a Pages
 ├── astro.config.mjs               # site + base + sitemap + compressHTML
@@ -102,14 +114,16 @@ FLASK/
 
 1. **Rutas internas: nunca hardcodear `href="/..."`.** Usar `routes.*` o `withBase('...')` de `src/data/links.ts`. GitHub Pages sirve bajo `/FLASK/`; hardcodear rompe todo.
 2. **Datos siempre en `src/data/*.ts`.** Cambiar el precio de un plan = 1 sola edición. Cero copy-paste entre páginas.
-3. **Un solo H1 por página** — respetado en las 9 páginas (verificado en las pruebas e2e).
+3. **Un solo H1 por página** — respetado en las 11 páginas (verificado en las pruebas e2e).
 4. **Cero placeholders** en producción: nada de `#`, `lorem`, `G-XXXXXXXXXX`.
 5. **Solo animar `transform` y `opacity`** — regla del CLAUDE.md original.
 6. **Máx 2 secciones con `pin` por página**, ningún `pin` en móvil sin adaptar.
 7. **Un solo acento cromático:** naranja `--flash-orange #FF5100` para UI **y para los acentos de texto**; rojo `--ember-red #FF1E1E` reservado a fondos (shader del hero, vetas de las imágenes). Verificado: el ember no aparece en ningún texto del sitio.
 8. **`prefers-reduced-motion: reduce`** debe desactivar todas las animaciones. Ya implementado en Reveal, SmoothScroll, HeroShader.
 9. **Las imágenes van de fondo, nunca como pieza de producto.** Se montan con `<SceneBg>`: a sangre, apagadas y bajo un velo que abre carril al texto. Lo que brilla es el titular.
-10. **El cotizador no tiene precios propios.** `src/data/quote.ts` los compone de `plans.ts` y `modules.ts`. Un cotizador que diga un número distinto al de `/planes` destruye justo la confianza que el sitio vende.
+10. **Nada duplica los precios.** El cotizador (`quote.ts`) y la base del chat (`kb.json.ts`) los componen de `plans.ts` y `modules.ts`. Un cotizador o un bot que digan un número distinto al de `/planes` destruyen justo la confianza que el sitio vende.
+11. **Estilos para nodos creados por JS: siempre `:global()`** colgando de un ancestro que sí esté en la plantilla. Ha mordido tres veces (raíces de componente, filas del cotizador, burbujas del chat).
+12. **El cotizador no tiene precios propios.** `src/data/quote.ts` los compone de `plans.ts` y `modules.ts`. Un cotizador que diga un número distinto al de `/planes` destruye justo la confianza que el sitio vende.
 
 ---
 
@@ -153,6 +167,42 @@ Sitio inicial en HTML puro. Deprecado.
   y guard `dataset.bound` para no duplicar listeners
 - **Skip link** "Saltar al contenido" + `<main id="contenido">` en el layout
 - `npm run check` (astro check) en verde: 0 errores
+
+### Fase J — Chat, footer, legales y hero móvil ✅
+
+**Chat con IA** (ver `CHATBOT.md` para el detalle). Premisa: el modelo es la
+parte menos fiable, así que se le da el trabajo más pequeño posible. No busca,
+no calcula y no recuerda; solo redacta.
+
+- `src/pages/kb.json.ts` genera la base de conocimiento **en el build** desde los
+  mismos datos que renderizan el sitio: 38 hechos, 13,5 kB, imposible que se
+  desincronice de `/planes`.
+- Recuperación léxica determinista (`_retrieval.mts`). Medido: **22/22 consultas
+  recuperan el hecho correcto**, 21 en primera posición.
+- **Barandilla de precios**: cualquier importe de la respuesta que no esté en la
+  lista blanca del build bloquea la respuesta. No depende de que el modelo
+  obedezca el prompt — es la única defensa que no puede fallar por el modelo.
+- Claves solo en Netlify, nunca en el front. Sin clave configurada el endpoint no
+  se cae: deriva a WhatsApp.
+- Prompt medido: ~357 tokens de media, 574 en el peor caso.
+
+**Cotizador: precio por opción y total en vivo.** Sin precios visibles se
+comportaba como un carrito sin etiquetas — marcar salía gratis y el total
+aparecía de golpe al final. Las capacidades se reetiquetan según el plan
+alcanzado ("Incluido" en vez de un precio que no se va a cobrar).
+
+**Hero en móvil.** Debajo de 900 px el shader ya no se inicializa: en vertical
+calculaba el ruido sobre un lienzo de proporción ~0.5 y las vetas salían
+estiradas. Manda la imagen de fondo. También se corrigió la proporción dentro del
+shader, así que tampoco se deforma en ventanas altas de escritorio.
+
+**Footer y legales.** Footer reescrito (4 columnas, garantías, redes, barra
+inferior) con la estructura en `data/footer.ts`. Nuevas `/privacidad` y
+`/terminos`, escritas sobre lo que el sitio hace de verdad.
+
+**Bug de base corregido:** `[hidden]` no ganaba a `display:flex`, así que el
+panel del chat estaba invisible pero interceptando clics. Añadido
+`[hidden]{display:none !important}` al reset, que blinda el patrón en todo el sitio.
 
 ### Fase I — Cotizador y auditoría de conversión ✅
 
@@ -290,6 +340,7 @@ Los tres primeros salen de `AUDITORIA-CONVERSION.md` y están ordenados por dine
 | 2 | **Cero reversión de riesgo.** "Garantizado" aparece 1 vez en todo el sitio y es sobre PageSpeed. El cliente pone el 50 % por adelantado y asume el 100 % del riesgo. | Decisión tuya | Algo acotado que puedas cumplir: "si el primer diseño no te convence, devolvemos el adelanto". En Jamstack productizado el coste real es bajo. |
 | 3 | **Analítica.** No hay ninguna. Sin datos, todo lo de las auditorías es criterio informado, no certeza. | Decisión tuya | Decidir antes de anunciar el sitio, no después. Las 4 métricas que importan están al final de `AUDITORIA-CONVERSION.md`. |
 | 4 | **El envío solo sale por WhatsApp** (formulario y cotizador). En escritorio sin WhatsApp Web el flujo se corta. | Decisión tuya + cuenta externa | Si eliges correo: cuenta en Formspree o Web3Forms, endpoint en el `action` de `contacto.astro`, borrar el interceptor `data-wa-fallback`, y cambiar el envío del cotizador. |
+| 4b | **Migrar el deploy a Netlify.** El chat necesita funciones; en GitHub Pages el widget degrada a WhatsApp y nunca responde con IA. | Decisión tuya | `netlify.toml` ya está listo. Solo falta conectar el repo y poner `ANTHROPIC_API_KEY` o `GROQ_API_KEY` en el panel. Ver `CHATBOT.md`. |
 | 5 | **Revisar el mapeo respuesta → plan del cotizador.** Los precios son tuyos, pero las reglas que deciden qué plan corresponde a cada respuesta son una propuesta mía. | Validación tuya | Todo en `src/data/quote.ts`. No des por buena una cotización hasta revisarlo. |
 
 ### P2 — Contenido tuyo que no se puede inventar
@@ -376,5 +427,11 @@ Estos archivos existen en tu disco local y están bloqueados por `.gitignore`:
 **"Cambié el logo / los colores y el favicon sigue igual"** → Los favicons y `og.png` son archivos generados, no se recalculan en el build. Corre `npm run brand` y commitea lo que cambie en `public/`.
 
 **"El texto de una sección se me fue al centro en vez de al carril izquierdo"** → Esa sección es `display:flex` o `grid` y `.container` se convirtió en item. Ya está blindado con `width:100%` en `global.css`; si aparece otra vez, es que alguien lo quitó.
+
+**"Puse `hidden` en un elemento y sigue ahí"** → Si el elemento tiene `display:flex` o `grid` propio, gana sobre el `display:none` del user agent. Ya está blindado con `[hidden]{display:none !important}` en `global.css`; si vuelve a pasar, alguien lo quitó.
+
+**"Un `<section>` mío tiene un hueco enorme arriba y abajo"** → La regla global `section{padding:120px 0}` aplica a **todo** `<section>`, incluidos los que son chrome de interfaz (el panel del chat, por ejemplo). Ponle `padding:0` explícito.
+
+**"El chat responde cosas raras o dice que no sabe algo que sí está"** → Mira primero `sources` en la respuesta del endpoint: casi siempre la recuperación trajo el hecho equivocado, y se arregla añadiendo frases de intención en `kb.json.ts`, no cambiando de modelo. Ver `CHATBOT.md`.
 
 **"Toqué un `padding` en `global.css` y se rompió otra cosa"** → `.container` usa el shorthand `padding` y aparece dos veces (base y media query de 640 px). Cualquier otra regla con la misma especificidad que use `padding` sobre un `.container` va a perder por orden de aparición. Usa longhands (`padding-block`) y sube la especificidad, como hace `.hero .hero-inner`.
