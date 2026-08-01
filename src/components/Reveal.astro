@@ -1,0 +1,116 @@
+---
+/**
+ * Envuelve contenido y lo revela al entrar en viewport.
+ *
+ * Uso:
+ *   <Reveal>...</Reveal>
+ *   <Reveal delay={0.15} y={40}>...</Reveal>
+ *   <Reveal as="section" stagger>...</Reveal>
+ *
+ * Notas:
+ * - Respeta prefers-reduced-motion (aparece instantáneo).
+ * - Cero JS si el navegador no soporta IntersectionObserver (fallback: visible).
+ * - Solo anima transform y opacity (regla del CLAUDE.md).
+ */
+
+interface Props {
+  as?: string;
+  delay?: number;
+  y?: number;
+  duration?: number;
+  stagger?: boolean;
+  class?: string;
+}
+
+const {
+  as: Tag = 'div',
+  delay = 0,
+  y = 24,
+  duration = 0.9,
+  stagger = false,
+  class: className = '',
+} = Astro.props;
+
+const classes = ['reveal', stagger ? 'reveal--stagger' : '', className].filter(Boolean).join(' ');
+---
+
+<Tag
+  class={classes}
+  data-reveal
+  data-reveal-delay={delay}
+  data-reveal-y={y}
+  data-reveal-duration={duration}
+>
+  <slot />
+</Tag>
+
+<script>
+  import { gsap, prefersReducedMotion, registerPlugins, ScrollTrigger } from '../scripts/motion';
+
+  function initReveals() {
+    const nodes = document.querySelectorAll<HTMLElement>('[data-reveal]:not([data-reveal-done])');
+    if (!nodes.length) return;
+
+    // Si el usuario prefiere reducir movimiento: aparecer instantáneo
+    if (prefersReducedMotion()) {
+      nodes.forEach((n) => {
+        n.setAttribute('data-reveal-done', '');
+        n.style.opacity = '1';
+        n.style.transform = 'none';
+      });
+      return;
+    }
+
+    registerPlugins();
+
+    nodes.forEach((el) => {
+      const delay = parseFloat(el.dataset.revealDelay || '0');
+      const y = parseFloat(el.dataset.revealY || '24');
+      const duration = parseFloat(el.dataset.revealDuration || '0.9');
+      const isStagger = el.classList.contains('reveal--stagger');
+
+      const targets = isStagger ? el.children : el;
+
+      gsap.fromTo(
+        targets,
+        { opacity: 0, y },
+        {
+          opacity: 1,
+          y: 0,
+          duration,
+          delay,
+          ease: 'power3.out',
+          stagger: isStagger ? 0.08 : 0,
+          scrollTrigger: {
+            trigger: el,
+            start: 'top 82%',
+            once: true,
+          },
+        }
+      );
+
+      el.setAttribute('data-reveal-done', '');
+    });
+  }
+
+  document.addEventListener('astro:page-load', initReveals);
+</script>
+
+<style is:global>
+  /* Estado inicial: si JS no corre o tarda, el CSS mantiene el elemento oculto pero accesible */
+  [data-reveal]:not([data-reveal-done]) {
+    opacity: 0;
+    transform: translate3d(0, 24px, 0);
+    will-change: transform, opacity;
+  }
+  [data-reveal-done] {
+    will-change: auto;
+  }
+  /* Fallback duro: si el navegador no soporta IntersectionObserver / JS falla, mostrar */
+  @media (prefers-reduced-motion: reduce) {
+    [data-reveal] {
+      opacity: 1 !important;
+      transform: none !important;
+    }
+  }
+</style>

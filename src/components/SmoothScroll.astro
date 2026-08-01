@@ -1,0 +1,63 @@
+---
+/**
+ * Smooth scroll global con Lenis.
+ * - Se inicializa una vez, se re-inicializa en astro:page-load (View Transitions).
+ * - Respeta prefers-reduced-motion (no arranca Lenis, deja scroll nativo).
+ * - Sincroniza con ScrollTrigger para que los pins/reveals no se rompan.
+ */
+---
+
+<script>
+  import Lenis from 'lenis';
+  import { prefersReducedMotion, registerPlugins, refreshTriggers, killAllTriggers, ScrollTrigger } from '../scripts/motion';
+
+  let lenis: Lenis | null = null;
+  let rafId: number | null = null;
+
+  function initLenis() {
+    if (prefersReducedMotion()) return;
+    registerPlugins();
+
+    lenis = new Lenis({
+      duration: 1.1,
+      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
+      wheelMultiplier: 1,
+      touchMultiplier: 1.4,
+    });
+
+    // Sincronizar Lenis con ScrollTrigger
+    lenis.on('scroll', ScrollTrigger.update);
+    // @ts-ignore — GSAP ticker firma flexible
+    (window as any).gsap?.ticker.add?.((time: number) => lenis?.raf(time * 1000));
+    // @ts-ignore
+    (window as any).gsap?.ticker.lagSmoothing?.(0);
+
+    // Fallback si no hay gsap.ticker
+    function raf(time: number) {
+      lenis?.raf(time);
+      rafId = requestAnimationFrame(raf);
+    }
+    rafId = requestAnimationFrame(raf);
+  }
+
+  function destroyLenis() {
+    if (rafId !== null) cancelAnimationFrame(rafId);
+    lenis?.destroy();
+    lenis = null;
+    rafId = null;
+    killAllTriggers();
+  }
+
+  // Inicial + cada navegación de View Transitions
+  document.addEventListener('astro:page-load', () => {
+    destroyLenis();
+    initLenis();
+    refreshTriggers();
+  });
+
+  // Limpieza al desmontar
+  document.addEventListener('astro:before-swap', () => {
+    destroyLenis();
+  });
+</script>

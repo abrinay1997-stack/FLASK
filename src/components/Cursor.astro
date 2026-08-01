@@ -1,0 +1,125 @@
+---
+/**
+ * Cursor custom sobrio: punto sólido + anillo con seguimiento suave.
+ * - Se activa solo si no es táctil, no prefiere reducir movimiento.
+ * - Estados: default, hover-link (anillo se expande y punto desaparece).
+ * - Cero costo si no se activa (elementos ocultos display:none).
+ */
+---
+
+<div class="cursor-dot" aria-hidden="true"></div>
+<div class="cursor-ring" aria-hidden="true"></div>
+
+<script>
+  import { gsap, isTouchDevice, prefersReducedMotion } from '../scripts/motion';
+
+  function initCursor() {
+    if (isTouchDevice() || prefersReducedMotion()) return;
+
+    const dot = document.querySelector<HTMLElement>('.cursor-dot');
+    const ring = document.querySelector<HTMLElement>('.cursor-ring');
+    if (!dot || !ring) return;
+
+    document.body.classList.add('has-cursor');
+
+    // Setters rápidos (mejor que gsap.set en cada mousemove)
+    const dotX = gsap.quickTo(dot, 'x', { duration: 0.15, ease: 'power3.out' });
+    const dotY = gsap.quickTo(dot, 'y', { duration: 0.15, ease: 'power3.out' });
+    const ringX = gsap.quickTo(ring, 'x', { duration: 0.55, ease: 'power3.out' });
+    const ringY = gsap.quickTo(ring, 'y', { duration: 0.55, ease: 'power3.out' });
+
+    const onMove = (e: MouseEvent) => {
+      dotX(e.clientX);
+      dotY(e.clientY);
+      ringX(e.clientX);
+      ringY(e.clientY);
+    };
+    window.addEventListener('mousemove', onMove, { passive: true });
+
+    // Hover en enlaces y botones: anillo se agranda, punto se atenúa
+    const hoverables = 'a, button, [role="button"], summary, input, select, textarea, label';
+    const onOver = (e: Event) => {
+      const t = e.target as HTMLElement;
+      if (t.closest(hoverables)) {
+        ring.classList.add('is-hover');
+        dot.classList.add('is-hover');
+      }
+    };
+    const onOut = (e: Event) => {
+      const t = e.target as HTMLElement;
+      if (t.closest(hoverables)) {
+        ring.classList.remove('is-hover');
+        dot.classList.remove('is-hover');
+      }
+    };
+    document.addEventListener('mouseover', onOver);
+    document.addEventListener('mouseout', onOut);
+
+    // Ocultar cursor al salir de la ventana
+    document.addEventListener('mouseleave', () => {
+      dot.style.opacity = '0';
+      ring.style.opacity = '0';
+    });
+    document.addEventListener('mouseenter', () => {
+      dot.style.opacity = '';
+      ring.style.opacity = '';
+    });
+  }
+
+  document.addEventListener('astro:page-load', initCursor);
+</script>
+
+<style is:global>
+  .cursor-dot,
+  .cursor-ring {
+    position: fixed;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate3d(-50%, -50%, 0);
+    display: none; /* se muestra solo cuando body.has-cursor */
+    transition: opacity 0.2s ease;
+  }
+  .cursor-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--flash-orange);
+    border-radius: 50%;
+    mix-blend-mode: normal;
+  }
+  .cursor-ring {
+    width: 34px;
+    height: 34px;
+    border: 1.5px solid rgba(255, 81, 0, 0.5);
+    border-radius: 50%;
+    transition: width 0.25s ease, height 0.25s ease, border-color 0.25s ease, opacity 0.2s ease;
+  }
+  .cursor-ring.is-hover {
+    width: 58px;
+    height: 58px;
+    border-color: var(--flash-orange);
+    background: rgba(255, 81, 0, 0.08);
+  }
+  .cursor-dot.is-hover {
+    opacity: 0;
+  }
+
+  body.has-cursor .cursor-dot,
+  body.has-cursor .cursor-ring {
+    display: block;
+  }
+  body.has-cursor {
+    cursor: none;
+  }
+  body.has-cursor a,
+  body.has-cursor button,
+  body.has-cursor input,
+  body.has-cursor select,
+  body.has-cursor textarea,
+  body.has-cursor label,
+  body.has-cursor summary,
+  body.has-cursor [role='button'] {
+    cursor: none;
+  }
+</style>

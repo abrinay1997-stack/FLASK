@@ -8,6 +8,10 @@
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 html{scroll-behavior:smooth;}
+/* Cuando Lenis toma control, desactivar el smooth nativo (Lenis lo hace) */
+html.lenis-smooth{scroll-behavior:auto;}
+html.lenis{height:auto;}
+html.lenis-smooth body{overscroll-behavior:none;}
 body{
   font-family:var(--font);
   background:var(--deep-black);
