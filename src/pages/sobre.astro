@@ -1,8 +1,10 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Reveal from '../components/Reveal.astro';
+import CineFrame from '../components/CineFrame.astro';
 import { routes } from '../data/links';
-import { site } from '../data/site';
+import { site, contact, waLink } from '../data/site';
+import { sobreVisuals } from '../data/images';
 ---
 
 <BaseLayout
@@ -24,6 +26,21 @@ import { site } from '../data/site';
           que entregan WordPress lento, con panel de administración a su nombre y un código que
           nunca ves. Nosotros hacemos lo opuesto.
         </p>
+      </Reveal>
+    </div>
+  </section>
+
+  <!-- BANDA CINEMÁTICA -->
+  <section class="sobre-band">
+    <div class="container">
+      <Reveal>
+        <CineFrame
+          visual={sobreVisuals.manifiesto}
+          ratio="21 / 8"
+          ratioMobile="16 / 11"
+          sizes="(max-width: 1360px) calc(100vw - 44px), 1200px"
+          widths={[768, 1200, 1800, 2400]}
+        />
       </Reveal>
     </div>
   </section>
@@ -84,7 +101,11 @@ import { site } from '../data/site';
     </div>
   </section>
 
-  <!-- QUIÉNES SOMOS (marcado como pendiente de contenido personal) -->
+  <!--
+    Pendiente de contenido del cliente: bio personal, foto profesional y
+    credenciales. Hasta que existan, este bloque habla del estudio y de
+    compromisos que ya están por escrito en /planes y /proceso — nada inventado.
+  -->
   <section class="who-section">
     <div class="container">
       <Reveal>
@@ -94,15 +115,58 @@ import { site } from '../data/site';
         </h2>
       </Reveal>
 
-      <Reveal delay={0.15}>
-        <div class="who-placeholder">
-          <p class="who-hint">
-            <strong>Nota interna:</strong> este bloque queda a la espera de tu bio real —
-            historia, experiencia, foto profesional, credenciales técnicas. No lo invento: es
-            contenido tuyo. Cuando lo tengas, actualiza <code>src/pages/sobre.astro</code>.
-          </p>
-        </div>
-      </Reveal>
+      <div class="who-grid">
+        <Reveal>
+          <div class="who-body">
+            <p class="who-lead">
+              FLASK es un estudio pequeño, no una fábrica de sitios. Hablas directo con quien
+              programa tu proyecto: sin ejecutivos de cuenta, sin intermediarios traduciendo lo
+              que quieres, sin tickets que tardan una semana en llegar a la persona correcta.
+            </p>
+
+            <dl class="who-facts">
+              <div>
+                <dt>Stack</dt>
+                <dd>
+                  Astro y arquitectura Jamstack sobre CDN. Supabase cuando el sitio necesita CMS
+                  o base de datos. Deploy continuo desde GitHub. Sin WordPress, sin plugins que
+                  actualizar cada semana.
+                </dd>
+              </div>
+              <div>
+                <dt>Compromisos</dt>
+                <dd>
+                  Precio fijo por escrito antes de arrancar, rondas de revisión definidas por
+                  plan, repositorio transferido a tu GitHub al pago final y dominio a tu nombre.
+                  Está en la propuesta, no en la conversación.
+                </dd>
+              </div>
+              <div>
+                <dt>Cómo trabajamos</dt>
+                <dd>
+                  100 % remoto para todo {site.location}. Coordinación por WhatsApp en horario
+                  laboral ({contact.horario}) y entregas parciales para que veas avances desde
+                  los primeros días, no una sorpresa al final.
+                </dd>
+              </div>
+            </dl>
+
+            <a class="btn btn-ghost" href={waLink('Hola FLASK, quiero hablar de mi proyecto')} target="_blank" rel="noopener">
+              Hablar con quien programa
+            </a>
+          </div>
+        </Reveal>
+
+        <Reveal delay={0.15}>
+          <CineFrame
+            class="who-visual"
+            visual={sobreVisuals.interfaz}
+            ratio="4 / 5"
+            ratioMobile="16 / 10"
+            sizes="(max-width: 900px) calc(100vw - 44px), 40vw"
+          />
+        </Reveal>
+      </div>
     </div>
   </section>
 
@@ -160,36 +224,58 @@ import { site } from '../data/site';
     color: var(--studio-gray);
     line-height: 1.6;
   }
+  .sobre-band {
+    padding: 20px 0 0;
+  }
   .who-section {
     padding: 80px 0;
     border-top: 1px solid rgba(255, 255, 255, 0.06);
   }
-  .who-placeholder {
-    border: 1px dashed rgba(255, 81, 0, 0.35);
-    border-radius: 18px;
-    padding: 28px 32px;
-    background: rgba(255, 81, 0, 0.04);
+  .who-grid {
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    gap: 60px;
+    align-items: start;
   }
-  .who-hint {
-    font-size: 15px;
-    color: var(--studio-gray);
-    line-height: 1.6;
-  }
-  .who-hint strong {
-    color: var(--flash-orange);
-    font-weight: 600;
-  }
-  .who-hint code {
-    font-family: monospace;
-    font-size: 13px;
-    background: rgba(255, 255, 255, 0.06);
-    padding: 2px 8px;
-    border-radius: 4px;
+  .who-lead {
+    font-size: 20px;
     color: var(--soft-white);
+    line-height: 1.45;
+    max-width: 46ch;
+  }
+  .who-facts {
+    margin: 36px 0 34px;
+    display: grid;
+    gap: 26px;
+  }
+  .who-facts dt {
+    font-size: 13px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--flash-orange);
+    margin-bottom: 10px;
+  }
+  .who-facts dd {
+    font-size: 16px;
+    font-weight: 300;
+    color: var(--studio-gray);
+    line-height: 1.65;
+    max-width: 58ch;
+  }
+  /* :global() porque la raíz de <CineFrame> no lleva el scope de esta página */
+  .who-grid :global(.who-visual) {
+    max-height: 620px;
   }
   @media (max-width: 900px) {
     .manifest-grid {
       grid-template-columns: 1fr;
+    }
+    .who-grid {
+      grid-template-columns: 1fr;
+      gap: 34px;
+    }
+    .who-grid :global(.who-visual) {
+      max-height: 340px;
     }
   }
 </style>

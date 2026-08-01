@@ -1,7 +1,9 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Reveal from '../components/Reveal.astro';
+import CineFrame from '../components/CineFrame.astro';
 import { procesoSteps } from '../data/services';
+import { procesoVisual } from '../data/images';
 import { routes } from '../data/links';
 ---
 
@@ -23,6 +25,21 @@ import { routes } from '../data/links';
           El scope creep es lo que quiebra a quien cobra barato en Panamá. Nosotros lo cerramos
           por adelantado con tres reglas simples que nos protegen a ambos.
         </p>
+      </Reveal>
+    </div>
+  </section>
+
+  <!-- BANDA CINEMÁTICA: corta el hero y anuncia los pasos -->
+  <section class="proceso-band">
+    <div class="container">
+      <Reveal>
+        <CineFrame
+          visual={procesoVisual}
+          ratio="21 / 8"
+          ratioMobile="16 / 11"
+          sizes="(max-width: 1360px) calc(100vw - 44px), 1200px"
+          widths={[768, 1200, 1800, 2400]}
+        />
       </Reveal>
     </div>
   </section>
@@ -66,13 +83,12 @@ import { routes } from '../data/links';
 </BaseLayout>
 
 <style>
+  .proceso-band {
+    padding: 20px 0 40px;
+  }
   .proceso-scene {
     padding: 100px 0;
     border-top: 1px solid rgba(255, 255, 255, 0.06);
-  }
-  .proceso-scene:first-of-type {
-    padding-top: 60px;
-    border-top: none;
   }
   .proceso-grid-detail {
     display: grid;

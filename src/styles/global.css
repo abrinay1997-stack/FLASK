@@ -25,6 +25,22 @@ a{color:inherit;text-decoration:none;}
 :focus-visible{outline:2px solid var(--flash-orange);outline-offset:3px;border-radius:4px;}
 .container{max-width:1280px;margin:0 auto;padding:0 40px;}
 
+/* Salto al contenido: invisible hasta recibir foco con Tab */
+.skip-link{
+  position:fixed;
+  top:12px;
+  left:50%;
+  z-index:200;
+  transform:translate(-50%,-160%);
+  padding:12px 22px;
+  border-radius:999px;
+  background:var(--flash-orange);
+  color:var(--deep-black);
+  font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  transition:transform .2s ease;
+}
+.skip-link:focus-visible{transform:translate(-50%,0);}
+
 /* ---------- NAVBAR FLOTANTE ---------- */
 .floating-nav{
   position:fixed;
@@ -146,7 +162,11 @@ a{color:inherit;text-decoration:none;}
   filter:blur(12px);z-index:0;
   pointer-events:none;
 }
-.hero-inner{position:relative;z-index:2;padding:60px 0;}
+/* `.hero .` no es decorativo: .hero-inner también lleva .container, y la regla
+   móvil de .container usa el shorthand `padding`. Con la misma especificidad
+   ganaba por orden y dejaba el padding vertical en 0, metiendo el H1 debajo de
+   .year/.handle. El selector extra lo blinda. */
+.hero .hero-inner{position:relative;z-index:2;padding-block:60px;}
 .hero .year{
   position:absolute;top:24px;left:40px;font-size:14px;
   color:var(--studio-gray);letter-spacing:.1em;
@@ -504,6 +524,22 @@ footer{
 }
 .simple-inner .simple-actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
 
+/* ---------- REVEAL COMO ITEM DE GRID ----------
+   <Reveal> mete un <div> entre la grid y la tarjeta, así que la tarjeta deja
+   de ser el item y ya no se estira a la altura de la fila. Este bloque le
+   devuelve el estirado: el envoltorio se estira (align-items:stretch por
+   defecto) y la tarjeta crece hasta llenarlo. */
+.plans-grid>.reveal,
+.plans-preview-grid>.reveal,
+.service-list>.reveal,
+.modules-grid>.reveal,
+.care-grid>.reveal{display:flex;flex-direction:column;}
+.plans-grid>.reveal>*,
+.plans-preview-grid>.reveal>*,
+.service-list>.reveal>*,
+.modules-grid>.reveal>*,
+.care-grid>.reveal>*{flex:1 1 auto;}
+
 /* ---------- REDUCED MOTION ---------- */
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{
@@ -558,8 +594,15 @@ footer{
   section{padding:80px 0;}
   .plans-grid{grid-template-columns:1fr;}
   .modules-grid{grid-template-columns:1fr;}
-  .hero .year,.hero .handle{left:22px;right:22px;}
-  .hero .handle{left:auto;}
+  /* En móvil el H1 crece varias líneas y las etiquetas absolutas terminan
+     encima. Aquí dejan de ser absolutas y fluyen como una fila sobre el H1. */
+  .hero .year,.hero .handle{
+    position:static;display:inline-block;
+    font-size:12px;letter-spacing:.14em;text-transform:uppercase;
+  }
+  .hero .handle{margin-left:14px;padding-left:14px;border-left:1px solid rgba(255,255,255,.14);}
+  .hero .hero-inner{padding-block:40px 60px;}
+  .hero .year+.handle{margin-bottom:22px;}
   .stats{gap:32px;margin-top:50px;}
   .diag-band{flex-direction:column;align-items:flex-start;}
   .contact-form-card{padding:30px 22px;}

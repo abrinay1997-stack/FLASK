@@ -31,17 +31,31 @@ import { routes } from '../data/links';
         <div class="contact-form-card">
           <h2>Escríbenos</h2>
           <p class="form-lead">
-            Los campos con <span style="color:var(--flash-orange);">*</span> son obligatorios. Nunca
-            compartimos tus datos con terceros.
+            Los campos con <span style="color:var(--flash-orange);">*</span> son obligatorios. Al
+            enviar se abre WhatsApp con tu mensaje ya redactado; solo tienes que darle a enviar.
+            Nunca compartimos tus datos con terceros.
           </p>
 
+          <!--
+            Doble camino a propósito:
+
+            · En Netlify, los atributos data-netlify hacen que el POST lo capture
+              Netlify Forms y redirija a /gracias.
+            · En GitHub Pages (el hosting actual) no hay backend que reciba el
+              POST, así que el script del final intercepta el submit y arma un
+              mensaje de WhatsApp con los datos del formulario.
+
+            El primero es el camino nativo; el segundo es lo que está vivo hoy.
+          -->
           <form
             name="contacto"
             method="POST"
             action={routes.gracias}
             data-netlify="true"
             data-netlify-honeypot="bot-field"
-            netlify
+            data-wa-fallback
+            data-wa-number={contact.whatsappRaw}
+            data-gracias={routes.gracias}
           >
             <input type="hidden" name="form-name" value="contacto" />
             <p class="honeypot">
@@ -80,11 +94,11 @@ import { routes } from '../data/links';
 
             <div class="form-actions">
               <button type="submit" class="btn btn-primary">
-                <span class="dot"></span> Enviar mensaje
+                <span class="dot"></span> Enviar por WhatsApp
               </button>
               <span class="form-note">
-                ¿Prefieres WhatsApp?{' '}
-                <a href={waLink()} target="_blank" rel="noopener">Escríbenos por aquí</a>
+                ¿Prefieres escribir tú mismo?{' '}
+                <a href={waLink()} target="_blank" rel="noopener">Abrir chat en blanco</a>
               </span>
             </div>
           </form>
@@ -120,16 +134,87 @@ import { routes } from '../data/links';
   </section>
 </BaseLayout>
 
-<script is:inline>
-  // Prellena el <select> si viene ?plan=... desde la home
-  (function () {
-    var params = new URLSearchParams(window.location.search);
-    var plan = params.get('plan');
-    if (plan) {
-      var sel = document.getElementById('plan');
-      if (sel && Array.from(sel.options).some(function (o) { return o.value === plan; })) {
-        sel.value = plan;
+<script>
+  /** Prellena el <select> si la URL trae ?plan=… (los enlaces de /planes lo hacen). */
+  function preselectPlan() {
+    const plan = new URLSearchParams(location.search).get('plan');
+    if (!plan) return;
+    const sel = document.querySelector<HTMLSelectElement>('#plan');
+    if (sel && [...sel.options].some((o) => o.value === plan)) sel.value = plan;
+  }
+
+  /**
+   * GitHub Pages sirve archivos estáticos: no hay nada que reciba el POST del
+   * formulario. En vez de dejarlo muerto, componemos un mensaje de WhatsApp con
+   * lo que escribió la persona y lo abrimos listo para enviar.
+   *
+   * En Netlify no hace falta: ahí Netlify Forms captura el POST de verdad, así
+   * que el handler se aparta y deja pasar el envío nativo.
+   */
+  function isNetlifyHost() {
+    return /(^|\.)netlify\.(app|com)$/.test(location.hostname);
+  }
+
+  function buildWhatsAppMessage(form: HTMLFormElement) {
+    const data = new FormData(form);
+    const value = (name: string) => String(data.get(name) ?? '').trim();
+
+    const planSelect = form.querySelector<HTMLSelectElement>('#plan');
+    const planLabel = planSelect?.selectedOptions[0]?.textContent?.trim() || value('plan');
+
+    const lines = [
+      'Hola FLASK, quiero cotizar mi sitio web.',
+      '',
+      `Nombre: ${value('nombre')}`,
+      `Correo: ${value('email')}`,
+    ];
+    if (value('whatsapp')) lines.push(`WhatsApp: ${value('whatsapp')}`);
+    lines.push(`Plan de interés: ${planLabel}`, '', 'Proyecto:', value('mensaje'));
+    return lines.join('\n');
+  }
+
+  function initContactForm() {
+    const form = document.querySelector<HTMLFormElement>('form[data-wa-fallback]');
+    if (!form || form.dataset.bound) return;
+    form.dataset.bound = 'true';
+
+    form.addEventListener('submit', (event) => {
+      if (isNetlifyHost()) return; // Netlify Forms se encarga
+
+      event.preventDefault();
+
+      // Honeypot: si un bot lo llenó, fingimos éxito y no abrimos nada
+      const trap = form.querySelector<HTMLInputElement>('[name="bot-field"]');
+      if (trap?.value) {
+        location.href = form.dataset.gracias || '/';
+        return;
       }
-    }
-  })();
+
+      const number = form.dataset.waNumber;
+      if (!number) return;
+
+      const url = `https://wa.me/${number}?text=${encodeURIComponent(buildWhatsAppMessage(form))}`;
+      const tab = window.open(url, '_blank', 'noopener');
+
+      if (tab) {
+        // WhatsApp ya está abierto en otra pestaña: aquí mostramos el acuse
+        location.href = form.dataset.gracias || '/';
+      } else {
+        // Bloqueador de pop-ups: navegamos en esta misma pestaña
+        location.href = url;
+      }
+    });
+  }
+
+  function init() {
+    preselectPlan();
+    initContactForm();
+  }
+
+  document.addEventListener('astro:page-load', init);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init, { once: true });
+  } else {
+    init();
+  }
 </script>
