@@ -34,7 +34,12 @@ const { activePath = '' } = Astro.props;
       </ul>
     </nav>
 
-    <a href={routes.contacto} class="nav-cta" aria-current={activePath === routes.contacto ? 'page' : undefined}>
+    <!--
+      El CTA global apunta al cotizador, no al formulario. Está en las 9 páginas:
+      mandarlo a un formulario en frío obligaba a elegir plan antes de saber cuál
+      encaja — justo la pregunta que la persona vino a resolver.
+    -->
+    <a href={routes.cotizador} class="nav-cta" aria-current={activePath === routes.cotizador ? 'page' : undefined}>
       Cotizar
     </a>
 

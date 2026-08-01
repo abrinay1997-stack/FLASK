@@ -1,0 +1,759 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { steps, parsePrice } from '../data/quote';
+import { plans, diagnostico } from '../data/plans';
+import { modules } from '../data/modules';
+import { routes } from '../data/links';
+import { contact } from '../data/site';
+
+/**
+ * El precio se enseña ANTES de pedir datos, a propósito.
+ *
+ * Es la promesa del sitio ("precio público, cero consultar por interno")
+ * ejecutada como experiencia en vez de como afirmación. Y comercialmente
+ * funciona mejor: cuatro respuestas ya invertidas + una cifra concreta delante
+ * hacen que pedir el contacto deje de ser un peaje y pase a ser el paso obvio
+ * para recibir la versión escrita.
+ */
+
+// El motor completo viaja al navegador como JSON: el cálculo del cliente y el
+// de /planes salen de los mismos datos, así que no pueden desviarse.
+const engine = {
+  steps,
+  plans: plans.map((p) => ({
+    slug: p.slug,
+    name: p.name,
+    price: p.price,
+    money: parsePrice(p.price),
+    delivery: p.delivery,
+    desc: p.desc,
+  })),
+  modules: modules.map((m) => ({ name: m.name, money: parsePrice(m.price), stack: m.stack })),
+  routes: { contacto: routes.contacto, planes: routes.planes },
+  whatsapp: contact.whatsappRaw,
+};
+---
+
+<BaseLayout
+  title="Cotizador"
+  description="Define lo que necesitas en cuatro respuestas y te decimos el precio al instante. Sin dar tus datos primero."
+  activePath={routes.cotizador}
+>
+  <section class="cot">
+    <div class="container">
+      <header class="cot-head">
+        <span class="eyebrow">Cotizador</span>
+        <h1>Tu precio en <span class="muted">cuatro respuestas.</span></h1>
+        <p class="cot-lead">
+          Sin dejar tus datos y sin esperar a que alguien te conteste. Ves la cifra al final;
+          si te encaja, entonces hablamos.
+        </p>
+      </header>
+
+      <!-- Progreso -->
+      <div class="cot-progress" role="group" aria-label="Progreso del cotizador">
+        <div class="cot-bar"><span data-bar></span></div>
+        <p class="cot-count" aria-live="polite" data-count>Paso 1 de {steps.length}</p>
+      </div>
+
+      <form class="cot-form" data-quote novalidate>
+        {steps.map((step, i) => (
+          <fieldset class="cot-step" data-step={step.id} hidden={i > 0}>
+            <legend tabindex="-1">
+              <span class="cot-q">{step.question}</span>
+              <span class="cot-help">{step.help}</span>
+            </legend>
+
+            <div class="cot-options" data-multiple={String(step.multiple)}>
+              {step.options.map((opt) => (
+                <label class="cot-opt">
+                  <input
+                    type={step.multiple ? 'checkbox' : 'radio'}
+                    name={step.id}
+                    value={opt.value}
+                  />
+                  <span class="cot-opt-body">
+                    <span class="cot-opt-label">{opt.label}</span>
+                    <span class="cot-opt-hint">{opt.hint}</span>
+                  </span>
+                  <span class="cot-tick" aria-hidden="true"></span>
+                </label>
+              ))}
+            </div>
+
+            <div class="cot-nav">
+              <button type="button" class="btn btn-ghost" data-back hidden={i === 0}>
+                Atrás
+              </button>
+              <button type="button" class="btn btn-primary" data-next disabled>
+                <span class="dot"></span>
+                {i === steps.length - 1 ? 'Ver mi precio' : 'Siguiente'}
+              </button>
+              {step.multiple && (
+                <button type="button" class="cot-skip" data-next>
+                  Ninguna de estas
+                </button>
+              )}
+            </div>
+          </fieldset>
+        ))}
+      </form>
+
+      <!-- RESULTADO -->
+      <div class="cot-result" data-result hidden aria-live="polite">
+        <div class="cot-result-head">
+          <span class="eyebrow">Tu estimación</span>
+          <h2 data-plan-name>—</h2>
+          <p class="cot-reason" data-reason></p>
+        </div>
+
+        <ul class="cot-lines" data-lines></ul>
+
+        <div class="cot-total">
+          <div>
+            <span class="cot-total-k">Total estimado</span>
+            <span class="cot-total-v" data-total>—</span>
+          </div>
+          <div class="cot-total-meta">
+            <span data-delivery></span>
+            <span class="cot-disclaimer">
+              Estimación, no factura. La propuesta escrita confirma alcance, cronograma y cifra final.
+            </span>
+          </div>
+        </div>
+
+        <div class="cot-send">
+          <h3>¿Te encaja? Te lo mandamos por escrito.</h3>
+          <p class="cot-send-lead">
+            Solo el nombre y por dónde te escribimos. El resumen de arriba va incluido, no hay que
+            repetir nada.
+          </p>
+          <div class="cot-fields">
+            <div class="field">
+              <label for="cot-nombre">Nombre <span class="req">*</span></label>
+              <input id="cot-nombre" name="nombre" type="text" autocomplete="name" placeholder="Cómo te llamas" />
+            </div>
+            <div class="field">
+              <label for="cot-contacto">WhatsApp o correo <span class="req">*</span></label>
+              <input id="cot-contacto" name="contacto" type="text" autocomplete="tel" placeholder="+507 6000 0000" />
+            </div>
+          </div>
+          <p class="cot-error" data-error hidden role="alert"></p>
+
+          <div class="cot-actions">
+            <button type="button" class="btn btn-primary" data-send>
+              <span class="dot"></span> Enviar y recibir la propuesta
+            </button>
+            <button type="button" class="btn btn-ghost" data-restart>Empezar de nuevo</button>
+          </div>
+
+          <p class="cot-alt">
+            ¿Prefieres que revisemos primero tu sitio actual?
+            <a href={`${routes.contacto}?plan=${diagnostico.slug}`}>
+              {diagnostico.name} · {diagnostico.price}
+            </a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script type="application/json" data-quote-engine set:html={JSON.stringify(engine)} is:inline />
+
+<script>
+  interface Money { min: number; max: number }
+  interface Opt { value: string; label: string; hint: string; requiresPlan?: string }
+  interface Step { id: string; question: string; help: string; multiple: boolean; options: Opt[] }
+  interface Engine {
+    steps: Step[];
+    plans: { slug: string; name: string; price: string; money: Money; delivery: string; desc: string }[];
+    modules: { name: string; money: Money; stack: string }[];
+    routes: { contacto: string; planes: string };
+    whatsapp: string;
+  }
+
+  const ORDER = ['start', 'launch', 'corporate', 'commerce'];
+
+  /**
+   * Mismas reglas que `computeQuote` en src/data/quote.ts. Se duplican aquí
+   * porque el cálculo tiene que ocurrir en el navegador sin backend; los DATOS
+   * (precios, planes, módulos) no se duplican: llegan serializados del build.
+   */
+  const CAPS: Record<string, { includedFrom?: string; moduleName?: string }> = {
+    form: { includedFrom: 'start' },
+    blog: { includedFrom: 'corporate' },
+    cms: { includedFrom: 'corporate' },
+    cobros: { includedFrom: 'commerce' },
+    inventario: { includedFrom: 'commerce', moduleName: 'Inventario avanzado' },
+    reservas: { moduleName: 'Sistema de reservas / citas' },
+    login: { moduleName: 'Login + roles + usuarios' },
+    panel: { moduleName: 'Panel administrativo / dashboard' },
+    portal: { moduleName: 'Portal de clientes' },
+    api: { moduleName: 'Integración de API externa' },
+    ia: { moduleName: 'Automatización con IA / WhatsApp' },
+  };
+
+  const money = (m: Money) => {
+    const f = (n: number) => `$${n.toLocaleString('en-US')}`;
+    return m.min === m.max ? f(m.min) : `${f(m.min)} – ${f(m.max)}`;
+  };
+
+  function initCotizador() {
+    const found = document.querySelector<HTMLFormElement>('[data-quote]');
+    const raw = document.querySelector<HTMLScriptElement>('[data-quote-engine]');
+    if (!found || !raw || found.dataset.bound) return;
+    found.dataset.bound = 'true';
+    const root: HTMLFormElement = found;
+
+    const engine: Engine = JSON.parse(raw.textContent || '{}');
+    const stepEls = [...root.querySelectorAll<HTMLFieldSetElement>('.cot-step')];
+    const result = document.querySelector<HTMLElement>('[data-result]')!;
+    const bar = document.querySelector<HTMLElement>('[data-bar]')!;
+    const count = document.querySelector<HTMLElement>('[data-count]')!;
+    const progress = document.querySelector<HTMLElement>('.cot-progress')!;
+
+    let current = 0;
+
+    const answers = (): Record<string, string[]> => {
+      const out: Record<string, string[]> = {};
+      for (const step of engine.steps) {
+        out[step.id] = [...root.querySelectorAll<HTMLInputElement>(`input[name="${step.id}"]:checked`)].map(
+          (i) => i.value
+        );
+      }
+      return out;
+    };
+
+    function paint() {
+      stepEls.forEach((el, i) => (el.hidden = i !== current));
+      const pct = ((current + 1) / stepEls.length) * 100;
+      bar.style.transform = `scaleX(${pct / 100})`;
+      count.textContent = `Paso ${current + 1} de ${stepEls.length}`;
+      // Un paso obligatorio no avanza hasta que haya respuesta; los múltiples sí
+      const step = engine.steps[current]!;
+      const chosen = root.querySelectorAll(`input[name="${step.id}"]:checked`).length;
+      const next = stepEls[current]!.querySelector<HTMLButtonElement>('button[data-next]:not(.cot-skip)')!;
+      next.disabled = !step.multiple && chosen === 0;
+    }
+
+    function go(to: number) {
+      current = Math.max(0, Math.min(stepEls.length - 1, to));
+      paint();
+      // Mover el foco al enunciado: sin esto, quien navega con teclado se queda
+      // en un botón que ya no existe en pantalla.
+      stepEls[current]!.querySelector<HTMLElement>('legend')?.focus();
+    }
+
+    function compute() {
+      const a = answers();
+      let slug = 'start';
+      let driver = '';
+      for (const step of engine.steps) {
+        for (const opt of step.options) {
+          if (a[step.id]?.includes(opt.value) && opt.requiresPlan) {
+            if (ORDER.indexOf(opt.requiresPlan) > ORDER.indexOf(slug)) {
+              slug = opt.requiresPlan;
+              driver = opt.label.toLowerCase();
+            }
+          }
+        }
+      }
+      const plan = engine.plans.find((p) => p.slug === slug)!;
+      const capStep = engine.steps.find((s) => s.id === 'capacidades')!;
+
+      const lines: { label: string; price: Money | null; note: string }[] = [
+        { label: plan.name, price: plan.money, note: plan.delivery },
+      ];
+
+      for (const cap of a.capacidades ?? []) {
+        const rule = CAPS[cap];
+        const opt = capStep.options.find((o) => o.value === cap);
+        if (!rule || !opt) continue;
+        if (rule.includedFrom && ORDER.indexOf(slug) >= ORDER.indexOf(rule.includedFrom)) {
+          lines.push({ label: opt.label, price: null, note: `Incluido en ${plan.name}` });
+        } else if (rule.moduleName) {
+          const mod = engine.modules.find((m) => m.name === rule.moduleName);
+          if (mod) lines.push({ label: opt.label, price: mod.money, note: mod.stack });
+        }
+      }
+
+      const total = lines.reduce(
+        (acc, l) => (l.price ? { min: acc.min + l.price.min, max: acc.max + l.price.max } : acc),
+        { min: 0, max: 0 }
+      );
+
+      return { plan, driver, lines, total, extras: lines.length - 1, a };
+    }
+
+    function show() {
+      const q = compute();
+
+      document.querySelector('[data-plan-name]')!.textContent = q.plan.name;
+      document.querySelector('[data-reason]')!.textContent = q.driver
+        ? `Lo pide "${q.driver}". Es el plan más pequeño que lo cubre.`
+        : 'Es el plan más pequeño que cubre lo que marcaste.';
+
+      const list = document.querySelector('[data-lines]')!;
+      list.innerHTML = '';
+      for (const l of q.lines) {
+        const li = document.createElement('li');
+        li.className = 'cot-line';
+        li.innerHTML =
+          `<span class="cot-line-label">${l.label}<small>${l.note}</small></span>` +
+          `<span class="cot-line-price${l.price ? '' : ' is-free'}">${l.price ? money(l.price) : 'Incluido'}</span>`;
+        list.appendChild(li);
+      }
+
+      document.querySelector('[data-total]')!.textContent = money(q.total);
+      document.querySelector('[data-delivery]')!.textContent =
+        q.extras > 0 ? `${q.plan.delivery}, más el plazo de cada capacidad` : q.plan.delivery;
+
+      root.hidden = true;
+      progress.hidden = true;
+      result.hidden = false;
+      result.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function send() {
+      const nombreEl = document.querySelector<HTMLInputElement>('#cot-nombre')!;
+      const viaEl = document.querySelector<HTMLInputElement>('#cot-contacto')!;
+      const nombre = nombreEl.value.trim();
+      const via = viaEl.value.trim();
+      const err = document.querySelector<HTMLElement>('[data-error]')!;
+
+      if (!nombre || !via) {
+        err.textContent = 'Falta tu nombre o por dónde te escribimos.';
+        err.hidden = false;
+        (nombre ? viaEl : nombreEl).focus();
+        return;
+      }
+      err.hidden = true;
+
+      const q = compute();
+      const urgencia = engine.steps
+        .find((s) => s.id === 'urgencia')!
+        .options.find((o) => o.value === q.a.urgencia?.[0])?.label;
+
+      // `null` marca líneas que se descartan; '' son saltos de párrafo a conservar.
+      const txt = [
+        `Hola FLASK, usé el cotizador y esto me salió:`,
+        '',
+        `Plan: ${q.plan.name}`,
+        ...q.lines.slice(1).map((l) => `+ ${l.label}: ${l.price ? money(l.price) : 'incluido'}`),
+        '',
+        `Total estimado: ${money(q.total)}`,
+        `Plazo: ${q.plan.delivery}`,
+        urgencia ? `Lo necesito: ${urgencia}` : null,
+        '',
+        `Nombre: ${nombre}`,
+        `Contacto: ${via}`,
+        '',
+        'Quiero la propuesta escrita.',
+      ]
+        .filter((l): l is string => l !== null)
+        .join('\n');
+
+      const url = `https://wa.me/${engine.whatsapp}?text=${encodeURIComponent(txt)}`;
+      const tab = window.open(url, '_blank', 'noopener');
+      if (!tab) location.href = url;
+    }
+
+    root.addEventListener('change', paint);
+    root.addEventListener('click', (e) => {
+      const t = e.target as HTMLElement;
+      if (t.closest('[data-next]')) {
+        if (current === stepEls.length - 1) show();
+        else go(current + 1);
+      } else if (t.closest('[data-back]')) {
+        go(current - 1);
+      }
+    });
+
+    document.querySelector('[data-send]')?.addEventListener('click', send);
+    document.querySelector('[data-restart]')?.addEventListener('click', () => {
+      root.reset();
+      result.hidden = true;
+      root.hidden = false;
+      progress.hidden = false;
+      go(0);
+      progress.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+
+    paint();
+  }
+
+  document.addEventListener('astro:page-load', initCotizador);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initCotizador, { once: true });
+  } else {
+    initCotizador();
+  }
+</script>
+
+<style>
+  .cot {
+    padding-top: 168px;
+    padding-bottom: 120px;
+  }
+  .cot-head {
+    max-width: 46ch;
+    margin-bottom: 46px;
+  }
+  .cot-head h1 {
+    font-size: clamp(38px, 5.6vw, 72px);
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -0.025em;
+    text-transform: uppercase;
+  }
+  .cot-head h1 .muted {
+    color: var(--studio-gray);
+  }
+  .cot-lead {
+    margin-top: 22px;
+    font-size: 18px;
+    font-weight: 300;
+    color: var(--studio-gray);
+    line-height: 1.55;
+  }
+
+  /* ---------- PROGRESO ---------- */
+  .cot-progress {
+    max-width: 780px;
+    margin-bottom: 34px;
+  }
+  .cot-bar {
+    height: 3px;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+  }
+  .cot-bar span {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, var(--flash-orange), var(--ember-red));
+    transform-origin: left;
+    transform: scaleX(0);
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .cot-count {
+    margin-top: 12px;
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--studio-gray);
+  }
+
+  /* ---------- PASOS ---------- */
+  .cot-step {
+    border: none;
+    max-width: 780px;
+  }
+  .cot-step legend {
+    display: block;
+    margin-bottom: 28px;
+  }
+  .cot-step legend:focus-visible {
+    outline: 2px solid var(--flash-orange);
+    outline-offset: 6px;
+    border-radius: 4px;
+  }
+  .cot-q {
+    display: block;
+    font-size: clamp(26px, 3.4vw, 40px);
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 10px;
+  }
+  .cot-help {
+    display: block;
+    font-size: 15px;
+    font-weight: 300;
+    color: var(--studio-gray);
+  }
+
+  .cot-options {
+    display: grid;
+    gap: 10px;
+  }
+  .cot-options[data-multiple='true'] {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .cot-opt {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.02);
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .cot-opt:hover {
+    border-color: rgba(255, 81, 0, 0.5);
+    background: rgba(255, 81, 0, 0.04);
+  }
+  /* El input real sigue en el DOM (accesible y navegable), solo invisible */
+  .cot-opt input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+  }
+  .cot-opt:has(input:focus-visible) {
+    outline: 2px solid var(--flash-orange);
+    outline-offset: 3px;
+  }
+  .cot-opt:has(input:checked) {
+    border-color: var(--flash-orange);
+    background: rgba(255, 81, 0, 0.08);
+  }
+  .cot-opt-body {
+    flex: 1;
+  }
+  .cot-opt-label {
+    display: block;
+    font-size: 17px;
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+  .cot-opt-hint {
+    display: block;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--studio-gray);
+    line-height: 1.4;
+  }
+  .cot-tick {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    position: relative;
+  }
+  /* Cuadrado en los pasos de selección múltiple: la forma es la única señal de
+     que aquí se puede marcar más de una opción. */
+  .cot-options[data-multiple='true'] .cot-tick {
+    border-radius: 6px;
+  }
+  .cot-opt:has(input:checked) .cot-tick {
+    border-color: var(--flash-orange);
+    background: var(--flash-orange);
+  }
+  .cot-opt:has(input:checked) .cot-tick::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 5px;
+    height: 9px;
+    border: solid var(--deep-black);
+    border-width: 0 2px 2px 0;
+    transform: translateY(-1px) rotate(45deg);
+  }
+
+  .cot-nav {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 30px;
+    flex-wrap: wrap;
+  }
+  .cot-nav .btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+  .cot-nav .btn:disabled:hover {
+    transform: none;
+  }
+  .cot-skip {
+    background: none;
+    border: none;
+    color: var(--studio-gray);
+    font-family: inherit;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 12px 4px;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+  .cot-skip:hover {
+    color: var(--soft-white);
+  }
+
+  /* ---------- RESULTADO ---------- */
+  .cot-result {
+    max-width: 780px;
+  }
+  .cot-result-head h2 {
+    font-size: clamp(34px, 4.6vw, 58px);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .cot-reason {
+    font-size: 16px;
+    font-weight: 300;
+    color: var(--studio-gray);
+    margin-bottom: 34px;
+  }
+
+  .cot-lines {
+    list-style: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  /*
+    Estas filas las crea el script con innerHTML, así que nacen sin el
+    `data-astro-cid-*` de esta página y una regla con scope no las alcanza.
+    El `:global()` cuelga de `.cot-lines`, que sí está en la plantilla, así que
+    el alcance sigue acotado a este bloque.
+  */
+  .cot-lines :global(.cot-line) {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 16px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .cot-lines :global(.cot-line-label) {
+    font-size: 16px;
+    font-weight: 500;
+  }
+  .cot-lines :global(.cot-line-label small) {
+    display: block;
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--studio-gray);
+    margin-top: 3px;
+  }
+  .cot-lines :global(.cot-line-price) {
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+  }
+  .cot-lines :global(.cot-line-price.is-free) {
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--flash-orange);
+  }
+
+  .cot-total {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 28px;
+    flex-wrap: wrap;
+    margin-top: 30px;
+    padding: 26px 28px;
+    border-radius: 18px;
+    background: linear-gradient(120deg, rgba(255, 81, 0, 0.14), rgba(238, 0, 0, 0.05));
+    border: 1px solid rgba(255, 81, 0, 0.35);
+  }
+  .cot-total-k {
+    display: block;
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--studio-gray);
+    margin-bottom: 8px;
+  }
+  .cot-total-v {
+    font-size: clamp(38px, 5vw, 58px);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+  .cot-total-meta {
+    text-align: right;
+    max-width: 34ch;
+  }
+  .cot-total-meta > span:first-child {
+    display: block;
+    font-size: 14px;
+    color: var(--flash-orange);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 8px;
+  }
+  .cot-disclaimer {
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--studio-gray);
+    line-height: 1.5;
+  }
+
+  .cot-send {
+    margin-top: 44px;
+    padding-top: 38px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .cot-send h3 {
+    font-size: 24px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin-bottom: 8px;
+  }
+  .cot-send-lead {
+    font-size: 15px;
+    font-weight: 300;
+    color: var(--studio-gray);
+    margin-bottom: 26px;
+    max-width: 52ch;
+  }
+  .cot-fields {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+  }
+  .cot-error {
+    margin-top: 4px;
+    font-size: 14px;
+    color: var(--ember-red);
+  }
+  .cot-actions {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+  }
+  .cot-alt {
+    margin-top: 26px;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--studio-gray);
+  }
+  .cot-alt a {
+    color: var(--flash-orange);
+    display: inline-block;
+    padding: 6px 0;
+  }
+
+  @media (max-width: 780px) {
+    .cot {
+      padding-top: 140px;
+    }
+    .cot-options[data-multiple='true'],
+    .cot-fields {
+      grid-template-columns: 1fr;
+    }
+    .cot-total {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .cot-total-meta {
+      text-align: left;
+    }
+  }
+</style>
