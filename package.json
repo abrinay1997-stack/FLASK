@@ -14,14 +14,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/abrinay1997-stack/FLASK.git"
+    "url": "git+https://github.com/abrinay1997-stack/CUATRONODOS.git"
   },
   "author": "CuatroNodos",
   "license": "UNLICENSED",
   "bugs": {
-    "url": "https://github.com/abrinay1997-stack/FLASK/issues"
+    "url": "https://github.com/abrinay1997-stack/CUATRONODOS/issues"
   },
-  "homepage": "https://github.com/abrinay1997-stack/FLASK#readme",
+  "homepage": "https://github.com/abrinay1997-stack/CUATRONODOS#readme",
   "dependencies": {
     "@astrojs/sitemap": "^3.7.3",
     "@fontsource/archivo": "^5.3.0",

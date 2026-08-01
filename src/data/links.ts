@@ -1,8 +1,8 @@
 /**
  * Helpers de URLs para respetar el `base` de Astro.
  *
- * En dev  → BASE_URL = '/'         → withBase('contacto.html') = '/contacto.html'
- * En prod → BASE_URL = '/FLASK'    → withBase('contacto.html') = '/FLASK/contacto.html'
+ * Netlify sirve en la raíz, así que en prod BASE_URL = '/' (igual que en dev).
+ * Se mantiene withBase() por si algún día se despliega bajo un subpath.
  *
  * Regla: NUNCA hardcodear rutas con '/…' en templates. Usar siempre withBase() o routes.*
  */
