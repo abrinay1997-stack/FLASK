@@ -11,6 +11,7 @@
     "check": "astro check",
     "brand": "node scripts/generate-brand-assets.mjs",
     "medir": "node scripts/measure-projects.mjs",
+    "medir:movil": "node scripts/check-mobile.mjs",
     "astro": "astro"
   },
   "repository": {

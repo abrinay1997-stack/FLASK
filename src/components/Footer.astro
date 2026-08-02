@@ -319,6 +319,16 @@ import { footerColumns, socials, footerTrust } from '../data/footer';
     .foot-col-title {
       margin-bottom: 12px;
     }
+    /*
+      El pitch se cae en teléfono. Es palabra por palabra el mismo párrafo que
+      abre la home, y quien llega hasta aquí bajando ya lo leyó hace mil píxeles.
+      En escritorio se queda: allí el footer se ve de un golpe y la columna de
+      marca necesita ese cuerpo para no quedar coja al lado de los enlaces.
+    */
+    .foot-pitch {
+      display: none;
+    }
+
     /* Los respiros de escritorio, a escala de teléfono. */
     .foot-top {
       gap: 40px;
