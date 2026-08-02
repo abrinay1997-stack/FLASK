@@ -17,9 +17,9 @@
  *      hizo el proyecto. `summary` es una frase; `challenge` y `solution`, un
  *      párrafo corto cada uno. Mismo criterio que en services.ts: el dolor del
  *      cliente antes que la herramienta.
- *   2. `metrics` — medidas de verdad, no recordadas. Lighthouse en móvil, en
- *      incógnito y sin extensiones; se anota la fecha en `measuredAt`. Si no se
- *      midió, se deja el array vacío y la banda no aparece.
+ *   2. `metrics` — medidas de verdad, no recordadas: `npm run medir` las saca de
+ *      Lighthouse y las devuelve listas para pegar, con su `measuredAt`. Si no
+ *      se midió, se deja el array vacío y la banda no aparece.
  *   3. `capabilities` — qué del catálogo se aplicó, con el mismo vocabulario de
  *      modules.ts, para que el visitante ate el caso con lo que puede contratar.
  *   4. `image` — captura en `src/assets/proyectos/<slug>.png`, importada arriba
@@ -28,7 +28,11 @@
  */
 
 export interface ProjectMetric {
-  /** Etiqueta corta: «Carga», «Lighthouse», «Productos». */
+  /**
+   * Etiqueta corta: «Carga», «Prueba de Google», «Productos».
+   * En el idioma del cliente, como el resto del sitio: nada de nombres de
+   * herramienta que solo reconozca un programador.
+   */
   k: string;
   /** El valor medido, con su unidad. */
   v: string;
@@ -71,7 +75,7 @@ export const projects: Project[] = [
     domain: 'play.bukoflow.com',
     url: 'https://play.bukoflow.com/',
     // TODO(contenido): sector, year, summary, challenge, solution, capabilities.
-    // TODO(medición): Lighthouse móvil + measuredAt.
+    // TODO(medición): `npm run medir` → metrics + measuredAt.
   },
   {
     slug: 'livesync-pro',
@@ -79,7 +83,7 @@ export const projects: Project[] = [
     domain: 'livesyncpro.com',
     url: 'https://livesyncpro.com/',
     // TODO(contenido): sector, year, summary, challenge, solution, capabilities.
-    // TODO(medición): Lighthouse móvil + measuredAt.
+    // TODO(medición): `npm run medir` → metrics + measuredAt.
   },
   {
     slug: 'acustica-superior',
@@ -87,7 +91,7 @@ export const projects: Project[] = [
     domain: 'acusticasuperior.com',
     url: 'https://acusticasuperior.com/',
     // TODO(contenido): sector, year, summary, challenge, solution, capabilities.
-    // TODO(medición): Lighthouse móvil + measuredAt.
+    // TODO(medición): `npm run medir` → metrics + measuredAt.
   },
   {
     slug: 'bukoflow-tienda',
@@ -95,7 +99,7 @@ export const projects: Project[] = [
     domain: 'tienda.bukoflow.com',
     url: 'https://tienda.bukoflow.com/',
     // TODO(contenido): sector, year, summary, challenge, solution, capabilities.
-    // TODO(medición): Lighthouse móvil + measuredAt.
+    // TODO(medición): `npm run medir` → metrics + measuredAt.
   },
 ];
 

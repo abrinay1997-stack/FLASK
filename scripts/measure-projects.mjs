@@ -79,6 +79,12 @@ async function measure(url, { attempts = 4 } = {}) {
  * se ve cargada, que es lo que promete la home ("abre en menos de un segundo").
  * El resto de métricas de Lighthouse le dicen algo a un desarrollador y nada a
  * quien va a contratar.
+ *
+ * La puntuación se etiqueta "Prueba de Google" y no "Lighthouse" por la regla
+ * de copy del sitio (ver services.ts): fuera nombres de tecnología salvo los
+ * que el cliente ya reconoce. Nadie fuera del oficio sabe qué es Lighthouse;
+ * todo el mundo sabe qué es Google. Y la etiqueta sigue siendo exacta, porque
+ * la prueba la corre Google.
  */
 function extract(json) {
   const lh = json.lighthouseResult;
@@ -92,7 +98,7 @@ function extract(json) {
     const s = lcpMs / 1000;
     metrics.push({ k: 'Carga', v: `${s < 10 ? s.toFixed(1) : Math.round(s)} s` });
   }
-  metrics.push({ k: 'Lighthouse', v: `${score}/100` });
+  metrics.push({ k: 'Prueba de Google', v: `${score}/100` });
   return metrics;
 }
 
