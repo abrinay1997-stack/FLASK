@@ -79,6 +79,9 @@ export interface NavLink {
 export const navLinks: NavLink[] = [
   { href: routes.home, label: 'Inicio' },
   { href: routes.servicios, label: 'Servicios' },
+  // Va antes de Planes a propósito: quien duda del precio suele estar dudando
+  // de si sabemos hacerlo. La prueba tiene que llegarle antes que la cifra.
+  { href: routes.proyectos, label: 'Proyectos' },
   { href: routes.planes, label: 'Planes' },
   { href: routes.proceso, label: 'Proceso' },
   { href: routes.ayuda, label: 'Ayuda' },

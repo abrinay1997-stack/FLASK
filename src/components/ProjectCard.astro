@@ -1,0 +1,295 @@
+---
+/**
+ * Ficha de un proyecto publicado.
+ *
+ * Se diseñó para verse bien a medio llenar. Toda la ficha salvo el nombre, el
+ * dominio y el enlace es condicional, porque los casos se completan de uno en
+ * uno: una tarjeta con solo el dominio tiene que parecer una decisión y no un
+ * hueco. De ahí que la variante sin captura no sea un marco vacío sino el
+ * dominio en grande sobre la textura de marca.
+ */
+import { Image } from 'astro:assets';
+import type { Project } from '../data/projects';
+import { publishedMetrics } from '../data/projects';
+
+interface Props {
+  project: Project;
+}
+
+const { project } = Astro.props;
+const metrics = publishedMetrics(project);
+const tags = [project.sector, project.year].filter(Boolean);
+---
+
+<article class="proj" data-featured={project.featured}>
+  <a
+    class="proj-media"
+    href={project.url}
+    target="_blank"
+    rel="noopener"
+    aria-label={`Abrir ${project.domain} en una pestaña nueva`}
+  >
+    {project.image ? (
+      <Image
+        src={project.image}
+        alt={`Captura de la portada de ${project.domain}`}
+        widths={[480, 800, 1200]}
+        sizes="(max-width: 900px) 100vw, 46vw"
+        format="webp"
+        quality={72}
+        loading="lazy"
+        decoding="async"
+      />
+    ) : (
+      <span class="proj-media-fallback" aria-hidden="true">{project.domain}</span>
+    )}
+    <span class="proj-media-veil" aria-hidden="true"></span>
+  </a>
+
+  <div class="proj-body">
+    {tags.length > 0 && (
+      <div class="proj-tags">
+        {tags.map((tag) => <span class="proj-tag">{tag}</span>)}
+      </div>
+    )}
+
+    <h3 class="proj-name">{project.name}</h3>
+
+    {project.summary && <p class="proj-summary">{project.summary}</p>}
+
+    {(project.challenge || project.solution) && (
+      <dl class="proj-story">
+        {project.challenge && (
+          <div>
+            <dt>De qué se partía</dt>
+            <dd>{project.challenge}</dd>
+          </div>
+        )}
+        {project.solution && (
+          <div>
+            <dt>Qué se construyó</dt>
+            <dd>{project.solution}</dd>
+          </div>
+        )}
+      </dl>
+    )}
+
+    {metrics.length > 0 && (
+      <div class="proj-metrics">
+        <ul>
+          {metrics.map((m) => (
+            <li>
+              <span class="proj-metric-v">{m.v}</span>
+              <span class="proj-metric-k">{m.k}</span>
+            </li>
+          ))}
+        </ul>
+        <p class="proj-measured">Medido el {project.measuredAt}</p>
+      </div>
+    )}
+
+    {project.capabilities && project.capabilities.length > 0 && (
+      <ul class="proj-caps">
+        {project.capabilities.map((cap) => <li>{cap}</li>)}
+      </ul>
+    )}
+
+    <a class="proj-visit" href={project.url} target="_blank" rel="noopener">
+      {project.domain} <span aria-hidden="true">↗</span>
+    </a>
+  </div>
+</article>
+
+<style>
+  .proj {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.02);
+    overflow: hidden;
+    transition: border-color 0.25s, transform 0.25s, background 0.25s;
+  }
+  .proj:hover {
+    border-color: var(--flash-orange);
+    transform: translateY(-4px);
+    background: rgba(255, 81, 0, 0.04);
+  }
+
+  /* ---------- MEDIA ---------- */
+  .proj-media {
+    position: relative;
+    display: block;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    background: var(--deep-black);
+  }
+  .proj-media :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
+    display: block;
+    transition: transform 0.5s ease;
+  }
+  .proj:hover .proj-media :global(img) {
+    transform: scale(1.03);
+  }
+  /*
+    Sin captura: el dominio hace de portada. Se apoya en el degradado de marca
+    para que la tarjeta siga leyéndose como una pieza acabada.
+  */
+  .proj-media-fallback {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    text-align: center;
+    font-size: clamp(17px, 2.2vw, 24px);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--soft-white);
+    background:
+      radial-gradient(ellipse 80% 70% at 50% 0%, rgba(255, 81, 0, 0.18), transparent 70%),
+      linear-gradient(160deg, rgba(238, 0, 0, 0.1), rgba(16, 1, 1, 0.9));
+    word-break: break-word;
+  }
+  /* Velo inferior: iguala el punto de contacto entre portada y cuerpo, tanto si
+     hay captura como si no. */
+  .proj-media-veil {
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 45%;
+    background: linear-gradient(180deg, transparent, rgba(16, 1, 1, 0.85));
+    pointer-events: none;
+  }
+
+  /* ---------- CUERPO ---------- */
+  .proj-body {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 28px 26px 26px;
+    flex: 1;
+  }
+  .proj-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .proj-tag {
+    font-size: 11.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--flash-orange);
+    padding: 5px 11px;
+    border: 1px solid rgba(255, 81, 0, 0.35);
+    border-radius: 999px;
+  }
+  .proj-name {
+    font-size: clamp(24px, 2.6vw, 32px);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+  }
+  .proj-summary {
+    font-size: 16px;
+    font-weight: 300;
+    color: var(--studio-gray);
+    line-height: 1.6;
+  }
+
+  .proj-story {
+    display: grid;
+    gap: 16px;
+  }
+  .proj-story dt {
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--flash-orange);
+    margin-bottom: 6px;
+  }
+  .proj-story dd {
+    font-size: 15px;
+    font-weight: 300;
+    color: var(--studio-gray);
+    line-height: 1.6;
+  }
+
+  .proj-metrics {
+    width: 100%;
+    padding-top: 18px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .proj-metrics ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 28px;
+    list-style: none;
+  }
+  .proj-metric-v {
+    display: block;
+    font-size: 30px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+  .proj-metric-k {
+    display: block;
+    margin-top: 7px;
+    font-size: 11.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--studio-gray);
+  }
+  .proj-measured {
+    margin-top: 14px;
+    font-size: 12px;
+    color: var(--studio-gray);
+    opacity: 0.75;
+  }
+
+  .proj-caps {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    list-style: none;
+  }
+  .proj-caps li {
+    font-size: 12.5px;
+    color: var(--studio-gray);
+    padding: 5px 11px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 999px;
+  }
+
+  .proj-visit {
+    margin-top: auto;
+    padding-top: 6px;
+    font-size: 14px;
+    letter-spacing: 0.04em;
+    color: var(--flash-orange);
+    word-break: break-all;
+  }
+  .proj-visit:hover {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .proj,
+    .proj-media :global(img) {
+      transition: none;
+    }
+    .proj:hover {
+      transform: none;
+    }
+    .proj:hover .proj-media :global(img) {
+      transform: none;
+    }
+  }
+</style>
