@@ -31,6 +31,7 @@ export const footerColumns: FooterColumn[] = [
   {
     title: 'Estudio',
     links: [
+      { label: 'Proyectos', href: routes.proyectos },
       { label: 'Cómo trabajamos', href: routes.proceso },
       { label: 'Centro de ayuda', href: routes.ayuda },
       { label: 'Contacto', href: routes.contacto },

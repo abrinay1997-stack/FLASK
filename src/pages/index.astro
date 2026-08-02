@@ -7,6 +7,7 @@ import SceneBg from '../components/SceneBg.astro';
 import { site, waLink } from '../data/site';
 import { plans } from '../data/plans';
 import { services } from '../data/services';
+import { projects } from '../data/projects';
 import { procesoVisual } from '../data/images';
 import { routes } from '../data/links';
 ---
@@ -49,6 +50,31 @@ import { routes } from '../data/links';
       <span>Scroll</span>
       <span class="hero-scroll-line" aria-hidden="true"></span>
     </a>
+  </section>
+
+  <!--
+    PRUEBA, antes que el discurso.
+
+    Es lo primero que aparece tras el hero porque es lo único de la home que el
+    visitante puede verificar sin fiarse de nosotros. Van los dominios y no unos
+    logos: un logo se dibuja, un dominio se abre.
+  -->
+  <section class="proof" aria-labelledby="proof-title">
+    <div class="container">
+      <div class="proof-inner">
+        <span class="eyebrow" id="proof-title">Trabajo publicado</span>
+        <ul class="proof-list">
+          {projects.map((project) => (
+            <li>
+              <a href={project.url} target="_blank" rel="noopener">{project.domain}</a>
+            </li>
+          ))}
+        </ul>
+        <a class="proof-link" href={routes.proyectos}>
+          Ver los proyectos <span aria-hidden="true">→</span>
+        </a>
+      </div>
+    </div>
   </section>
 
   <!-- PREVIEW SERVICIOS -->
@@ -231,6 +257,56 @@ import { routes } from '../data/links';
   /* Ocultar el gradiente CSS antiguo (lo reemplaza el shader) */
   .hero-cinematic::after {
     display: none !important;
+  }
+
+  /* ---------- BANDA DE PRUEBA ---------- */
+  .proof {
+    padding: 34px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    background: rgba(255, 255, 255, 0.015);
+  }
+  .proof-inner {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 18px 30px;
+  }
+  .proof .eyebrow {
+    margin: 0;
+    flex-shrink: 0;
+  }
+  .proof-list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 26px;
+    list-style: none;
+    flex: 1;
+  }
+  .proof-list a {
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    color: var(--studio-gray);
+    transition: color 0.25s;
+  }
+  .proof-list a:hover {
+    color: var(--soft-white);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+  .proof-link {
+    flex-shrink: 0;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--flash-orange);
+    white-space: nowrap;
+  }
+  .proof-link:hover {
+    text-decoration: underline;
+    text-underline-offset: 4px;
   }
 
   /* ---------- RESTO DE LA HOME ---------- */

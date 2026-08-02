@@ -6,6 +6,7 @@ import { modules } from '../data/modules';
 import { carePlans, careNote } from '../data/care';
 import { faqGroups } from '../data/faq';
 import { services, procesoSteps } from '../data/services';
+import { projects } from '../data/projects';
 
 /**
  * Base de conocimiento del chatbot, generada en el build desde los MISMOS
@@ -213,6 +214,36 @@ export const GET: APIRoute = () => {
       text: `${step.title}: ${step.desc}`,
     });
   }
+
+  /* ---------------- Proyectos ---------------- */
+  /**
+   * "¿Tienen ejemplos?" es de las primeras preguntas de cualquiera que dude, y
+   * hasta ahora el bot no tenía con qué responderla. Se genera desde el mismo
+   * projects.ts que dibuja la página, así que un caso nuevo aparece en los dos
+   * sitios a la vez.
+   */
+  add({
+    id: 'proyectos',
+    topic: 'proyectos',
+    q: [
+      'tienen ejemplos',
+      'puedo ver trabajos',
+      'portafolio',
+      'portfolio',
+      'que han hecho',
+      'muestrame sitios que hayan hecho',
+      'tienen casos',
+      'trabajos anteriores',
+      'referencias',
+      'con quien han trabajado',
+      'como se que saben hacerlo',
+    ],
+    text:
+      'Sí. Hay sitios publicados y funcionando que puedes abrir ahora mismo: ' +
+      projects.map((p) => `${p.name} (${p.domain})`).join(', ') +
+      '. Están todos en la página de Proyectos, cada uno con enlace directo a su dominio ' +
+      'para que compruebes tú mismo cómo carga.',
+  });
 
   /* ---------------- FAQ ---------------- */
   for (const group of faqGroups) {

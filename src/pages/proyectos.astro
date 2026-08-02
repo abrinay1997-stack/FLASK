@@ -1,0 +1,190 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Reveal from '../components/Reveal.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import SceneBg from '../components/SceneBg.astro';
+
+import { projects, publishedMetrics } from '../data/projects';
+import { sobreVisuals } from '../data/images';
+import { routes } from '../data/links';
+import { site, waLink } from '../data/site';
+
+/**
+ * La página que le faltaba al sitio.
+ *
+ * Todo lo demás son promesas escritas por quien cobra: los plazos, la velocidad,
+ * el precio cerrado. Esta es la única donde el visitante puede ir a comprobarlo
+ * él mismo, y por eso cada tarjeta enlaza al sitio en vivo en lugar de a una
+ * ficha interna. Mandarle a un caso de estudio propio sería pedirle que vuelva a
+ * creernos; mandarle al dominio del cliente es dejar que lo verifique.
+ *
+ * Mientras las fichas no tengan métricas medidas, la página no habla de
+ * velocidad. Prometerla aquí sin la cifra al lado sería el mismo humo que el
+ * sitio critica en las agencias.
+ */
+const origin = Astro.site ?? new URL('http://localhost:4321');
+const anyMeasured = projects.some((p) => publishedMetrics(p).length > 0);
+
+const itemListSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: `Proyectos — ${site.name}`,
+  description: `Sitios publicados por ${site.name} en ${site.location}.`,
+  url: new URL(routes.proyectos, origin).toString(),
+  mainEntity: {
+    '@type': 'ItemList',
+    itemListElement: projects.map((project, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name: project.name,
+      url: project.url,
+    })),
+  },
+};
+---
+
+<BaseLayout
+  title="Proyectos"
+  description={`Sitios que hemos construido y están en línea hoy. Cada uno enlaza a su dominio para que compruebes tú mismo cómo carga. ${site.name}, ${site.location}.`}
+  activePath={routes.proyectos}
+  jsonLd={[itemListSchema]}
+>
+  <!-- HERO -->
+  <section class="hero hero-short">
+    <div class="container hero-inner">
+      <span class="year">Proyectos</span>
+      <span class="handle">{projects.length} sitios en línea</span>
+      <Reveal>
+        <h1>No te lo contamos. <span class="muted">Ábrelos.</span></h1>
+      </Reveal>
+      <Reveal delay={0.15}>
+        <p class="lead">
+          Todo lo demás en este sitio son promesas nuestras. Esto es lo único que puedes
+          comprobar sin fiarte de nadie: cada tarjeta abre el sitio real, funcionando hoy.
+          Míralo desde tu celular y cronométralo si quieres.
+        </p>
+      </Reveal>
+    </div>
+  </section>
+
+  <!-- REJILLA DE PROYECTOS -->
+  <section class="proyectos" id="trabajo">
+    <div class="container">
+      <div class="proyectos-grid">
+        {projects.map((project) => (
+          <Reveal>
+            <ProjectCard project={project} />
+          </Reveal>
+        ))}
+      </div>
+
+      {anyMeasured && (
+        <p class="proyectos-nota">
+          Las cifras de esta página se miden con Lighthouse en móvil, en modo incógnito y sin
+          extensiones. Cada una lleva la fecha de su medición al lado, porque un número sin
+          fecha deja de ser cierto sin que nadie lo toque.
+        </p>
+      )}
+    </div>
+  </section>
+
+  <!-- CIERRE -->
+  <section class="proyectos-cta">
+    <SceneBg visual={sobreVisuals.interfaz} side="center" dim={0.34} />
+    <div class="container">
+      <Reveal>
+        <h2>¿El tuyo es el siguiente?</h2>
+        <p>
+          Dinos qué necesitas y te decimos el precio y la fecha. Sin llamadas de venta y sin
+          «consultar por interno».
+        </p>
+        <div class="proyectos-cta-actions">
+          <a class="btn btn-primary" href={routes.cotizador}>
+            <span class="dot"></span> Calcular mi precio
+          </a>
+          <a
+            class="btn btn-ghost"
+            href={waLink('Hola CuatroNodos, vi sus proyectos y quiero cotizar el mío')}
+            target="_blank"
+            rel="noopener"
+          >
+            Hablar por WhatsApp
+          </a>
+        </div>
+      </Reveal>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .proyectos {
+    padding: 20px 0 120px;
+  }
+  /*
+    Dos columnas fijas en vez de auto-fit: con cuatro fichas, `auto-fit` deja una
+    huérfana a ancho completo en cuanto una tarjeta crece más que las otras, y
+    aquí van a crecer desparejas mientras se completan los casos uno a uno.
+  */
+  .proyectos-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+    align-items: start;
+  }
+  .proyectos-nota {
+    margin-top: 44px;
+    max-width: 68ch;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--studio-gray);
+    line-height: 1.65;
+  }
+
+  /* ---------- CIERRE ---------- */
+  .proyectos-cta {
+    position: relative;
+    overflow: hidden;
+    padding: 130px 0;
+    text-align: center;
+  }
+  .proyectos-cta .container {
+    position: relative;
+    z-index: 1;
+  }
+  .proyectos-cta h2 {
+    font-size: clamp(34px, 5vw, 64px);
+    font-weight: 600;
+    line-height: 1.02;
+    letter-spacing: -0.025em;
+    text-transform: uppercase;
+    text-shadow: 0 4px 40px rgba(16, 1, 1, 0.85);
+  }
+  .proyectos-cta p {
+    margin: 22px auto 0;
+    max-width: 52ch;
+    font-size: 17px;
+    font-weight: 300;
+    color: var(--studio-gray);
+    line-height: 1.6;
+    text-shadow: 0 2px 20px rgba(16, 1, 1, 0.9);
+  }
+  .proyectos-cta-actions {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 38px;
+  }
+
+  @media (max-width: 900px) {
+    .proyectos-grid {
+      grid-template-columns: 1fr;
+    }
+    .proyectos {
+      padding-bottom: 90px;
+    }
+    .proyectos-cta {
+      padding: 96px 0;
+    }
+  }
+</style>

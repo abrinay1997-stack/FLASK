@@ -23,6 +23,7 @@ export function withBase(path: string): string {
 export const routes = {
   home: BASE,
   servicios: withBase('servicios.html'),
+  proyectos: withBase('proyectos.html'),
   planes: withBase('planes.html'),
   proceso: withBase('proceso.html'),
   ayuda: withBase('ayuda.html'),
