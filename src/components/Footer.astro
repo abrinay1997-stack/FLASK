@@ -300,9 +300,35 @@ import { footerColumns, socials, footerTrust } from '../data/footer';
     }
   }
   @media (max-width: 560px) {
+    /*
+      Dos columnas, no una.
+
+      Apiladas en una sola columna, las cuatro secciones de enlaces medían
+      796 px: más que la pantalla entera de un teléfono, solo el menú del pie.
+      Con el resto de bloques el footer llegaba a 1580 px —dos pantallas y
+      media— y al bajar daba la sensación de que no se acababa nunca.
+
+      Los rótulos largos ("Mantenimiento (Care)") parten en dos líneas a este
+      ancho, y está bien: dos líneas en un pie se leen sin esfuerzo, media
+      pantalla de scroll de más no.
+    */
     .foot-nav {
-      grid-template-columns: 1fr;
-      gap: 34px;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 28px 18px;
+    }
+    .foot-col-title {
+      margin-bottom: 12px;
+    }
+    /* Los respiros de escritorio, a escala de teléfono. */
+    .foot-top {
+      gap: 40px;
+      padding: 52px 0 40px;
+    }
+    .foot-trust {
+      margin-top: 20px;
+    }
+    .foot-cta {
+      margin-top: 22px;
     }
     .foot-bottom {
       flex-direction: column;
