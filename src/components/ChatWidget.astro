@@ -517,9 +517,29 @@ const sugerencias = [
     .chat-launcher {
       padding: 14px;
     }
+    /*
+      En teléfono el panel se ancla al viewport, no al lanzador.
+
+      Antes era `position:absolute` dentro de `.chat` —que va desplazado
+      `right:14px`— y encima pedía `width:calc(100vw - 28px)`. Dos medidas
+      distintas decidiendo el mismo ancho: si `100vw` no coincide exactamente
+      con el ancho útil, el panel se descuadra y se sale por la derecha. Es
+      justo lo que pasaba en Safari de iOS, donde `100vw` no siempre mide lo
+      que se ve; en Chromium no se reproducía.
+
+      Con `left` y `right` fijados y `width:auto`, el ancho lo deriva el
+      navegador del viewport real. No hay aritmética que pueda desajustarse.
+    */
     .chat-panel {
-      width: calc(100vw - 28px);
+      position: fixed;
+      left: 14px;
+      right: 14px;
+      bottom: 14px;
+      width: auto;
+      /* dvh descuenta la barra de direcciones de Safari; vh queda de reserva
+         para navegadores que no lo soporten. */
       height: min(72vh, 560px);
+      height: min(72dvh, 560px);
     }
   }
 

@@ -215,6 +215,77 @@ async function checkFooter(browser, base) {
   }
 }
 
+async function checkChat(browser, base) {
+  console.log('\nE. Panel del chat abierto, dentro de la pantalla');
+  const { devices } = await loadPlaywright();
+
+  /*
+   * El último escenario no es un teléfono: es un viewport estrecho con canal de
+   * barra de scroll reservado, de forma que el ancho utilizable queda por debajo
+   * de lo que miden las unidades de viewport.
+   *
+   * Está aquí porque el fallo del panel apareció en Safari de iOS y Chromium no
+   * lo reproducía: allí `100vw` no siempre coincide con lo que se ve. Sin este
+   * caso, la comprobación pasaba igual con el código roto y no servía de nada.
+   */
+  const cases = [
+    ...PHONES.map((n) => ({ name: n, opts: { ...devices[n] }, gutter: false })),
+    { name: 'desajuste de 100vw', opts: { viewport: { width: 500, height: 700 } }, gutter: true },
+  ];
+
+  for (const c of cases) {
+    const name = c.name;
+    const ctx = await browser.newContext(c.opts);
+    const page = await ctx.newPage();
+    // En /proceso, que es donde apareció el fallo: el panel se abre sobre una
+    // página larga y con el nav flotante encima.
+    await page.goto(`${base}/proceso.html`, { waitUntil: 'load' });
+    if (c.gutter) {
+      await page.addStyleTag({
+        content:
+          'html{scrollbar-gutter:stable both-edges;overflow-y:scroll}' +
+          '::-webkit-scrollbar{width:16px;background:#333}',
+      });
+    }
+    await page.waitForTimeout(400);
+    await page.click('.chat-launcher');
+    await page.waitForTimeout(500);
+    const r = await page.evaluate(() => {
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const p = document.querySelector('.chat-panel').getBoundingClientRect();
+      // Lo que de verdad duele es que se corten los controles, no el borde.
+      const out = [];
+      for (const el of document.querySelectorAll('.chat-panel *')) {
+        const b = el.getBoundingClientRect();
+        if (b.width > 0 && (b.right > vw + 0.5 || b.left < -0.5)) {
+          out.push(el.className ? String(el.className).trim().split(/\s+/)[0] : el.tagName);
+        }
+      }
+      return {
+        gapL: Math.round(p.left),
+        gapR: Math.round(vw - p.right),
+        w: Math.round(p.width),
+        fitsV: p.top >= -0.5 && p.bottom <= vh + 0.5,
+        cut: [...new Set(out)].slice(0, 4),
+      };
+    });
+    const ok = Math.abs(r.gapL - r.gapR) <= 1 && r.gapL >= 0 && r.gapR >= 0 && r.cut.length === 0 && r.fitsV;
+    if (!ok) {
+      fail(
+        `chat en ${name}: márgenes ${r.gapL}/${r.gapR}px` +
+          (r.cut.length ? `, se cortan: ${r.cut.join(', ')}` : '') +
+          (r.fitsV ? '' : ', no cabe de alto')
+      );
+    }
+    console.log(
+      `   ${name.padEnd(20)} ancho ${String(r.w).padStart(4)}  izq ${String(r.gapL).padStart(3)}  der ${String(r.gapR).padStart(3)}` +
+        `  cortados:${r.cut.length}  ${mark(ok)}`
+    );
+    await ctx.close();
+  }
+}
+
 /* ------------------------------------------------------------------ */
 async function main() {
   try {
@@ -236,6 +307,7 @@ async function main() {
     await checkNav(browser, base);
     await checkPages(browser, base, pages);
     await checkFooter(browser, base);
+    await checkChat(browser, base);
   } finally {
     await browser.close();
     server.close();
