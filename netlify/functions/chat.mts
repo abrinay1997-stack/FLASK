@@ -78,6 +78,23 @@ interface Provider {
 const CONOCIDOS = ['anthropic', 'groq'];
 
 /**
+ * Cómo se describe CHAT_PROVIDER en el registro.
+ *
+ * NUNCA se escribe el valor crudo. Parece una variable inofensiva —solo admite
+ * dos palabras— pero en producción alguien pegó ahí su clave de Groq en vez de
+ * la palabra 'groq', y el registro la publicó entera y en claro. Un campo donde
+ * cabe un secreto acaba conteniendo un secreto: la regla es que ningún valor de
+ * entorno se imprime, aunque "no sea un secreto".
+ */
+function describeChatProvider(): string {
+  const crudo = process.env.CHAT_PROVIDER;
+  if (!crudo) return '(ausente)';
+  const limpio = crudo.trim().toLowerCase().replace(/^["']|["']$/g, '');
+  if (CONOCIDOS.includes(limpio)) return limpio;
+  return `(valor no reconocido, ${limpio.length} caracteres)`;
+}
+
+/**
  * Lee CHAT_PROVIDER tolerando lo que de verdad se pega en un panel: espacios
  * sobrantes, mayúsculas y comillas alrededor del valor.
  *
@@ -91,7 +108,9 @@ function proveedorForzado(): string | undefined {
   const crudo = process.env.CHAT_PROVIDER?.trim().toLowerCase().replace(/^["']|["']$/g, '');
   if (!crudo) return undefined;
   if (CONOCIDOS.includes(crudo)) return crudo;
-  console.error(`[chat] CHAT_PROVIDER="${crudo}" no es ${CONOCIDOS.join(' ni ')}; se ignora`);
+  console.error(
+    `[chat] CHAT_PROVIDER ${describeChatProvider()}: se esperaba ${CONOCIDOS.join(' o ')}. Se ignora.`
+  );
   return undefined;
 }
 
@@ -282,7 +301,7 @@ export default async (req: Request, context: Context) => {
      * registra solo la presencia, nunca el valor.
      */
     console.error(
-      `[chat] ningún proveedor disponible. CHAT_PROVIDER=${process.env.CHAT_PROVIDER ?? '(ausente)'}; ` +
+      `[chat] ningún proveedor disponible. CHAT_PROVIDER ${describeChatProvider()}; ` +
         `ANTHROPIC_API_KEY ${process.env.ANTHROPIC_API_KEY ? 'presente' : 'ausente'}; ` +
         `GROQ_API_KEY ${process.env.GROQ_API_KEY ? 'presente' : 'ausente'}`
     );

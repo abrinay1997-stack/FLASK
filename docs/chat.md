@@ -117,8 +117,9 @@ puede publicar un precio falso.
    - `ANTHROPIC_API_KEY` — si está, tiene prioridad; mejores respuestas
    - `GROQ_API_KEY` — alternativa más barata y rápida
 3. Opcionales:
-   - `CHAT_PROVIDER` — `groq` o `anthropic` para fijar cuál se usa e ignorar el
-     otro. **Léete el aviso de abajo antes de darlo por innecesario.**
+   - `CHAT_PROVIDER` — la **palabra** `groq` o `anthropic`, no la clave. Fija
+     cuál se usa e ignora el otro. **Léete el aviso de abajo antes de darlo por
+     innecesario.**
    - `CHAT_MODEL` — fija el modelo. Solo se aplica cuando hay una única clave
      configurada; con dos están `ANTHROPIC_MODEL` y `GROQ_MODEL`, porque el
      mismo nombre de modelo no existe en las dos APIs. Por defecto usa
@@ -135,6 +136,13 @@ puede publicar un precio falso.
 Si fallan todos los proveedores configurados, el chat deriva a WhatsApp. Cada
 intento fallido queda en el registro de la función con el nombre del proveedor y
 la respuesta que dio.
+
+> **Ningún valor de entorno se escribe en el registro, ni los que "no son
+> secretos".** `CHAT_PROVIDER` solo admite dos palabras y aun así el registro
+> llegó a publicar una clave de Groq entera y en claro, porque se pegó ahí en vez
+> de en `GROQ_API_KEY`. Un campo donde cabe un secreto acaba conteniendo un
+> secreto. De un valor no reconocido se registra su longitud, nunca su
+> contenido.
 4. Despliega. La función queda en `/api/chat` y el widget la detecta sola.
 
 **Sin ninguna clave el sitio no se rompe:** el endpoint responde derivando a

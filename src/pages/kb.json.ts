@@ -122,9 +122,22 @@ export const GET: APIRoute = () => {
       'tarifas',
       'es caro',
       'cual es el mas barato',
+      // "¿Qué planes tienen?" es de las tres preguntas más frecuentes y no
+      // recuperaba este hecho: ninguna de las frases de arriba lleva la palabra
+      // "planes", así que ganaban preguntas frecuentes sueltas y la respuesta
+      // salía sin una sola cifra. Justo el fallo que docs/chat.md dice arreglar
+      // aquí y no en el prompt.
+      'que planes tienen',
+      'cuales son sus planes',
+      'que planes manejan',
+      'planes',
+      'paquetes',
+      'que ofrecen',
+      'que opciones hay',
+      'lista de planes',
     ],
     text:
-      `Los sitios van de ${plans.find((p) => p.slug === 'start')!.price} a ` +
+      `Nuestros sitios van de ${plans.find((p) => p.slug === 'start')!.price} a ` +
       `${plans.find((p) => p.slug === 'commerce')!.price}: ` +
       plans.map((p) => `${p.name} ${p.price}`).join(', ') +
       `. Todos los precios son fijos y públicos. Para una cifra exacta según lo que necesitas, ` +
@@ -165,7 +178,7 @@ export const GET: APIRoute = () => {
       'modulos',
     ],
     text:
-      'Además de los planes hay capacidades que se enchufan a lo que ya tengas, con precio cerrado y sin rehacer el sitio: ' +
+      'Además de los planes, le enchufamos capacidades a lo que ya tengas, con precio cerrado y sin rehacer el sitio: ' +
       modules.map((m) => `${m.name} (${m.price})`).join(', ') +
       '. Puedes empezar con una y sumar el resto más adelante.',
   });
@@ -191,7 +204,7 @@ export const GET: APIRoute = () => {
       'permanencia',
     ],
     text:
-      'CuatroNodos Care es el mantenimiento mensual: ' +
+      'CuatroNodos Care es nuestro mantenimiento mensual: ' +
       carePlans.map((c) => `${c.name} ${c.price}${c.suffix}`).join(', ') +
       `. ${careNote} Sin plan Care activo no monitorizamos el sitio ni respondemos incidencias.`,
   });
@@ -239,7 +252,7 @@ export const GET: APIRoute = () => {
       'como se que saben hacerlo',
     ],
     text:
-      'Sí. Hay sitios publicados y funcionando que puedes abrir ahora mismo: ' +
+      'Sí. Tenemos sitios publicados y funcionando que puedes abrir ahora mismo: ' +
       projects.map((p) => `${p.name} (${p.domain})`).join(', ') +
       '. Están todos en la página de Proyectos, cada uno con enlace directo a su dominio ' +
       'para que compruebes tú mismo cómo carga.',
@@ -271,9 +284,9 @@ export const GET: APIRoute = () => {
       'quiero hablar con alguien',
     ],
     text:
-      `Se habla directo con quien programa, por WhatsApp al ${contact.whatsapp}, ` +
+      `Hablas directo con quien programa tu sitio, por WhatsApp al ${contact.whatsapp}, ` +
       `en horario ${contact.horario} (${contact.timezone}). ` +
-      `${site.name} opera desde ${site.location}, 100 % en remoto para todo el país.`,
+      `Operamos desde ${site.location}, 100 % en remoto para todo el país.`,
   });
 
   add({
@@ -287,7 +300,7 @@ export const GET: APIRoute = () => {
       'cotizador',
     ],
     text:
-      'El cotizador del sitio da un precio en cuatro preguntas, sin dejar datos primero: ' +
+      'Nuestro cotizador te da un precio en cuatro preguntas, sin que dejes tus datos primero: ' +
       'qué necesitas, de qué tamaño, qué tiene que hacer y para cuándo. Al final muestra el desglose y el total.',
   });
 
@@ -303,9 +316,9 @@ export const GET: APIRoute = () => {
       'que es jamstack',
     ],
     text:
-      'CuatroNodos no usa WordPress. Construye de otra forma: sin complementos que actualizar y sin panel público ' +
+      'No usamos WordPress. Construimos de otra forma: sin complementos que actualizar y sin panel público ' +
       'por el que puedan entrar. Un WordPress barato suele abrir en cinco segundos y hay que mantenerlo cada ' +
-      'semana; estos sitios abren en menos de uno y puedes dejarlos solos un año.',
+      'semana; los nuestros abren en menos de uno y puedes dejarlos solos un año.',
   });
 
   add({
@@ -319,7 +332,7 @@ export const GET: APIRoute = () => {
       'me quedo atrapado',
     ],
     text:
-      'El código es tuyo. Al pago final el repositorio se transfiere a tu cuenta de GitHub y el dominio queda ' +
+      'El código es tuyo. Al pago final te transferimos el repositorio a tu cuenta de GitHub y el dominio queda ' +
       'a tu nombre. Si mañana quieres irte con otra agencia, te llevas todo.',
   });
 
@@ -334,8 +347,8 @@ export const GET: APIRoute = () => {
       'anticipo',
     ],
     text:
-      'Se paga 50 % por adelantado para reservar el cupo y arrancar, y el 50 % restante a la entrega, ' +
-      'antes de publicar y de transferir el repositorio. Los precios están en dólares. ' +
+      'Cobramos el 50 % por adelantado para reservar tu cupo y arrancar, y el 50 % restante a la entrega, ' +
+      'antes de publicar y de transferirte el repositorio. Los precios están en dólares. ' +
       `El ${diagnostico.name} se paga íntegro por adelantado.`,
   });
 
@@ -350,7 +363,7 @@ export const GET: APIRoute = () => {
     ],
     text:
       'Cada plan incluye un número definido de rondas de revisión, especificado en la propuesta. ' +
-      'Agotadas las incluidas, cada ronda adicional cuesta $40.',
+      'Agotadas las incluidas, te cobramos $40 por cada ronda adicional.',
   });
 
   add({
@@ -372,7 +385,7 @@ export const GET: APIRoute = () => {
     topic: 'legal',
     q: ['que hacen con mis datos', 'privacidad', 'usan cookies', 'me van a spamear'],
     text:
-      'El sitio no usa cookies propias ni tiene analítica instalada. ' +
+      'No usamos cookies propias ni tenemos analítica instalada en el sitio. ' +
       (formDestination === 'whatsapp'
         ? 'Los formularios no envían nada a ningún servidor: redactan un mensaje de WhatsApp en tu navegador que tú decides enviar. '
         : 'El formulario de contacto se envía al servicio de formularios del alojamiento y lo leemos desde ahí; el cotizador no envía nada, redacta un mensaje de WhatsApp en tu navegador que tú decides enviar. ') +
@@ -390,7 +403,7 @@ export const GET: APIRoute = () => {
       'incluye logo',
     ],
     text:
-      'El precio del paquete cubre diseño, desarrollo, despliegue y las revisiones del plan. No cubre redacción ' +
+      'El precio del paquete cubre diseño, desarrollo, despliegue y las revisiones del plan. No cubrimos la redacción ' +
       'de contenido, sesión de fotografía ni licencias de imágenes premium: eso se cotiza aparte solo si lo necesitas.',
   });
 
