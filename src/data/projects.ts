@@ -80,7 +80,9 @@ export interface Project {
 export const projects: Project[] = [
   {
     slug: 'bukoflow-play',
-    name: 'Bukoflow Play',
+    // El sitio se presenta como StemFlow; el slug sigue el dominio, que es lo
+    // que ata la ficha con su captura en src/assets/proyectos/.
+    name: 'StemFlow',
     domain: 'play.bukoflow.com',
     url: 'https://play.bukoflow.com/',
     image: bukoflowPlay,
