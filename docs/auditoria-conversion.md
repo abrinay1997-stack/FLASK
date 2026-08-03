@@ -1,7 +1,11 @@
 # Auditoría de conversión — sin anestesia
 
+> **Foto de un momento, no el estado actual.** Este documento se dejó tal como
+> se escribió. Parte de lo que señala ya está resuelto y parte sigue abierto;
+> lo que sigue vivo está en [`ROADMAP.md`](../ROADMAP.md).
+>
 > Fecha: 2026-08-01 · Medido sobre el build de producción.
-> Complementa `AUDITORIA.md` (jerarquía, accesibilidad, animación, marca).
+> Complementa [`auditoria-diseno.md`](auditoria-diseno.md) (jerarquía, accesibilidad, animación, marca).
 > Aquí solo se habla de una cosa: **por qué alguien que entra no acaba pagando.**
 
 ---

@@ -1,5 +1,9 @@
 # Auditoría del sitio CuatroNodos
 
+> **Foto de un momento, no el estado actual.** Este documento se dejó tal como
+> se escribió. Parte de lo que señala ya está resuelto y parte sigue abierto;
+> lo que sigue vivo está en [`ROADMAP.md`](../ROADMAP.md).
+>
 > Fecha: 2026-08-01 · Medida sobre el build de producción servido en local
 > (`npm run build && npm run preview`), con Chromium headless a 1440×900 y 390×844.
 >
@@ -268,7 +272,7 @@ el naranja del texto y el rojo del fondo es lo que hace que la palabra salte.
 ## Cómo reproducir estas mediciones
 
 Los scripts viven fuera del repo (son herramientas de auditoría, no de build).
-Con el sitio servido en `http://localhost:4321/FLASK` mediante
+Con el sitio servido en `http://localhost:4321` mediante
 `npm run build && npm run preview`, cada bloque se mide así:
 
 - **Contraste:** captura del recorte de cada elemento de texto → histograma de

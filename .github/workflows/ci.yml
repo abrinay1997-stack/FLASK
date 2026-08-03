@@ -1,7 +1,7 @@
-name: CI (build check)
+name: CI
 
-# El deploy real lo hace Netlify al detectar push en main. Este workflow
-# solo verifica que el proyecto siga compilando; ya no publica a GitHub Pages.
+# El deploy lo hace Netlify al detectar un push en main. Este workflow no
+# publica nada: solo verifica que lo que entra a main compile y tipe bien.
 
 on:
   push:
@@ -12,7 +12,7 @@ on:
 
 jobs:
   build:
-    name: Build (Astro)
+    name: Tipos y build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -26,6 +26,11 @@ jobs:
 
       - name: Install
         run: npm ci
+
+      # `astro build` NO comprueba tipos. Sin este paso, un error de TypeScript
+      # llega a producción con el CI en verde.
+      - name: Comprobar tipos
+        run: npm run check
 
       - name: Build
         run: npm run build

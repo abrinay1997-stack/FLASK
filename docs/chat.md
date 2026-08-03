@@ -82,8 +82,8 @@ Dos decisiones que no son de estilo:
   KB responde bien. En un modelo pequeño, encauzar la pregunta rinde más que
   pulir el prompt.
 - **Degrada a WhatsApp, no a un error.** Si `/api/chat` no existe (hoy, en
-  GitHub Pages), el widget lo detecta al primer intento y se convierte en un
-  atajo a WhatsApp y al cotizador. El mismo código sirve en Pages hoy y en
+  un hosting estático sin funciones), el widget lo detecta al primer intento y se convierte en un
+  atajo a WhatsApp y al cotizador. El mismo código sirve con funciones y sin ellas, hoy y en
   Netlify mañana.
 
 ---

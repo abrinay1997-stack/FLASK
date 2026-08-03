@@ -1,0 +1,146 @@
+# CuatroNodos
+
+Sitio web de CuatroNodos, agencia de sitios web en Panamá. Astro con salida
+estática pura, desplegado en Netlify.
+
+**En producción:** https://cuatronodos.netlify.app
+
+---
+
+## Arranque rápido
+
+```bash
+npm install
+npm run dev        # http://localhost:4321
+```
+
+Node 22. No hace falta nada más para trabajar en el sitio: no hay base de datos
+ni servicios externos que levantar. El chat es lo único que necesita Netlify, y
+cuando no lo encuentra degrada solo a WhatsApp (ver [`docs/chat.md`](docs/chat.md)).
+
+## Comandos
+
+| Comando | Qué hace |
+|---|---|
+| `npm run dev` | Servidor de desarrollo |
+| `npm run build` | Genera `dist/` |
+| `npm run preview` | Sirve `dist/` localmente |
+| `npm run check` | `astro check` — tipos de TypeScript y diagnósticos de `.astro` |
+| `npm run medir:movil` | Auditoría de layout en móvil sobre `dist/` (requiere `npm run build` antes) |
+| `npm run medir` | Mide los proyectos publicados con Lighthouse |
+| `npm run brand` | Regenera favicons y `og.png` en `public/` — solo al cambiar el branding |
+
+`npm run build` **no** comprueba tipos. Para eso está `npm run check`.
+
+### Las dos auditorías
+
+`npm run medir:movil` comprueba sobre el sitio ya construido que el navbar quede
+centrado, que ninguna página deje espacio muerto tras el footer, que el footer no
+se coma media pantalla de más y que el panel del chat no se corte. Nació de fallos
+reales, y cada comprobación se verificó reintroduciendo el bug para confirmar que
+salta. Sale con código 1 si algo se pasa de presupuesto.
+
+Necesita Playwright, que **no** es dependencia del proyecto a propósito —
+arrastra la descarga de un navegador y encarecería cada build de Netlify para
+algo que solo se corre a mano:
+
+```bash
+npm i -D playwright && npx playwright install chromium
+```
+
+`npm run medir` necesita una API key gratuita de PageSpeed Insights; los pasos
+están en la cabecera de `scripts/measure-projects.mjs`.
+
+---
+
+## Estructura
+
+```
+src/
+├── pages/          Una página = un archivo. kb.json.ts genera la base del chat.
+├── layouts/        BaseLayout.astro — head, SEO, JSON-LD, nav y footer.
+├── components/     Piezas reutilizables (.astro con estilos con scope).
+├── data/           TODO el contenido y los precios. Ver abajo.
+├── scripts/        motion.ts — registro de GSAP y utilidades de animación.
+├── styles/         global.css — tokens de marca, navbar, hero, utilidades.
+└── assets/         Imágenes procesadas por astro:assets.
+
+netlify/functions/  chat.mts — endpoint del chat. Único código de servidor.
+scripts/            Herramientas que se corren a mano, no en el build.
+docs/               Arquitectura y decisiones. Ver el índice al final.
+```
+
+### `src/data/` es el centro de gravedad
+
+Todo el contenido vive ahí, no en las páginas. Cambiar el precio de un plan es
+**una sola edición** y se propaga a `/planes`, al cotizador, al formulario de
+contacto y a lo que responde el chat.
+
+| Archivo | Qué manda |
+|---|---|
+| `site.ts` | Nombre, descripción, WhatsApp, horario |
+| `plans.ts` | Los cuatro planes y el diagnóstico |
+| `modules.ts` | Capacidades que se suman a un plan |
+| `care.ts` | Planes de mantenimiento |
+| `services.ts` | Los tres pilares, el proceso y los enlaces del nav |
+| `projects.ts` | Trabajo publicado |
+| `quote.ts` | Motor del cotizador — **compone precios de `plans.ts`, no los repite** |
+| `faq.ts`, `footer.ts`, `images.ts`, `links.ts` | Ayuda, pie, imágenes y rutas |
+
+---
+
+## Reglas que no se negocian
+
+Las cinco que más han mordido. La lista completa, con el porqué de cada una,
+está en [`docs/convenciones.md`](docs/convenciones.md).
+
+1. **Nunca hardcodear rutas internas.** Usar `routes.*` o `withBase()` de
+   `src/data/links.ts`.
+2. **Los precios no se duplican.** El cotizador y la base del chat los componen
+   de `plans.ts` y `modules.ts`. Un cotizador que diga un número distinto al de
+   `/planes` destruye justo la confianza que el sitio vende.
+3. **Cero jerga en el copy de cara al cliente.** Solo los nombres que el cliente
+   ya reconoce: WordPress, Google, WhatsApp, GitHub, Yappy. Si una frase solo la
+   entiende un programador, está mal escrita para esta página.
+4. **`prefers-reduced-motion: reduce` desactiva todas las animaciones.**
+5. **Nada de datos inventados.** Métricas, testimonios y casos solo se publican
+   medidos o verificados. Es el argumento entero del sitio: una cifra inflada en
+   una página desmonta las otras once.
+
+---
+
+## Despliegue
+
+Netlify construye y publica en cada push a `main`. `netlify.toml` define el
+comando, las cabeceras de seguridad y la caché.
+
+GitHub Actions **no** despliega: `.github/workflows/ci.yml` solo verifica que el
+proyecto compile, en cada push a `main` y en cada pull request.
+
+### Variables de entorno
+
+Se configuran en el panel de Netlify, **nunca en el repo**:
+
+| Variable | Para qué |
+|---|---|
+| `ANTHROPIC_API_KEY` | Chat con Claude (tiene prioridad si está) |
+| `GROQ_API_KEY` | Alternativa más barata para el chat |
+| `CHAT_MODEL` | Opcional, para fijar el modelo |
+
+Sin ninguna clave el endpoint sigue respondiendo: deriva a WhatsApp en vez de
+fallar.
+
+---
+
+## Documentación
+
+| Documento | Qué contiene |
+|---|---|
+| [`ROADMAP.md`](ROADMAP.md) | Lo que falta, ordenado por impacto |
+| [`docs/convenciones.md`](docs/convenciones.md) | Las reglas del proyecto y el troubleshooting |
+| [`docs/chat.md`](docs/chat.md) | Cómo está armado el chat y por qué |
+| [`docs/auditoria-diseno.md`](docs/auditoria-diseno.md) | Auditoría de jerarquía, accesibilidad y branding |
+| [`docs/auditoria-conversion.md`](docs/auditoria-conversion.md) | Auditoría comercial |
+
+Las dos auditorías son **fotos de un momento**, no el estado actual. Lo que
+sigue vivo de ellas está en `ROADMAP.md`.
