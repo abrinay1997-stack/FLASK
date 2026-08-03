@@ -240,6 +240,7 @@ export default async (req: Request, context: Context) => {
   const system = buildSystem(kb, facts);
 
   let reply = '';
+  let fallo = 'network';
   try {
     const res = await fetch(provider.url, {
       method: 'POST',
@@ -247,12 +248,30 @@ export default async (req: Request, context: Context) => {
       body: JSON.stringify(provider.body(system, messages)),
       signal: AbortSignal.timeout(20_000),
     });
-    if (!res.ok) throw new Error(`proveedor devolvió ${res.status}`);
+
+    if (!res.ok) {
+      /*
+       * El motivo real vive aquí y en ningún otro sitio: una clave mal pegada,
+       * una cuota agotada y un modelo retirado dan los tres el mismo "se me cayó
+       * la conexión" en pantalla. Sin este log había que adivinar. Va al registro
+       * de la función (Netlify → Functions → chat), que solo ve quien administra
+       * el sitio; al visitante nunca se le enseña el error del proveedor.
+       */
+      const detalle = (await res.text().catch(() => '')).slice(0, 500);
+      console.error(`[chat] ${provider.url} devolvió ${res.status}: ${detalle}`);
+      fallo = `http_${res.status}`;
+      throw new Error(fallo);
+    }
+
     reply = trimReply(provider.extract(await res.json()).trim());
-  } catch {
+  } catch (err) {
+    if (fallo === 'network') console.error('[chat] fallo llamando al proveedor:', err);
     return json({
       reply: `Se me cayó la conexión. Escríbenos por WhatsApp al ${kb.site.whatsapp} y te respondemos al momento.`,
       degraded: true,
+      // Solo el código, nunca el cuerpo del error: sirve para diagnosticar desde
+      // las herramientas del navegador sin publicar nada del proveedor.
+      code: fallo,
     });
   }
 
