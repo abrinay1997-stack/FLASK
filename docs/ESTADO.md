@@ -15,6 +15,20 @@ Reglas de este documento:
   [`convenciones.md`](convenciones.md); cómo funciona el chat, en
   [`chat.md`](chat.md). Aquí solo está el estado.
 
+**Dónde está el sitio hoy:** en beta. Publicado pero sin anunciar, sin dominio
+propio y sin buscar clientes todavía. El dominio se compra cuando lo de abajo
+esté hecho, no antes — y hay un punto (el 1) que **hay que hacer antes de
+comprarlo** o se vuelve caro.
+
+Cada pendiente lleva quién lo desbloquea:
+
+| Marca | Significa |
+|---|---|
+| `[código]` | Se hace entero desde el repo. Cero dinero, cero cuentas nuevas |
+| `[tuyo]` | Necesita contenido, una decisión o una gestión que solo puedes hacer tú |
+| `[cuenta]` | Gratis en dinero, pero exige abrir una cuenta en un servicio externo |
+| `[$]` | Cuesta dinero. Fuera de alcance mientras no haya presupuesto |
+
 ---
 
 ## Lo medido — 2026-08-03
@@ -51,6 +65,9 @@ Lo que sigue verde y conviene no romper:
 - **Solo se animan `transform` y `opacity`** en todo el sitio.
 - **Ninguna página deja al visitante sin salida:** el CTA del nav está en las
   doce, también en móvil.
+- **Datos estructurados ya emitidos:** `Organization` en todas las páginas
+  (`BaseLayout`), `FAQPage` en `/ayuda`, `Service` + `Offer` en `/planes` y
+  `CollectionPage` + `ItemList` en `/proyectos`.
 
 ### Cómo repetir esta medición
 
@@ -71,50 +88,121 @@ encabezados, animaciones) salen de `document.getAnimations()` y
 
 ---
 
-## P1 — Bloquea vender de verdad
+# El plan hasta salir de beta
 
-| # | Pendiente | Quién lo desbloquea | Nota |
-|---|---|---|---|
-| 1 | **Las fichas de `/proyectos` están a medias.** Los cuatro proyectos ya tienen sector, resumen y captura; les falta año, reto, solución, capacidades y **métricas**. | Contenido tuyo | Lo que escribes tú: a qué se dedica, qué problema tenía, qué se construyó. Lo demás ya son comandos: `npm run medir` saca las métricas con su `measuredAt` y `npm run capturas` rehace las portadas. Todo el hueco está marcado con `TODO` en `src/data/projects.ts`. |
-| 2 | **Dominio propio.** `.netlify.app` en la barra resta credibilidad a todo lo demás. | Compra tuya | Al comprarlo: apuntarlo en Netlify y cambiar `site` en `astro.config.mjs`. No hace falta volver a correr `npm run brand`, y el formulario ya no cambia de comportamiento al mudar de dominio. |
-| 3 | **Comprobar que los envíos del formulario te están llegando.** El destino está declarado en `formDestination` (`src/data/site.ts`) y hoy vale `'netlify'`: los envíos caen en **Netlify Forms**, no en WhatsApp. | Comprobación tuya | En Netlify: Forms → que el formulario `contacto` aparezca en *Active forms*, y activar la notificación por correo. Haz un envío de prueba. Si prefieres que vuelva a WhatsApp, cambia el valor a `'whatsapp'`: arrastra solo el copy del botón y lo que declara `/privacidad`. |
-| 4 | **Cero reversión de riesgo.** El cliente pone el 50 % por adelantado y asume el 100 % del riesgo. | Decisión tuya | La palabra «garantizado» aparece una vez en todo el sitio y es sobre PageSpeed ≥ 90: una especificación técnica, no una promesa comercial. Es normal en una agencia con portafolio; es letal en una sin él. Algo acotado que puedas cumplir: «si el primer diseño no te convence, devolvemos el adelanto». |
-| 5 | **Analítica.** No hay ninguna. Sin datos, todo lo de este documento es criterio informado, no certeza. | Decisión tuya | Decidir **antes** de anunciar el sitio, no después. Las cuatro métricas que importan están al final. |
-| 6 | **El envío del cotizador solo sale por WhatsApp.** En escritorio sin WhatsApp Web el flujo se corta. El formulario de `/contacto` ya no depende de eso (punto 3). | Decisión tuya + cuenta externa | Si eliges correo: cuenta en Formspree o Web3Forms, endpoint en el `action` del form, añadir el destino a `FormDestination` en `src/data/site.ts` y cambiar el envío del cotizador. |
-| 7 | **Revisar el mapeo respuesta → plan del cotizador.** Los precios son tuyos, pero las reglas que deciden qué plan corresponde a cada respuesta son una propuesta, no una decisión tomada. | Validación tuya | Todo en `src/data/quote.ts`. No des por buena una cotización hasta revisarlo. Si el cotizador estima sistemáticamente por debajo de lo que acabas cobrando, estás generando expectativas que luego rompes. |
+Ordenado por lo que de verdad mueve la aguja, no por lo que es fácil. El orden
+de los bloques es el orden de ejecución: el bloque 1 tiene una fecha límite
+real, y el 2 es el que decide si el sitio convence o no.
 
-## P2 — Contenido que no se puede inventar
+## Bloque 1 — Antes de comprar el dominio
 
-| # | Pendiente | Dónde tocar |
+Un solo punto, pero la ventana se cierra sola.
+
+| # | Pendiente | Quién |
 |---|---|---|
-| 8 | **Bio real.** El bloque de quiénes están detrás vive en `/proceso` y está pendiente de contenido: historia, foto y credenciales. | `proceso.astro` tiene un comentario marcando el punto exacto. La foto va a `src/assets/` y se registra en `src/data/images.ts`. |
-| 9 | **Prueba social de verdad.** `/proyectos` ya enseña cuatro sitios reales con captura y resumen — eso cerró el «cero enlaces a algo hecho por ti». Lo que sigue en cero: testimonios, nombres propios y **cifras medidas**. | La objeción real de tu comprador no es el precio, es «¿y este quién es?». Lo más barato que la responde hoy: el PageSpeed de estos cuatro proyectos, que es un comando (punto 1). |
-| 10 | **`/blog`** — solo si van a existir posts reales. Cero blogs vacíos. | Contenido SEO local: «cuánto cuesta una página web en Panamá», comparativas, guías. |
+| 1 | **URLs limpias, sin `.html`.** Hoy `astro.config.mjs` usa `format:'file'` y el sitio se sirve en `/contacto.html`. Cambiarlo a `trailingSlash:'always'` + `format:'directory'` toca todas las rutas de `links.ts`. | `[código]` |
 
-## P3 — Ventas
+**Por qué antes y no después.** Mientras nadie enlace al sitio desde fuera,
+cambiar las rutas no cuesta nada: se cambia y ya. En cuanto haya dominio propio,
+Google indexando y enlaces externos, el mismo cambio exige redirecciones 301,
+reindexación y aceptar una caída temporal de posiciones. Es la única tarea de
+toda la lista que se encarece por esperar.
 
-| # | Pendiente | Nota |
+Ojo con dos cosas al hacerlo: `format:'file'` está puesto por compatibilidad con
+**Netlify Forms** (ver el comentario en `astro.config.mjs`), así que hay que
+comprobar que el formulario de `/contacto` siga recibiendo envíos; y el
+`canonical` y el `sitemap` tienen que quedar diciendo lo mismo que las rutas
+nuevas.
+
+## Bloque 2 — Convertir promesa en prueba
+
+Es el bloque que más pesa en la probabilidad de éxito, y casi todo es gratis.
+Hoy el sitio afirma que es rápido y seguro, pero **no enseña una sola cifra
+propia**. Todo lo de aquí convierte afirmación en evidencia.
+
+| # | Pendiente | Quién |
 |---|---|---|
-| 11 | **El Diagnóstico de $49 está enterrado.** Es la única oferta de fricción baja del sitio: barata, concreta, y convierte a un desconocido en alguien que ya te pagó. Hoy vive como una banda debajo de la tabla de precios, sin página propia y compitiendo con cuatro planes de $295 a $1 200 que la aplastan. | Darle página propia y tratarla como la puerta para tráfico frío, no como un extra. |
-| 12 | **No hay captura para quien no está listo hoy.** Cero correo, cero lista, cero imán. La mayoría de quien entra a una web de agencia no compra en esa visita, y el sitio no tiene forma de quedarse con esa persona. | El imán ya está escrito en la home («te enviamos un reporte de velocidad de tu sitio actual») y **no está implementado**: falta el campo donde pegar la URL. Es además la entrada natural al Diagnóstico del punto 11. |
-| 13 | **Los planes no se pueden comparar.** Cuatro listas distintas, sin filas comunes; `Commerce` dice «Todo lo de Corporate» y obliga a subir con la vista, leer otra tarjeta y recordar. | Una tabla comparativa con las mismas filas para los cuatro. Aburrida, sí: es el formato que la gente sabe leer cuando está decidiendo. |
-| 14 | **Care está fuera del momento de venta.** Es el ingreso recurrente —lo único que hace que el negocio no dependa de vender un sitio nuevo cada mes— y aparece pasado el 70 % del scroll de `/planes`. Nunca se ofrece mientras la persona está decidiendo. | Que aparezca en el resultado del cotizador y en la propuesta, marcado por defecto. Un mantenimiento no se vende aparte: se adjunta. |
-| 15 | **El argumento contra el WordPress barato está solo en la home**, no en `/planes`, que es donde se compara. Quien llega directo a tus precios lee $295 contra nada. | Una fila de comparación junto a la tabla de precios: qué te dan por $199 y qué te damos por $295. Con datos, no adjetivos. |
-| 16 | **`/planes` tiene 13 acciones compitiendo** en el cuerpo de la página (medido 2026-08-03): 4 tarjetas de plan, 7 de capacidad y 2 botones. Cuando todo es prioritario, nada lo es. | Que las 7 tarjetas de capacidad no sean enlaces individuales, sino una lista con un solo CTA al cierre. |
-| 17 | **Sin señal de progreso en páginas largas.** `/planes` mide 7 911 px en móvil y `/proceso` 6 713 px, con seis bloques distintos y sin índice, anclas ni indicador de sección. Quien busca «el precio del mantenimiento» scrollea a ciegas. | Barato: una fila de anclas bajo el titular (`Planes · Capacidades · Care · FAQ`). Caro: índice lateral pegajoso. |
-| 18 | **El hero de la home no dice qué hace CuatroNodos hasta la bajada.** «Sitios que encienden. Código tuyo.» es memorable pero no informativo. | Apuesta consciente por el tono sobre la claridad: bien mientras el tráfico venga de referidos, revisable si llega tráfico frío de búsqueda. |
+| 2 | **Métricas reales de los cuatro proyectos.** `npm run medir` los pasa por la API de PageSpeed y devuelve las cifras con su `measuredAt`, listas para pegar. La API tiene cuota anónima gratuita: **cero dinero, cero cuenta**. Es la mejor relación esfuerzo/impacto de toda la lista. | `[código]` |
+| 3 | **Medir el propio sitio y publicarlo.** El sitio vende velocidad y no enseña la suya. Apuntar `npm run medir` también a `cuatronodos.netlify.app` y poner la cifra donde se lee. Es autoevidencia y ya la tienes. | `[código]` |
+| 4 | **Fichas de `/proyectos` completas.** Ya tienen sector, resumen y captura; faltan año, reto, solución y capacidades. Marcado con `TODO` en `src/data/projects.ts`. | `[tuyo]` |
+| 5 | **Estructura de testimonios.** Hoy no existe ni el sitio donde ponerlos. Se puede dejar montado —tipo, componente, tarjeta— para que publicar uno sea añadir un objeto a un array. Los textos y los permisos son tuyos. | `[código]` + `[tuyo]` |
+| 6 | **Quién está detrás.** El bloque vive en `/proceso` y está vacío. En un servicio de confianza el anonimato es una barrera de compra: la objeción real del comprador no es el precio, es «¿y este quién es?». | `[tuyo]` |
+| 7 | **Qué significa «CuatroNodos».** El nombre no se explica en ninguna página. Es una línea de origen de marca y hoy es storytelling desaprovechado. | `[tuyo]` |
+| 8 | **Reversión de riesgo.** La palabra «garantizado» aparece una vez en todo el sitio y es sobre PageSpeed ≥ 90: una especificación técnica, no una promesa comercial. Hoy el cliente pone el 50 % por adelantado y asume el 100 % del riesgo. Algo acotado y cumplible («si el primer diseño no te convence, devolvemos el adelanto») elimina de golpe la objeción más cara. | `[tuyo]` |
+| 9 | **«Muchos clientes lo dejan así».** Está en `/servicios`, hablando de Care — el único ingreso recurrente del negocio. El sitio le está diciendo al visitante que no lo contrate. Honestidad bien intencionada, efecto comercial contrario. | `[código]` |
+| 10 | **La estadística sin fuente.** «Cuatro de cada diez personas se van de una página que tarda más de tres segundos» (`services.ts`). No lleva fuente, y el sitio entero se vende sobre no publicar datos sin verificar. O se cita, o se suaviza. | `[código]` |
+| 11 | **Datos legales visibles** (aviso de operación, RUC). Para un pago de $850–$1 200 por adelantado, la formalidad se lee como seguridad. | `[tuyo]` |
 
-## P4 — Técnico, accesibilidad y marca
+## Bloque 3 — Que quien llegue no se vaya
 
-| # | Pendiente | Nota |
+Todo esto es programable aquí y ninguna pieza necesita dinero.
+
+| # | Pendiente | Quién |
 |---|---|---|
-| 19 | **Prueba con lector de pantalla real** (NVDA / VoiceOver). | Lo auditado es estructura, no experiencia. Es el único hueco de accesibilidad que queda, y no se puede cerrar desde el repo. |
-| 20 | **El `<select>` de `/contacto` usa `appearance:none`** con la flecha dibujada en `background-image`. | Funciona, pero en Windows con alto contraste la flecha puede desaparecer. Riesgo bajo; conviene saberlo. |
-| 21 | **Medir el sitio en vivo.** LCP, INP y CLS reales sobre el CDN. | `npm run medir` ya lo hace para los proyectos publicados; falta apuntarlo también al propio sitio. |
-| 22 | **Search Console.** | Sitemap y canonical ya se emiten bien y dicen lo mismo; falta darlos de alta y verificar. |
-| 23 | **La marca es solo tipográfica.** El rayo del favicon no aparece en el nav, ni en el footer, ni en la imagen social. Tampoco hay versión sobre fondo claro para facturas o propuestas. | Todo el sistema asume fondo oscuro. |
-| 24 | **URLs limpias sin `.html`** (`trailingSlash:'always'` + `format:'directory'`). | Cambiaría todas las rutas de `links.ts`. Hacerlo **antes** de que el sitio tenga enlaces externos apuntándole, no después. No corre prisa por coherencia —sitemap y canonical ya dicen lo mismo—: es cosmética de la barra de direcciones. |
-| 25 | **El shader es un `requestAnimationFrame` permanente** mientras el hero está en pantalla. Es la única animación corriendo del sitio, y el mayor consumo de la home. | Ya se pausa fuera del viewport y no arranca con reduce-motion, que es lo correcto. Si algún día importa la batería, se puede bajar a 30 fps sin que se note. |
+| 12 | **Tabla comparativa de planes.** Cuatro listas distintas sin filas comunes; `Commerce` dice «Todo lo de Corporate» y obliga a subir con la vista, leer otra tarjeta y recordar. Aburrida, sí: es el formato que la gente sabe leer cuando decide. | `[código]` |
+| 13 | **Care en el resultado del cotizador**, marcado por defecto. Es el ingreso recurrente y hoy aparece pasado el 70 % del scroll de `/planes`, nunca en el momento de decidir. Un mantenimiento no se vende aparte: se adjunta. | `[código]` |
+| 14 | **Fila de comparación contra el WordPress barato en `/planes`.** El argumento está solo en la home, pero la comparación se decide mirando el precio. Quien llega directo a `/planes` lee $295 contra nada. | `[código]` |
+| 15 | **Página propia para el Diagnóstico de $49.** Es la única oferta de fricción baja del sitio y vive como una banda debajo de la tabla, aplastada por cuatro planes de $295 a $1 200. Es el producto que debería recibir al tráfico frío. | `[código]` |
+| 16 | **Captura de quien no está listo hoy.** El imán ya está escrito en la home —«te enviamos un reporte de velocidad de tu sitio actual»— y no está implementado: falta el campo donde pegar la URL. Se puede construir con la misma API de PageSpeed del punto 2 y la función de Netlify que ya existe para el chat. Sin coste. | `[código]` |
+| 17 | **`/planes` tiene 13 acciones compitiendo** en el cuerpo (medido 2026-08-03). Cuando todo es prioritario, nada lo es. Que las 7 tarjetas de capacidad sean una lista con un solo CTA al cierre. | `[código]` |
+| 18 | **Sin señal de progreso en páginas largas.** `/planes` mide 7 911 px en móvil y `/proceso` 6 713 px. Una fila de anclas bajo el titular (`Planes · Capacidades · Care · FAQ`) es barata y resuelve. | `[código]` |
+| 19 | **El envío del cotizador solo sale por WhatsApp.** En escritorio sin WhatsApp Web el flujo se corta. `/contacto` ya no depende de eso. | `[tuyo]` + `[cuenta]` |
+| 20 | **Revisar el mapeo respuesta → plan del cotizador.** Los precios son tuyos; las reglas que deciden qué plan corresponde a cada respuesta son una propuesta mía, no una decisión tomada. Vive entero en `src/data/quote.ts`. | `[tuyo]` |
+| 21 | **Comprobar que los envíos del formulario llegan.** `formDestination` vale `'netlify'`: los envíos caen en Netlify Forms. Falta verlo en el panel, activar la notificación por correo y hacer un envío de prueba. | `[tuyo]` |
+
+## Bloque 4 — Que te encuentren
+
+| # | Pendiente | Quién |
+|---|---|---|
+| 22 | **Blog con Content Collections de Astro.** El motor se monta aquí y no cuesta nada; los artículos los escribes tú. Un competidor ya ranquea con «cuánto cuesta una página web en Panamá», que es exactamente la búsqueda de mayor intención del mercado. **Cero blogs vacíos:** el motor solo tiene sentido si van a existir posts. | `[código]` + `[tuyo]` |
+| 23 | **`LocalBusiness` además de `Organization`.** El schema que ya se emite es correcto pero genérico; `LocalBusiness` con área de servicio es el que compite en búsquedas locales. | `[código]` |
+| 24 | **Analítica.** Sin datos, todo este documento es criterio informado, no certeza. Hay opciones sin coste (Cloudflare Web Analytics es gratis y sin cookies, así que no obliga a banner). Decidir **antes** de anunciar el sitio. Toca `/privacidad` en el mismo commit. | `[cuenta]` |
+| 25 | **Search Console.** Sitemap y canonical ya se emiten bien; falta darlos de alta y verificar. Hacerlo **después** del punto 1, no antes. | `[cuenta]` |
+
+## Bloque 5 — Técnico y marca
+
+| # | Pendiente | Quién |
+|---|---|---|
+| 26 | **Prueba con lector de pantalla real** (NVDA / VoiceOver). Lo auditado es estructura, no experiencia. Es el único hueco de accesibilidad que queda y no se puede cerrar desde el repo. | `[tuyo]` |
+| 27 | **El `<select>` de `/contacto` usa `appearance:none`** con la flecha en `background-image`. En Windows con alto contraste puede desaparecer. Riesgo bajo. | `[código]` |
+| 28 | **La marca es solo tipográfica.** El rayo del favicon no aparece en el nav, ni en el footer, ni en la imagen social, y no hay versión sobre fondo claro para facturas o propuestas. | `[código]` |
+| 29 | **El shader es un `requestAnimationFrame` permanente** mientras el hero está en pantalla. Es la única animación corriendo del sitio. Ya se pausa fuera del viewport y no arranca con reduce-motion; si algún día importa la batería, baja a 30 fps sin que se note. | `[código]` |
+| 30 | **Los 9 PNG de origen pesan 11,2 MB** y en WebP q90 pesarían 0,87 MB — un 92 % menos, imperceptible en pantalla porque se muestran al 32–50 % de opacidad bajo un velo. No afecta a lo que se sirve (Astro ya emite 1,19 MB de WebP), solo al peso del repo. | `[código]` |
+
+## Fuera de alcance mientras no haya presupuesto
+
+No están olvidados: están descartados a propósito, y conviene no volver a
+evaluarlos cada mes.
+
+| Descartado | Por qué |
+|---|---|
+| Checkout / depósito en línea `[$]` | Exige cuenta de comercio y comisión por transacción. Hasta entonces el cierre es por WhatsApp o formulario |
+| Panel de cliente `[$]` | Necesita servidor y base de datos con coste recurrente. Contradice el «$0 de infraestructura» que hoy sostiene el margen |
+| BrowserStack o similar `[$]` | Ya cubierto gratis: `npm run medir:movil` mide el layout real en Chromium headless |
+| Auditoría de seguridad formal `[$]` | Un sitio estático sin panel ni base de datos tiene una superficie de ataque mínima. Cuando haya panel de cliente, se replantea |
+| Community manager, producción de vídeo, patrocinios `[$]` | Plan de redes, no de repo |
+
+---
+
+## Sobre el análisis externo del 2026-08-03
+
+Ese informe se hizo desde el navegador, sin acceso al código. Acierta en lo
+grande —la falta de prueba social y de dominio propio son los dos agujeros
+reales— pero conviene no actuar sobre estos cuatro puntos:
+
+- **«No detecté datos estructurados (schema.org)».** Sí los hay, y desde hace
+  tiempo: `Organization`, `FAQPage`, `Service` + `Offer` y `CollectionPage`. Lo
+  que falta es matizar `Organization` a `LocalBusiness` (punto 23), que es otra
+  cosa y mucho más pequeña.
+- **«URLs limpias» como fortaleza.** Es justo al revés: el sitio sirve
+  `/contacto.html`. Es el punto 1, y es el único con fecha límite.
+- **«Ocultar los íconos de redes “próximamente”».** Ya no enlazan a ningún
+  sitio: se dibujan apagados, fuera del orden de foco y con `aria-hidden`,
+  precisamente para no llevar a un 404. Si aun así se prefiere no anunciarlos,
+  es un filtro de una línea en `Footer.astro` — pero no es el bug que describe.
+- **«No pude verificar el responsive» y «auditar el contraste».** Los dos están
+  medidos: el layout móvil con `npm run medir:movil`, y el contraste del texto
+  secundario dio 10,4 : 1 sobre fondo real, muy por encima del 4,5 que pide AA.
 
 ---
 
@@ -158,7 +246,7 @@ números que de verdad deciden:
 3. **Cotizador vs. formulario directo**, en leads que acaban en venta. No en
    leads: en ventas.
 4. **Plan estimado vs. plan vendido.** Si divergen, las reglas de `quote.ts`
-   están mal calibradas (punto 7).
+   están mal calibradas (punto 20).
 
 ---
 
