@@ -1,0 +1,61 @@
+---
+/**
+ * Índice de secciones para páginas largas.
+ *
+ * Nació en `/ayuda`, que es la única página que lo tenía: una fila de píldoras
+ * bajo el titular para saltar sin scrollear a ciegas. Se extrajo aquí al
+ * necesitarlo también `/planes` (7 911 px en móvil) y `/proceso` (6 713 px).
+ *
+ * DOS REGLAS AL USARLO:
+ *
+ * 1. Cada `href` que empiece por `#` necesita que su sección declare ese `id`
+ *    Y un `scroll-margin-top` de al menos 110 px: el nav flotante mide eso y,
+ *    sin el margen, el salto deja el titular de la sección debajo de la barra.
+ * 2. Los destinos se eligen por lo que alguien busca, no por lo que la página
+ *    contiene. Una sección de la que nadie pregunta «¿dónde está?» no merece
+ *    una entrada aquí; el índice pierde valor cuanto más largo es.
+ *
+ * Acepta rutas de otra página (`/servicios/#care`), que es lo que permite
+ * ofrecer el precio del mantenimiento desde la página donde se decide comprar.
+ */
+interface Item {
+  href: string;
+  label: string;
+}
+
+interface Props {
+  items: Item[];
+  /** Para el lector de pantalla: «Secciones de …». */
+  label: string;
+}
+
+const { items, label } = Astro.props;
+---
+
+<nav class="section-nav" aria-label={label}>
+  {items.map((item) => <a href={item.href}>{item.label}</a>)}
+</nav>
+
+<style>
+  .section-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .section-nav a {
+    /* 10px arriba y abajo sobre 13px de texto deja el objetivo por encima de
+       los 24px que pide WCAG 2.5.8. Si se toca el tamaño, hay que recomprobarlo. */
+    padding: 10px 18px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 999px;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    color: var(--studio-gray);
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+  }
+  .section-nav a:hover {
+    border-color: var(--flash-orange);
+    color: var(--soft-white);
+    background: rgba(255, 81, 0, 0.06);
+  }
+</style>

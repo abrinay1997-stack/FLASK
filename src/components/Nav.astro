@@ -135,7 +135,11 @@ const { activePath = '' } = Astro.props;
     );
   }
 
-  /** Marca el enlace de la página actual comparando pathname (sin .html). */
+  /**
+   * Marca el enlace de la página actual. Normaliza los dos extremos —quita un
+   * `.html` heredado y la barra final— para comparar formas equivalentes de la
+   * misma ruta: así sigue acertando aunque alguien llegue por una URL vieja.
+   */
   function syncCurrent() {
     const here = location.pathname.replace(/\.html$/, '').replace(/\/$/, '');
     document.querySelectorAll<HTMLAnchorElement>('.nav-links a, .nav-cta').forEach((a) => {

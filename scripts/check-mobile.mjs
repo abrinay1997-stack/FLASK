@@ -129,7 +129,7 @@ async function checkNav(browser, base) {
   const page = await (await browser.newContext()).newPage();
   for (const w of NAV_WIDTHS) {
     await page.setViewportSize({ width: w, height: 800 });
-    await page.goto(`${base}/index.html`, { waitUntil: 'domcontentloaded' });
+    await page.goto(`${base}/`, { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(120);
     const m = await page.evaluate(() => {
       const r = document.querySelector('.nav-pill').getBoundingClientRect();
@@ -185,7 +185,7 @@ async function checkFooter(browser, base) {
   for (const name of PHONES) {
     const ctx = await browser.newContext({ ...devices[name] });
     const page = await ctx.newPage();
-    await page.goto(`${base}/index.html`, { waitUntil: 'load' });
+    await page.goto(`${base}/`, { waitUntil: 'load' });
     await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
     await page.waitForTimeout(500);
     const r = await page.evaluate(() => {
@@ -239,7 +239,7 @@ async function checkChat(browser, base) {
     const page = await ctx.newPage();
     // En /proceso, que es donde apareció el fallo: el panel se abre sobre una
     // página larga y con el nav flotante encima.
-    await page.goto(`${base}/proceso.html`, { waitUntil: 'load' });
+    await page.goto(`${base}/proceso/`, { waitUntil: 'load' });
     if (c.gutter) {
       await page.addStyleTag({
         content:
@@ -299,8 +299,43 @@ async function main() {
   const { server, port } = await serveDist();
   const base = `http://127.0.0.1:${port}`;
 
+  /**
+   * Las páginas se descubren recorriendo dist/, no listando su raíz.
+   *
+   * Antes esto era un `readdir` plano filtrando `.html`, y funcionaba porque
+   * cada página era un archivo suelto (`contacto.html`). Al pasar a URLs de
+   * directorio (`contacto/index.html`) ese filtro siguió sin fallar:
+   * simplemente dejó de encontrar diez de las doce páginas, y la comprobación
+   * de espacio muerto pasó en verde midiendo solo la home y el 404. Un
+   * verificador que se queda sin sujetos y no protesta es peor que no tenerlo,
+   * así que abajo se exige un mínimo.
+   */
   const { readdir } = await import('node:fs/promises');
-  const pages = (await readdir(DIST)).filter((f) => f.endsWith('.html')).sort();
+  async function findPages(dir = DIST, prefix = '') {
+    const found = [];
+    for (const entry of await readdir(dir, { withFileTypes: true })) {
+      if (entry.name === '_astro') continue;
+      const rel = prefix ? `${prefix}/${entry.name}` : entry.name;
+      if (entry.isDirectory()) found.push(...(await findPages(join(dir, entry.name), rel)));
+      else if (entry.name.endsWith('.html')) found.push(rel);
+    }
+    return found;
+  }
+  const pages = (await findPages()).sort();
+  /*
+   * Suelo, no cuenta exacta: el sitio crece y esto no debería pedir
+   * mantenimiento cada vez que se añade una página. Lo que vigila es la caída
+   * brusca — si el descubrimiento se vuelve a romper, devolverá dos o tres, no
+   * once.
+   */
+  const MINIMO_PAGINAS = 10;
+  if (pages.length < MINIMO_PAGINAS) {
+    console.error(
+      `Solo se encontraron ${pages.length} páginas en dist/, menos del mínimo ` +
+        `esperado (${MINIMO_PAGINAS}). El descubrimiento está roto: no te fíes de este informe.`,
+    );
+    process.exitCode = 1;
+  }
 
   const browser = await chromium.launch();
   try {

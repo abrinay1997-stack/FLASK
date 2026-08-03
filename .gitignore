@@ -42,7 +42,3 @@ BRANDING.html
 
 # Instrucciones internas para Claude
 CLAUDE.md
-
-# Nota: stitch_3d_web_creation_hero/ SÍ se versiona como carpeta de referencias
-# visuales para el resto del equipo. Las imagenes ACTIVAS del sitio se mueven
-# a src/assets/... y se importan con Astro Image.

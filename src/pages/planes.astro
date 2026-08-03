@@ -4,6 +4,7 @@ import PlanCard from '../components/PlanCard.astro';
 import ModuleCard from '../components/ModuleCard.astro';
 import Reveal from '../components/Reveal.astro';
 import SceneBg from '../components/SceneBg.astro';
+import SectionNav from '../components/SectionNav.astro';
 
 import { plans, diagnostico } from '../data/plans';
 import { modules } from '../data/modules';
@@ -75,6 +76,29 @@ const showcase = ['start', 'corporate']
             <PlanCard plan={plan} />
           </Reveal>
         ))}
+      </div>
+
+      <!--
+        El índice va DEBAJO de las tarjetas, no bajo el titular: los precios van
+        primeros a propósito (ver el comentario de arriba) y meter una fila de
+        enlaces antes los empujaría hacia abajo.
+
+        Los tres destinos son las tres preguntas que le quedan a alguien que
+        acaba de ver un precio, y dos de ellas ya no viven en esta página: Care
+        se mudó a /servicios y la FAQ a /ayuda. Hasta ahora, quien miraba $850 y
+        se preguntaba «¿y el mantenimiento?» o «¿de quién es el código?» no
+        tenía ningún camino desde aquí.
+      -->
+      <div class="planes-next">
+        <span class="planes-next-label">¿Y después del precio?</span>
+        <SectionNav
+          label="Más sobre los planes"
+          items={[
+            { href: '#modulos', label: 'Capacidades que se suman' },
+            { href: `${routes.servicios}#care`, label: 'Mantenimiento desde $35/mes' },
+            { href: routes.ayuda, label: 'Preguntas frecuentes' },
+          ]}
+        />
       </div>
     </div>
   </section>
@@ -183,6 +207,27 @@ const showcase = ['start', 'corporate']
   }
   .planes-title .muted {
     color: var(--studio-gray);
+  }
+
+  .planes-next {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px 20px;
+    margin-top: 54px;
+    padding-top: 34px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .planes-next-label {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--studio-gray);
+  }
+
+  /* Destino de #modulos: sin esto el nav flotante tapa el titular al saltar. */
+  .modulos {
+    scroll-margin-top: 110px;
   }
 
   /* ---------- RESPALDO ---------- */

@@ -4,7 +4,7 @@ import SceneBg from '../components/SceneBg.astro';
 import Reveal from '../components/Reveal.astro';
 import { contact, waLink, site, formDestination } from '../data/site';
 import { planOptions } from '../data/plans';
-import { sobreVisuals } from '../data/images';
+import { sceneVisuals } from '../data/images';
 import { routes } from '../data/links';
 
 /**
@@ -32,7 +32,7 @@ const esWhatsApp = formDestination === 'whatsapp';
   activePath={routes.contacto}
 >
   <section class="ct">
-    <SceneBg visual={sobreVisuals.interfaz} side="right" dim={0.4} eager />
+    <SceneBg visual={sceneVisuals.interfaz} side="right" dim={0.4} eager />
 
     <div class="container">
       <div class="ct-grid">

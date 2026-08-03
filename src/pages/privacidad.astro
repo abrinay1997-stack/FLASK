@@ -2,22 +2,41 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { site, contact, waLink, formDestination } from '../data/site';
 import { routes } from '../data/links';
+import { metaPixelId, ga4MeasurementId } from '../data/analytics';
 
 /**
- * Esta política describe lo que el sitio hace HOY, no una plantilla genérica:
- * no hay analítica y no hay cookies propias.
+ * Esta política describe lo que el sitio hace HOY, no una plantilla genérica.
  *
- * Lo que pasa con el formulario de contacto depende de `formDestination`
- * (src/data/site.ts), así que ese punto se redacta desde el mismo valor que
- * gobierna el envío. Decir aquí que nada sale del navegador mientras el POST se
- * va a un tercero no es un descuido de redacción: es una declaración falsa en el
- * único documento del sitio que promete exactitud.
+ * Los dos puntos que pueden quedarse desfasados se redactan desde el mismo
+ * valor que gobierna el comportamiento, no a mano:
  *
- * Si algún día se instala analítica, se conecta un endpoint de correo o se
- * activan cookies, hay que actualizar este archivo EN EL MISMO commit.
+ *   - el destino del formulario, desde `formDestination` (src/data/site.ts);
+ *   - las herramientas de medición, desde `src/data/analytics.ts`.
+ *
+ * Decir aquí que nada sale del navegador mientras el POST se va a un tercero, o
+ * que no hay analítica mientras un píxel informa de cada visita, no es un
+ * descuido de redacción: es una declaración falsa en el único documento del
+ * sitio que promete exactitud. Derivarlo del dato es lo que impide que alguien
+ * active una herramienta y se olvide de esta página.
+ *
+ * Si se conecta un endpoint de correo o entra cualquier otro tercero, hay que
+ * actualizar este archivo EN EL MISMO commit.
  */
 const actualizado = '3 de agosto de 2026';
 const esWhatsApp = formDestination === 'whatsapp';
+
+const medicion = [
+  metaPixelId && {
+    nombre: 'Píxel de Meta',
+    empresa: 'Meta Platforms, Inc.',
+    para: 'Saber cuánta gente llega desde Instagram y Facebook y qué hace después en el sitio.',
+  },
+  ga4MeasurementId && {
+    nombre: 'Google Analytics 4',
+    empresa: 'Google LLC',
+    para: 'Contar visitas y ver qué páginas se recorren, de forma agregada.',
+  },
+].filter(Boolean) as { nombre: string; empresa: string; para: string }[];
 ---
 
 <BaseLayout
@@ -47,11 +66,41 @@ const esWhatsApp = formDestination === 'whatsapp';
         </p>
 
         <h2>2. Qué datos recogemos</h2>
-        <p>
-          <strong>Del sitio web: ninguno.</strong> No usamos cookies propias, no hay herramientas
-          de analítica instaladas y no creamos perfiles de navegación. Puedes recorrer todas las
-          páginas sin que quede registro nuestro de tu visita.
-        </p>
+        {medicion.length === 0 ? (
+          <p>
+            <strong>Del sitio web: ninguno.</strong> No usamos cookies propias, no hay herramientas
+            de analítica instaladas y no creamos perfiles de navegación. Puedes recorrer todas las
+            páginas sin que quede registro nuestro de tu visita.
+          </p>
+        ) : (
+          <Fragment>
+            <p>
+              <strong>Del sitio web: datos de navegación, a través de terceros.</strong> No
+              guardamos nada en servidores nuestros, pero el sitio carga herramientas de medición
+              que sí registran tu visita: qué páginas ves, desde dónde llegaste, y datos técnicos
+              de tu navegador y tu conexión, incluida tu dirección IP. Esas herramientas usan
+              cookies y tecnologías parecidas.
+            </p>
+            <ul>
+              {medicion.map((m) => (
+                <li>
+                  <strong>{m.nombre}</strong> ({m.empresa}). {m.para}
+                </li>
+              ))}
+            </ul>
+            <p>
+              Las empresas que las proporcionan tratan esos datos según sus propias políticas y
+              pueden vincularlos con la cuenta que tengas en sus servicios. Nosotros solo vemos
+              informes agregados: cuánta gente entra y qué recorre, no quién es cada persona.
+            </p>
+            <p>
+              <strong>Cómo evitarlo.</strong> Puedes bloquear estas herramientas sin perder nada
+              del sitio: con el bloqueo de rastreadores que ya traen Firefox, Safari y Brave, con
+              cualquier extensión de bloqueo, o activando <em>No rastrear</em> en tu navegador. El
+              sitio funciona igual — ninguna función depende de que estas herramientas carguen.
+            </p>
+          </Fragment>
+        )}
         {esWhatsApp ? (
           <Fragment>
             <p>
@@ -129,7 +178,7 @@ const esWhatsApp = formDestination === 'whatsapp';
 
         <h2>8. Cambios en esta política</h2>
         <p>
-          Si en el futuro instalamos analítica, activamos cookies o conectamos el formulario a un
+          Si en el futuro añadimos otra herramienta de medición o conectamos el formulario a un
           servicio de correo, actualizaremos esta página y su fecha antes de que ese cambio entre
           en funcionamiento.
         </p>

@@ -1,0 +1,255 @@
+---
+/**
+ * /smark/ — el enlace único de la bio en redes.
+ *
+ * NO SE ENLAZA DESDE NINGUNA PARTE DEL SITIO. No está en el nav ni en el pie, y
+ * va con `noindex` y fuera del sitemap: existe para que se llegue a ella desde
+ * fuera, y para que Google no la trate como una puerta alternativa al sitio.
+ *
+ * Por qué vive aquí y no en un acortador ajeno: el enlace lleva el dominio del
+ * negocio, las visitas se miden con las mismas herramientas que el resto del
+ * sitio y nadie puede apagarlo ni cambiar de precio.
+ *
+ * REGLA AL AÑADIR BOTONES: no. O casi.
+ * Esta página tiene un solo trabajo, que es repartir hacia un destino. Cada
+ * botón nuevo reparte peor los clics entre todos los demás — es el mismo
+ * problema que ya tiene /planes con sus trece acciones, y aquí se nota más
+ * porque no hay nada más en pantalla. Si entra un destino, conviene que salga
+ * otro.
+ *
+ * Nada de esto duplica datos: el teléfono sale de site.ts, las rutas de
+ * links.ts y las redes de footer.ts. Cuando esas fuentes cambien, esta página
+ * cambia sola.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site, contact, waLink } from '../data/site';
+import { routes } from '../data/links';
+import { socials } from '../data/footer';
+
+// Solo las redes que ya existen. `footer.ts` marca con `href` las que están
+// activas; mientras no lo tengan, aquí no se dibuja nada — un enlace de la bio
+// que lleva a un perfil vacío es peor que no ofrecerlo.
+const redesActivas = socials.filter((s) => s.href);
+
+const destinos = [
+  {
+    href: routes.cotizador,
+    label: 'Calcular el precio de mi sitio',
+    hint: 'Cuatro preguntas y ves la cifra. Sin dejar tus datos.',
+    primary: true,
+  },
+  {
+    href: waLink('Hola CuatroNodos, los vi en redes y quiero cotizar mi sitio'),
+    label: 'Escribirnos por WhatsApp',
+    hint: contact.horario,
+    external: true,
+  },
+  {
+    href: routes.planes,
+    label: 'Ver planes y precios',
+    hint: 'Desde $295, publicados y cerrados por escrito.',
+  },
+  {
+    href: routes.proyectos,
+    label: 'Trabajo publicado',
+    hint: 'Sitios reales, con su dirección para comprobarlos.',
+  },
+];
+---
+
+<BaseLayout
+  bare
+  title={site.name}
+  description={site.descriptionShort}
+  noindex={true}
+  bodyClass="smark-body"
+>
+  <section class="smark">
+    <div class="smark-card">
+      <header class="smark-head">
+        <h1 class="smark-brand">{site.name}<span class="dot">.</span></h1>
+        <p class="smark-tagline">{site.tagline}</p>
+        <p class="smark-meta">Agencia web · {site.location}</p>
+      </header>
+
+      <nav class="smark-links" aria-label="Enlaces de CuatroNodos">
+        {destinos.map((d) => (
+          <a
+            class:list={['smark-link', { primary: d.primary }]}
+            href={d.href}
+            target={d.external ? '_blank' : undefined}
+            rel={d.external ? 'noopener' : undefined}
+          >
+            <span class="smark-link-label">{d.label}</span>
+            <span class="smark-link-hint">{d.hint}</span>
+          </a>
+        ))}
+      </nav>
+
+      {redesActivas.length > 0 && (
+        <ul class="smark-social" aria-label="Redes sociales">
+          {redesActivas.map((s) => (
+            <li>
+              <a href={s.href} target="_blank" rel="noopener" aria-label={s.name}>
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <path d={s.icon} />
+                </svg>
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <p class="smark-foot">
+        <a href={routes.home}>Ir al sitio completo</a>
+      </p>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  /* Sin nav ni pie, la tarjeta manda: se centra en la pantalla y respira. */
+  .smark {
+    min-height: 100svh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* La regla global `section{padding:120px 0}` aquí sobra: el centrado ya da
+       el aire, y con ella la tarjeta se salía de pantalla en móviles bajos. */
+    padding: 40px 22px;
+  }
+  .smark-card {
+    width: 100%;
+    max-width: 460px;
+  }
+
+  .smark-head {
+    text-align: center;
+    margin-bottom: 38px;
+  }
+  .smark-brand {
+    /* Fluido, no fijo: a 30px con 0.16em de separación la marca no cabe en 320px
+       y el punto naranja quedaba cortado contra el borde. El `clamp` la baja a
+       22px en las pantallas estrechas y la deja crecer hasta 30 en el resto. */
+    font-size: clamp(22px, 6.5vw, 30px);
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+  .smark-brand .dot {
+    color: var(--flash-orange);
+  }
+  .smark-tagline {
+    margin-top: 14px;
+    font-size: 17px;
+    font-weight: 300;
+    color: var(--soft-white);
+  }
+  .smark-meta {
+    margin-top: 8px;
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--studio-gray);
+  }
+
+  .smark-links {
+    display: grid;
+    gap: 12px;
+  }
+  .smark-link {
+    display: block;
+    padding: 18px 22px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.02);
+    transition: border-color 0.25s, background 0.25s, transform 0.25s;
+  }
+  .smark-link:hover {
+    border-color: var(--flash-orange);
+    background: rgba(255, 81, 0, 0.06);
+    transform: translateY(-2px);
+  }
+  .smark-link-label {
+    display: block;
+    font-size: 16px;
+    font-weight: 500;
+  }
+  .smark-link-hint {
+    display: block;
+    margin-top: 4px;
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--studio-gray);
+  }
+
+  /* El destino principal se distingue por relleno, no por otro color: el sitio
+     tiene un solo acento y meter un segundo tono aquí lo rompería. */
+  .smark-link.primary {
+    background: var(--soft-white);
+    border-color: var(--soft-white);
+  }
+  .smark-link.primary .smark-link-label {
+    color: var(--deep-black);
+    font-weight: 600;
+  }
+  .smark-link.primary .smark-link-hint {
+    color: rgba(16, 1, 1, 0.66);
+  }
+  .smark-link.primary:hover {
+    background: var(--flash-orange);
+    border-color: var(--flash-orange);
+  }
+
+  .smark-social {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 26px;
+  }
+  .smark-social a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 999px;
+    transition: border-color 0.25s, color 0.25s;
+  }
+  .smark-social a:hover {
+    border-color: var(--flash-orange);
+    color: var(--flash-orange);
+  }
+  .smark-social svg {
+    width: 17px;
+    height: 17px;
+    fill: currentColor;
+  }
+
+  .smark-foot {
+    margin-top: 30px;
+    text-align: center;
+  }
+  .smark-foot a {
+    display: inline-block;
+    /* 12px de texto se quedan en 15px de alto: el padding lo sube por encima
+       de los 24px que pide WCAG 2.5.8. */
+    padding: 8px 12px;
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--studio-gray);
+  }
+  .smark-foot a:hover {
+    color: var(--flash-orange);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .smark-link:hover {
+      transform: none;
+    }
+  }
+</style>

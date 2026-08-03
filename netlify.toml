@@ -38,6 +38,15 @@
   node_bundler = "esbuild"
 
 # ---------- HEADERS ----------
+# Por defecto: cabeceras de seguridad y NADA de caché agresiva, para que un
+# despliegue se vea al instante.
+#
+# El `Cache-Control` vivía en una regla `for = "/*.html"`. Al pasar a URLs de
+# directorio esa regla dejó de servir: la página ya no se pide como
+# `/contacto.html` sino como `/contacto/`, así que solo habría seguido
+# acertando en `/404.html` y todas las demás se habrían quedado sin política.
+# Por eso ahora el valor por defecto cuelga de `/*` y la excepción se declara
+# aparte, abajo.
 [[headers]]
   for = "/*"
   [headers.values]
@@ -46,15 +55,14 @@
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "camera=(), microphone=(), geolocation=()"
     Strict-Transport-Security = "max-age=31536000; includeSubDomains"
+    Cache-Control = "public, max-age=0, must-revalidate"
 
-# Assets de Astro con hash: cache inmutable
+# La excepción: los assets de Astro llevan un hash en el nombre, así que un
+# archivo concreto no cambia nunca — si cambia el contenido, cambia el nombre.
+# Esta regla va DESPUÉS y es MÁS ESPECÍFICA que la de arriba, que son los dos
+# criterios con los que Netlify puede resolver un conflicto: gane el que gane,
+# el año de caché inmutable se conserva.
 [[headers]]
   for = "/_astro/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
-
-# HTML: no cachear agresivamente para poder desplegar cambios al instante
-[[headers]]
-  for = "/*.html"
-  [headers.values]
-    Cache-Control = "public, max-age=0, must-revalidate"

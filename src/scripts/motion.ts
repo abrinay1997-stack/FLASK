@@ -19,9 +19,3 @@ export function prefersReducedMotion(): boolean {
   if (typeof window === 'undefined') return false;
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
-
-/** Detecta si es un dispositivo táctil (para desactivar efectos de hover). */
-export function isTouchDevice(): boolean {
-  if (typeof window === 'undefined') return false;
-  return window.matchMedia('(hover: none), (pointer: coarse)').matches;
-}

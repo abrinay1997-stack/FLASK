@@ -152,13 +152,14 @@ fallar.
 
 ## Documentación
 
+Tres documentos, sin solaparse. Si algo no cabe en ninguno, probablemente no
+haga falta escribirlo.
+
 | Documento | Qué contiene |
 |---|---|
-| [`ROADMAP.md`](ROADMAP.md) | Lo que falta, ordenado por impacto |
+| [`docs/ESTADO.md`](docs/ESTADO.md) | **Hallazgos y pendientes.** El único sitio donde se mira qué falta y cómo está el sitio hoy |
 | [`docs/convenciones.md`](docs/convenciones.md) | Las reglas del proyecto y el troubleshooting |
 | [`docs/chat.md`](docs/chat.md) | Cómo está armado el chat y por qué |
-| [`docs/auditoria-diseno.md`](docs/auditoria-diseno.md) | Auditoría de jerarquía, accesibilidad y branding |
-| [`docs/auditoria-conversion.md`](docs/auditoria-conversion.md) | Auditoría comercial |
 
-Las dos auditorías son **fotos de un momento**, no el estado actual. Lo que
-sigue vivo de ellas está en `ROADMAP.md`.
+`ESTADO.md` es un documento vivo: **lo que se cierra se borra**, no se archiva.
+El historial de git guarda lo cerrado.
