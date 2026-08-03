@@ -86,7 +86,10 @@ export const projects: Project[] = [
     domain: 'play.bukoflow.com',
     url: 'https://play.bukoflow.com/',
     image: bukoflowPlay,
-    // TODO(contenido): sector, year, summary, challenge, solution, capabilities.
+    sector: 'Música',
+    summary:
+      'Una plataforma para escuchar música en tres dimensiones: cada instrumento se mueve por el espacio y se ajusta en tiempo real mientras suena.',
+    // TODO(contenido): year, challenge, solution, capabilities.
     // TODO(medición): `npm run medir` → metrics + measuredAt.
   },
   {
@@ -95,7 +98,10 @@ export const projects: Project[] = [
     domain: 'livesyncpro.com',
     url: 'https://livesyncpro.com/',
     image: livesyncPro,
-    // TODO(contenido): sector, year, summary, challenge, solution, capabilities.
+    sector: 'Software técnico',
+    summary:
+      'Una suite de herramientas de cálculo para ingenieros: física, comportamiento térmico de los equipos y gestión del inventario, en una sola plataforma colaborativa.',
+    // TODO(contenido): year, challenge, solution, capabilities.
     // TODO(medición): `npm run medir` → metrics + measuredAt.
   },
   {
@@ -104,7 +110,10 @@ export const projects: Project[] = [
     domain: 'acusticasuperior.com',
     url: 'https://acusticasuperior.com/',
     image: acusticaSuperior,
-    // TODO(contenido): sector, year, summary, challenge, solution, capabilities.
+    sector: 'Acústica',
+    summary:
+      'El sitio de una empresa panameña de tratamiento acústico: qué hace, los proyectos que ha entregado y un camino directo a cotizar por WhatsApp.',
+    // TODO(contenido): year, challenge, solution, capabilities.
     // TODO(medición): `npm run medir` → metrics + measuredAt.
   },
   {
@@ -113,7 +122,10 @@ export const projects: Project[] = [
     domain: 'tienda.bukoflow.com',
     url: 'https://tienda.bukoflow.com/',
     image: bukoflowTienda,
-    // TODO(contenido): sector, year, summary, challenge, solution, capabilities.
+    sector: 'Música',
+    summary:
+      'Una tienda de beats con licencia inmediata: catálogo, compra en línea y servicios de producción a medida.',
+    // TODO(contenido): year, challenge, solution, capabilities.
     // TODO(medición): `npm run medir` → metrics + measuredAt.
   },
 ];
