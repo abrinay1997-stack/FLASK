@@ -75,8 +75,28 @@ interface Provider {
  * andamiaje da mejores respuestas. Lo que cambia es que si falla se prueba el
  * siguiente.
  */
+const CONOCIDOS = ['anthropic', 'groq'];
+
+/**
+ * Lee CHAT_PROVIDER tolerando lo que de verdad se pega en un panel: espacios
+ * sobrantes, mayúsculas y comillas alrededor del valor.
+ *
+ * Y si aun así no es ninguno de los dos, se ignora y se avisa por el registro.
+ * La primera versión de esto hacía lo contrario —un valor no reconocido dejaba
+ * la lista de proveedores vacía— y el chat contestaba "todavía no está
+ * conectado" teniendo las claves puestas. Una variable mal escrita puede costar
+ * una respuesta peor; no puede apagar el chat entero sin decir nada.
+ */
+function proveedorForzado(): string | undefined {
+  const crudo = process.env.CHAT_PROVIDER?.trim().toLowerCase().replace(/^["']|["']$/g, '');
+  if (!crudo) return undefined;
+  if (CONOCIDOS.includes(crudo)) return crudo;
+  console.error(`[chat] CHAT_PROVIDER="${crudo}" no es ${CONOCIDOS.join(' ni ')}; se ignora`);
+  return undefined;
+}
+
 function pickProviders(): Provider[] {
-  const forzado = process.env.CHAT_PROVIDER?.trim().toLowerCase();
+  const forzado = proveedorForzado();
   const anthropic = forzado && forzado !== 'anthropic' ? undefined : process.env.ANTHROPIC_API_KEY;
   const groq = forzado && forzado !== 'groq' ? undefined : process.env.GROQ_API_KEY;
 
@@ -255,6 +275,17 @@ export default async (req: Request, context: Context) => {
 
   // Sin clave configurada el chat no se cae: deriva a WhatsApp.
   if (proveedores.length === 0) {
+    /*
+     * Qué variables VE la función, que no es lo mismo que las que hay escritas
+     * en el panel: pueden estar fuera del contexto de despliegue, sin marcar
+     * para funciones, o no haberse redesplegado desde que se crearon. Se
+     * registra solo la presencia, nunca el valor.
+     */
+    console.error(
+      `[chat] ningún proveedor disponible. CHAT_PROVIDER=${process.env.CHAT_PROVIDER ?? '(ausente)'}; ` +
+        `ANTHROPIC_API_KEY ${process.env.ANTHROPIC_API_KEY ? 'presente' : 'ausente'}; ` +
+        `GROQ_API_KEY ${process.env.GROQ_API_KEY ? 'presente' : 'ausente'}`
+    );
     return json({
       reply: `El asistente todavía no está conectado. Escríbenos por WhatsApp al ${kb.site.whatsapp} y te contestamos directo.`,
       degraded: true,
