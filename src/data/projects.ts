@@ -31,6 +31,11 @@
  *      una imagen de relleno.
  */
 
+import bukoflowPlay from '../assets/proyectos/bukoflow-play.jpg';
+import livesyncPro from '../assets/proyectos/livesync-pro.jpg';
+import acusticaSuperior from '../assets/proyectos/acustica-superior.jpg';
+import bukoflowTienda from '../assets/proyectos/bukoflow-tienda.jpg';
+
 export interface ProjectMetric {
   /**
    * Etiqueta corta: «Carga», «Prueba de Google», «Productos».
@@ -78,6 +83,7 @@ export const projects: Project[] = [
     name: 'Bukoflow Play',
     domain: 'play.bukoflow.com',
     url: 'https://play.bukoflow.com/',
+    image: bukoflowPlay,
     // TODO(contenido): sector, year, summary, challenge, solution, capabilities.
     // TODO(medición): `npm run medir` → metrics + measuredAt.
   },
@@ -86,6 +92,7 @@ export const projects: Project[] = [
     name: 'LiveSync Pro',
     domain: 'livesyncpro.com',
     url: 'https://livesyncpro.com/',
+    image: livesyncPro,
     // TODO(contenido): sector, year, summary, challenge, solution, capabilities.
     // TODO(medición): `npm run medir` → metrics + measuredAt.
   },
@@ -94,6 +101,7 @@ export const projects: Project[] = [
     name: 'Acústica Superior',
     domain: 'acusticasuperior.com',
     url: 'https://acusticasuperior.com/',
+    image: acusticaSuperior,
     // TODO(contenido): sector, year, summary, challenge, solution, capabilities.
     // TODO(medición): `npm run medir` → metrics + measuredAt.
   },
@@ -102,6 +110,7 @@ export const projects: Project[] = [
     name: 'Bukoflow Tienda',
     domain: 'tienda.bukoflow.com',
     url: 'https://tienda.bukoflow.com/',
+    image: bukoflowTienda,
     // TODO(contenido): sector, year, summary, challenge, solution, capabilities.
     // TODO(medición): `npm run medir` → metrics + measuredAt.
   },
