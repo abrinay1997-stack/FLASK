@@ -48,8 +48,8 @@ const OUT_DIR = join(ROOT, 'src/assets/proyectos');
  * 1440×900 y sin escalado: la tarjeta pide como mucho 1200px de ancho
  * (`widths` en ProjectCard), así que un original de 1440 ya da de sobra y
  * `astro:assets` lo baja a WebP. Capturar al doble solo engordaría el repo con
- * píxeles que nadie llega a ver — el mismo error que ya pesa 13 MB en
- * stitch_3d_web_creation_hero/.
+ * píxeles que nadie llega a ver: en binarios eso no se deshace, se arrastra en
+ * cada clon aunque después se borre el archivo.
  */
 const VIEWPORT = { width: 1440, height: 900 };
 

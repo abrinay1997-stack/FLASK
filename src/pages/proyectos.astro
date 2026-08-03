@@ -5,7 +5,7 @@ import ProjectCard from '../components/ProjectCard.astro';
 import SceneBg from '../components/SceneBg.astro';
 
 import { projects, publishedMetrics } from '../data/projects';
-import { sobreVisuals } from '../data/images';
+import { sceneVisuals } from '../data/images';
 import { routes } from '../data/links';
 import { site, waLink } from '../data/site';
 
@@ -97,7 +97,7 @@ const itemListSchema = {
 
   <!-- CIERRE -->
   <section class="proyectos-cta">
-    <SceneBg visual={sobreVisuals.interfaz} side="center" dim={0.34} />
+    <SceneBg visual={sceneVisuals.interfaz} side="center" dim={0.34} />
     <div class="container">
       <Reveal>
         <h2>¿El tuyo es el siguiente?</h2>

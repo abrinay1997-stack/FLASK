@@ -5,7 +5,6 @@
   --studio-gray:#BABABA;
   --flash-orange:#FF5100;
   --ember-red:#FF1E1E;
-  --section-gap:140px;
   --font:'Archivo',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -266,21 +265,6 @@ a{color:inherit;text-decoration:none;}
 }
 .btn-ghost:hover{border-color:var(--flash-orange);color:var(--flash-orange);}
 
-/* ---------- STATS ---------- */
-.stats{
-  display:flex;flex-wrap:wrap;gap:60px;margin-top:70px;
-  position:relative;z-index:2;
-}
-.stat .num{
-  font-size:clamp(40px,6vw,88px);font-weight:600;
-  line-height:1;letter-spacing:-.02em;
-}
-.stat .label{
-  margin-top:10px;font-size:13px;color:var(--studio-gray);
-  text-transform:uppercase;letter-spacing:.12em;
-}
-.stat .num.accent{color:var(--flash-orange);}
-
 /* ---------- SECTIONS ---------- */
 section{padding:120px 0;}
 .eyebrow{
@@ -368,16 +352,6 @@ h2.section-title .muted{color:var(--studio-gray);}
 .plan.featured .plan-cta{background:var(--soft-white);color:var(--deep-black);border-color:var(--soft-white);}
 .plan.featured .plan-cta:hover{background:var(--flash-orange);border-color:var(--flash-orange);color:var(--deep-black);}
 
-.diag-band{
-  margin-top:26px;padding:28px 32px;border-radius:22px;
-  background:linear-gradient(120deg,var(--flash-orange),var(--signal-red));
-  color:var(--soft-white);
-  display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap;
-}
-.diag-band .diag-copy h2{font-size:22px;font-weight:600;margin-bottom:6px;text-transform:none;letter-spacing:normal;}
-.diag-band .diag-copy p{font-size:14px;font-weight:300;max-width:60ch;opacity:.95;}
-.diag-band .diag-price{font-size:32px;font-weight:600;letter-spacing:-.02em;white-space:nowrap;}
-
 /* ---------- CAPACIDADES AVANZADAS ----------
    La tarjeta en sí vive en ModuleCard.astro con estilos propios. */
 .modules-intro{
@@ -418,12 +392,6 @@ h2.section-title .muted{color:var(--studio-gray);}
 
 /* ---------- PROCESO ---------- */
 .proceso-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
-.proceso-card .proceso-num{
-  font-size:56px;font-weight:600;color:var(--flash-orange);
-  letter-spacing:-.03em;line-height:1;
-}
-.proceso-card h3{font-size:22px;font-weight:600;margin:14px 0 10px;}
-.proceso-card p{font-size:15px;font-weight:300;color:var(--studio-gray);}
 
 /* ---------- FAQ ---------- */
 .faq details{
@@ -470,22 +438,11 @@ h2.section-title .muted{color:var(--studio-gray);}
    El footer vive entero en Footer.astro con estilos propios. */
 
 /* ============================================================
-   CONTACTO
+   CAMPOS DE FORMULARIO
+   Primitivas compartidas por /contacto y /cotizador. El envoltorio de cada
+   formulario vive con estilos con scope en su propia página; aquí solo está
+   lo que los dos comparten, para que un campo se vea igual en ambos.
    ============================================================ */
-.contact-wrap{
-  display:grid;grid-template-columns:1.4fr 1fr;gap:60px;
-  padding:60px 0 100px;
-}
-.contact-form-card{
-  border:1px solid rgba(255,255,255,.1);border-radius:22px;
-  padding:44px;background:rgba(255,255,255,.02);
-}
-.contact-form-card h2{
-  font-size:28px;font-weight:600;margin-bottom:8px;letter-spacing:-.01em;
-}
-.contact-form-card .form-lead{
-  color:var(--studio-gray);font-size:15px;font-weight:300;margin-bottom:34px;
-}
 .field{margin-bottom:22px;}
 .field label{
   display:block;font-size:12px;font-weight:500;letter-spacing:.14em;
@@ -515,32 +472,6 @@ h2.section-title .muted{color:var(--studio-gray);}
 }
 .field input::placeholder,.field textarea::placeholder{color:rgba(255,247,247,.35);}
 .honeypot{position:absolute;left:-9999px;height:0;overflow:hidden;visibility:hidden;}
-.form-actions{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:10px;}
-.form-note{font-size:12px;color:var(--studio-gray);font-weight:300;}
-.form-note a{color:var(--flash-orange);display:inline-block;padding:6px 0;}
-
-.contact-side h3{
-  font-size:14px;text-transform:uppercase;letter-spacing:.16em;
-  color:var(--flash-orange);margin-bottom:16px;
-}
-.contact-side .prefer{
-  font-size:24px;font-weight:600;line-height:1.25;margin-bottom:26px;
-}
-.contact-side .prefer .muted{color:var(--studio-gray);font-weight:400;}
-.contact-list{list-style:none;display:flex;flex-direction:column;gap:22px;}
-.contact-list li{
-  border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:22px;
-  transition:border-color .25s;
-}
-.contact-list li:hover{border-color:var(--flash-orange);}
-.contact-list .clabel{
-  font-size:12px;text-transform:uppercase;letter-spacing:.14em;
-  color:var(--studio-gray);display:block;margin-bottom:6px;
-}
-.contact-list .cvalue{font-size:18px;font-weight:500;}
-.contact-list .cvalue a{display:inline-block;padding:4px 0;}
-.contact-list .cvalue a:hover{color:var(--flash-orange);}
-.contact-list .cmeta{font-size:13px;color:var(--studio-gray);font-weight:300;margin-top:4px;}
 
 /* ============================================================
    PÁGINAS LEGALES
@@ -656,7 +587,6 @@ h2.section-title .muted{color:var(--studio-gray);}
   .service-list{grid-template-columns:1fr;}
   .care-grid{grid-template-columns:1fr;}
   .proceso-grid{grid-template-columns:1fr;}
-  .contact-wrap{grid-template-columns:1fr;gap:40px;}
 }
 @media(max-width:900px){
   /* Nav flotante colapsa: pill se convierte en menu dropdown */
@@ -702,9 +632,6 @@ h2.section-title .muted{color:var(--studio-gray);}
   .hero .handle{margin-left:14px;padding-left:14px;border-left:1px solid rgba(255,255,255,.14);}
   .hero .hero-inner{padding-block:40px 60px;}
   .hero .year+.handle{margin-bottom:22px;}
-  .stats{gap:32px;margin-top:50px;}
-  .diag-band{flex-direction:column;align-items:flex-start;}
-  .contact-form-card{padding:30px 22px;}
   .brand{font-size:14px;padding:11px 0 11px 8px;}
   .nav-cta{padding:8px 14px;font-size:12px;}
 }

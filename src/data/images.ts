@@ -1,19 +1,19 @@
 /**
  * Punto único de verdad de las imágenes cinemáticas del sitio.
  *
- * Los originales viven en `stitch_3d_web_creation_hero/` (referencia, 16:9,
- * ~1.3 MB cada uno). Los que están en uso se copian a `src/assets/<página>/`
- * con nombre kebab-case y se importan aquí: Astro los procesa con
- * `astro:assets` y emite WebP responsive, así que el PNG pesado nunca llega
- * al navegador.
+ * Los originales son PNG 16:9 de ~1.3 MB. Viven en `src/assets/<destino>/` con
+ * nombre kebab-case y se importan aquí: Astro los procesa con `astro:assets` y
+ * emite WebP responsive, así que el PNG pesado nunca llega al navegador.
  *
  * Para cambiar la imagen de una sección se edita este archivo, no la página.
+ * Una imagen nueva se añade aquí con su `alt` y su encuadre; ninguna página
+ * importa un asset por su cuenta.
  */
 import velocidad from '../assets/servicios/velocidad.png';
 import seguridad from '../assets/servicios/seguridad.png';
 import entrega from '../assets/servicios/entrega.png';
-import webGrid from '../assets/sobre/web-grid.png';
-import interfaz from '../assets/sobre/interfaz.png';
+import webGrid from '../assets/escenas/web-grid.png';
+import interfaz from '../assets/escenas/interfaz.png';
 import flujo from '../assets/proceso/flujo.png';
 import start from '../assets/planes/start.png';
 import corporate from '../assets/planes/corporate.png';
@@ -51,8 +51,12 @@ export const serviceVisuals: Record<string, Visual> = {
   },
 };
 
-/** /sobre — manifiesto y bloque de quiénes están detrás. */
-export const sobreVisuals = {
+/**
+ * Escenas de uso general: nacieron para la página `/sobre`, que ya no existe —
+ * su contenido vive hoy en `/proceso`. Se reparten entre `/proceso`,
+ * `/contacto` y `/proyectos`, así que no llevan el nombre de ninguna página.
+ */
+export const sceneVisuals = {
   manifiesto: {
     src: webGrid,
     alt: 'Retícula infinita de servidores encendidos en rojo, perdiéndose en el horizonte.',
