@@ -105,8 +105,8 @@ después del primer despliegue con las rutas nuevas. Netlify detecta los
 formularios leyendo el HTML publicado, y ese HTML ahora vive en
 `contacto/index.html` en vez de `contacto.html`. En local el `<form>` conserva
 `data-netlify`, el honeypot y el `action="/gracias/"`, así que no hay motivo
-para que falle — pero es el punto 21 y conviene verificarlo antes que ningún
-otro. Ver también el punto 3 del bloque 2.
+para que falle — pero es el punto 20 y conviene verificarlo antes que ningún
+otro: si se rompe, se rompe en silencio y sin síntoma visible.
 
 ## Bloque 2 — Convertir promesa en prueba
 
@@ -116,16 +116,15 @@ propia**. Todo lo de aquí convierte afirmación en evidencia.
 
 | # | Pendiente | Quién |
 |---|---|---|
-| 2 | **Métricas reales de los cuatro proyectos.** `npm run medir` los pasa por la API de PageSpeed y devuelve las cifras con su `measuredAt`, listas para pegar. La API tiene cuota anónima gratuita: **cero dinero, cero cuenta**. Es la mejor relación esfuerzo/impacto de toda la lista. | `[código]` |
-| 3 | **Medir el propio sitio y publicarlo.** El sitio vende velocidad y no enseña la suya. Apuntar `npm run medir` también a `cuatronodos.netlify.app` y poner la cifra donde se lee. Es autoevidencia y ya la tienes. | `[código]` |
-| 4 | **Fichas de `/proyectos` completas.** Ya tienen sector, resumen y captura; faltan año, reto, solución y capacidades. Marcado con `TODO` en `src/data/projects.ts`. | `[tuyo]` |
-| 5 | **Estructura de testimonios.** Hoy no existe ni el sitio donde ponerlos. Se puede dejar montado —tipo, componente, tarjeta— para que publicar uno sea añadir un objeto a un array. Los textos y los permisos son tuyos. | `[código]` + `[tuyo]` |
-| 6 | **Quién está detrás.** El bloque vive en `/proceso` y está vacío. En un servicio de confianza el anonimato es una barrera de compra: la objeción real del comprador no es el precio, es «¿y este quién es?». | `[tuyo]` |
-| 7 | **Qué significa «CuatroNodos».** El nombre no se explica en ninguna página. Es una línea de origen de marca y hoy es storytelling desaprovechado. | `[tuyo]` |
-| 8 | **Reversión de riesgo.** La palabra «garantizado» aparece una vez en todo el sitio y es sobre PageSpeed ≥ 90: una especificación técnica, no una promesa comercial. Hoy el cliente pone el 50 % por adelantado y asume el 100 % del riesgo. Algo acotado y cumplible («si el primer diseño no te convence, devolvemos el adelanto») elimina de golpe la objeción más cara. | `[tuyo]` |
-| 9 | **«Muchos clientes lo dejan así».** Está en `/servicios`, hablando de Care — el único ingreso recurrente del negocio. El sitio le está diciendo al visitante que no lo contrate. Honestidad bien intencionada, efecto comercial contrario. | `[código]` |
-| 10 | **La estadística sin fuente.** «Cuatro de cada diez personas se van de una página que tarda más de tres segundos» (`services.ts`). No lleva fuente, y el sitio entero se vende sobre no publicar datos sin verificar. O se cita, o se suaviza. | `[código]` |
-| 11 | **Datos legales visibles** (aviso de operación, RUC). Para un pago de $850–$1 200 por adelantado, la formalidad se lee como seguridad. | `[tuyo]` |
+| 2 | **Medir el propio sitio y publicarlo.** El sitio vende velocidad y no enseña la suya. Apuntar `npm run medir` a `cuatronodos.netlify.app` y poner la cifra donde se lee. Es autoevidencia y ya la tienes. | `[código]` |
+| 3 | **Estructura de testimonios.** Hoy no existe ni el sitio donde ponerlos. Se puede dejar montado —tipo, componente, tarjeta— para que publicar uno sea añadir un objeto a un array. Los textos y los permisos son tuyos. | `[código]` + `[tuyo]` |
+| 4 | **Quién está detrás.** El bloque vive en `/proceso` y está vacío. En un servicio de confianza el anonimato es una barrera de compra: la objeción real del comprador no es el precio, es «¿y este quién es?». | `[tuyo]` |
+| 5 | **Qué significa «CuatroNodos».** El nombre no se explica en ninguna página. Es una línea de origen de marca y hoy es storytelling desaprovechado. | `[tuyo]` |
+| 6 | **Reversión de riesgo.** La palabra «garantizado» aparece una vez en todo el sitio y es sobre PageSpeed ≥ 90: una especificación técnica, no una promesa comercial. Hoy el cliente pone el 50 % por adelantado y asume el 100 % del riesgo. Algo acotado y cumplible («si el primer diseño no te convence, devolvemos el adelanto») elimina de golpe la objeción más cara. | `[tuyo]` |
+| 7 | **«Muchos clientes lo dejan así».** Está en `/servicios`, hablando de Care — el único ingreso recurrente del negocio. El sitio le está diciendo al visitante que no lo contrate. Honestidad bien intencionada, efecto comercial contrario. | `[código]` |
+| 8 | **La estadística sin fuente.** «Cuatro de cada diez personas se van de una página que tarda más de tres segundos» (`services.ts`). No lleva fuente, y el sitio entero se vende sobre no publicar datos sin verificar. O se cita, o se suaviza. | `[código]` |
+| 9 | **Datos legales visibles** (aviso de operación, RUC). Para un pago de $850–$1 200 por adelantado, la formalidad se lee como seguridad. | `[tuyo]` |
+| 10 | **Fichas de `/proyectos` completas.** Ya tienen sector, resumen y captura; faltan año, reto, solución y capacidades. Marcado con `TODO` en `src/data/projects.ts`. Sin métricas: ver la decisión de abajo. | `[tuyo]` |
 
 ## Bloque 3 — Que quien llegue no se vaya
 
@@ -133,35 +132,35 @@ Todo esto es programable aquí y ninguna pieza necesita dinero.
 
 | # | Pendiente | Quién |
 |---|---|---|
-| 12 | **Tabla comparativa de planes.** Cuatro listas distintas sin filas comunes; `Commerce` dice «Todo lo de Corporate» y obliga a subir con la vista, leer otra tarjeta y recordar. Aburrida, sí: es el formato que la gente sabe leer cuando decide. | `[código]` |
-| 13 | **Care en el resultado del cotizador**, marcado por defecto. Es el ingreso recurrente y hoy aparece pasado el 70 % del scroll de `/planes`, nunca en el momento de decidir. Un mantenimiento no se vende aparte: se adjunta. | `[código]` |
-| 14 | **Fila de comparación contra el WordPress barato en `/planes`.** El argumento está solo en la home, pero la comparación se decide mirando el precio. Quien llega directo a `/planes` lee $295 contra nada. | `[código]` |
-| 15 | **Página propia para el Diagnóstico de $49.** Es la única oferta de fricción baja del sitio y vive como una banda debajo de la tabla, aplastada por cuatro planes de $295 a $1 200. Es el producto que debería recibir al tráfico frío. | `[código]` |
-| 16 | **Captura de quien no está listo hoy.** El imán ya está escrito en la home —«te enviamos un reporte de velocidad de tu sitio actual»— y no está implementado: falta el campo donde pegar la URL. Se puede construir con la misma API de PageSpeed del punto 2 y la función de Netlify que ya existe para el chat. Sin coste. | `[código]` |
-| 17 | **`/planes` tiene 13 acciones compitiendo** en el cuerpo (medido 2026-08-03). Cuando todo es prioritario, nada lo es. Que las 7 tarjetas de capacidad sean una lista con un solo CTA al cierre. | `[código]` |
-| 18 | **Sin señal de progreso en páginas largas.** `/planes` mide 7 911 px en móvil y `/proceso` 6 713 px. Una fila de anclas bajo el titular (`Planes · Capacidades · Care · FAQ`) es barata y resuelve. | `[código]` |
-| 19 | **El envío del cotizador solo sale por WhatsApp.** En escritorio sin WhatsApp Web el flujo se corta. `/contacto` ya no depende de eso. | `[tuyo]` + `[cuenta]` |
-| 20 | **Revisar el mapeo respuesta → plan del cotizador.** Los precios son tuyos; las reglas que deciden qué plan corresponde a cada respuesta son una propuesta mía, no una decisión tomada. Vive entero en `src/data/quote.ts`. | `[tuyo]` |
-| 21 | **Comprobar que los envíos del formulario llegan.** `formDestination` vale `'netlify'`: los envíos caen en Netlify Forms. Falta verlo en el panel, activar la notificación por correo y hacer un envío de prueba. | `[tuyo]` |
+| 11 | **Tabla comparativa de planes.** Cuatro listas distintas sin filas comunes; `Commerce` dice «Todo lo de Corporate» y obliga a subir con la vista, leer otra tarjeta y recordar. Aburrida, sí: es el formato que la gente sabe leer cuando decide. | `[código]` |
+| 12 | **Care en el resultado del cotizador**, marcado por defecto. Es el ingreso recurrente y hoy aparece pasado el 70 % del scroll de `/planes`, nunca en el momento de decidir. Un mantenimiento no se vende aparte: se adjunta. | `[código]` |
+| 13 | **Fila de comparación contra el WordPress barato en `/planes`.** El argumento está solo en la home, pero la comparación se decide mirando el precio. Quien llega directo a `/planes` lee $295 contra nada. | `[código]` |
+| 14 | **Página propia para el Diagnóstico de $49.** Es la única oferta de fricción baja del sitio y vive como una banda debajo de la tabla, aplastada por cuatro planes de $295 a $1 200. Es el producto que debería recibir al tráfico frío. | `[código]` |
+| 15 | **Captura de quien no está listo hoy.** El imán ya está escrito en la home —«te enviamos un reporte de velocidad de tu sitio actual»— y no está implementado: falta el campo donde pegar la URL. Se puede construir con la misma API de PageSpeed del punto 2 y la función de Netlify que ya existe para el chat. Sin coste. | `[código]` |
+| 16 | **`/planes` tiene 13 acciones compitiendo** en el cuerpo (medido 2026-08-03). Cuando todo es prioritario, nada lo es. Que las 7 tarjetas de capacidad sean una lista con un solo CTA al cierre. | `[código]` |
+| 17 | **Sin señal de progreso en páginas largas.** `/planes` mide 7 911 px en móvil y `/proceso` 6 713 px. Una fila de anclas bajo el titular (`Planes · Capacidades · Care · FAQ`) es barata y resuelve. | `[código]` |
+| 18 | **El envío del cotizador solo sale por WhatsApp.** En escritorio sin WhatsApp Web el flujo se corta. `/contacto` ya no depende de eso. | `[tuyo]` + `[cuenta]` |
+| 19 | **Revisar el mapeo respuesta → plan del cotizador.** Los precios son tuyos; las reglas que deciden qué plan corresponde a cada respuesta son una propuesta mía, no una decisión tomada. Vive entero en `src/data/quote.ts`. | `[tuyo]` |
+| 20 | **Comprobar que los envíos del formulario llegan.** `formDestination` vale `'netlify'`: los envíos caen en Netlify Forms. Falta verlo en el panel, activar la notificación por correo y hacer un envío de prueba. | `[tuyo]` |
 
 ## Bloque 4 — Que te encuentren
 
 | # | Pendiente | Quién |
 |---|---|---|
-| 22 | **Blog con Content Collections de Astro.** El motor se monta aquí y no cuesta nada; los artículos los escribes tú. Un competidor ya ranquea con «cuánto cuesta una página web en Panamá», que es exactamente la búsqueda de mayor intención del mercado. **Cero blogs vacíos:** el motor solo tiene sentido si van a existir posts. | `[código]` + `[tuyo]` |
-| 23 | **`LocalBusiness` además de `Organization`.** El schema que ya se emite es correcto pero genérico; `LocalBusiness` con área de servicio es el que compite en búsquedas locales. | `[código]` |
-| 24 | **Analítica.** Sin datos, todo este documento es criterio informado, no certeza. Hay opciones sin coste (Cloudflare Web Analytics es gratis y sin cookies, así que no obliga a banner). Decidir **antes** de anunciar el sitio. Toca `/privacidad` en el mismo commit. | `[cuenta]` |
-| 25 | **Search Console.** Sitemap y canonical ya se emiten bien; falta darlos de alta y verificar. Hacerlo **después** del punto 1, no antes. | `[cuenta]` |
+| 21 | **Blog con Content Collections de Astro.** El motor se monta aquí y no cuesta nada; los artículos los escribes tú. Un competidor ya ranquea con «cuánto cuesta una página web en Panamá», que es exactamente la búsqueda de mayor intención del mercado. **Cero blogs vacíos:** el motor solo tiene sentido si van a existir posts. | `[código]` + `[tuyo]` |
+| 22 | **`LocalBusiness` además de `Organization`.** El schema que ya se emite es correcto pero genérico; `LocalBusiness` con área de servicio es el que compite en búsquedas locales. | `[código]` |
+| 23 | **Analítica.** Sin datos, todo este documento es criterio informado, no certeza. Hay opciones sin coste (Cloudflare Web Analytics es gratis y sin cookies, así que no obliga a banner). Decidir **antes** de anunciar el sitio. Toca `/privacidad` en el mismo commit. | `[cuenta]` |
+| 24 | **Search Console.** Sitemap y canonical ya se emiten bien; falta darlos de alta y verificar. Hacerlo **después** del punto 1, no antes. | `[cuenta]` |
 
 ## Bloque 5 — Técnico y marca
 
 | # | Pendiente | Quién |
 |---|---|---|
-| 26 | **Prueba con lector de pantalla real** (NVDA / VoiceOver). Lo auditado es estructura, no experiencia. Es el único hueco de accesibilidad que queda y no se puede cerrar desde el repo. | `[tuyo]` |
-| 27 | **El `<select>` de `/contacto` usa `appearance:none`** con la flecha en `background-image`. En Windows con alto contraste puede desaparecer. Riesgo bajo. | `[código]` |
-| 28 | **La marca es solo tipográfica.** El rayo del favicon no aparece en el nav, ni en el footer, ni en la imagen social, y no hay versión sobre fondo claro para facturas o propuestas. | `[código]` |
-| 29 | **El shader es un `requestAnimationFrame` permanente** mientras el hero está en pantalla. Es la única animación corriendo del sitio. Ya se pausa fuera del viewport y no arranca con reduce-motion; si algún día importa la batería, baja a 30 fps sin que se note. | `[código]` |
-| 30 | **Los 9 PNG de origen pesan 11,2 MB** y en WebP q90 pesarían 0,87 MB — un 92 % menos, imperceptible en pantalla porque se muestran al 32–50 % de opacidad bajo un velo. No afecta a lo que se sirve (Astro ya emite 1,19 MB de WebP), solo al peso del repo. | `[código]` |
+| 25 | **Prueba con lector de pantalla real** (NVDA / VoiceOver). Lo auditado es estructura, no experiencia. Es el único hueco de accesibilidad que queda y no se puede cerrar desde el repo. | `[tuyo]` |
+| 26 | **El `<select>` de `/contacto` usa `appearance:none`** con la flecha en `background-image`. En Windows con alto contraste puede desaparecer. Riesgo bajo. | `[código]` |
+| 27 | **La marca es solo tipográfica.** El rayo del favicon no aparece en el nav, ni en el footer, ni en la imagen social, y no hay versión sobre fondo claro para facturas o propuestas. | `[código]` |
+| 28 | **El shader es un `requestAnimationFrame` permanente** mientras el hero está en pantalla. Es la única animación corriendo del sitio. Ya se pausa fuera del viewport y no arranca con reduce-motion; si algún día importa la batería, baja a 30 fps sin que se note. | `[código]` |
+| 29 | **Los 9 PNG de origen pesan 11,2 MB** y en WebP q90 pesarían 0,87 MB — un 92 % menos, imperceptible en pantalla porque se muestran al 32–50 % de opacidad bajo un velo. No afecta a lo que se sirve (Astro ya emite 1,19 MB de WebP), solo al peso del repo. | `[código]` |
 
 ## Fuera de alcance mientras no haya presupuesto
 
@@ -186,7 +185,7 @@ reales— pero conviene no actuar sobre estos cuatro puntos:
 
 - **«No detecté datos estructurados (schema.org)».** Sí los hay, y desde hace
   tiempo: `Organization`, `FAQPage`, `Service` + `Offer` y `CollectionPage`. Lo
-  que falta es matizar `Organization` a `LocalBusiness` (punto 23), que es otra
+  que falta es matizar `Organization` a `LocalBusiness` (punto 22), que es otra
   cosa y mucho más pequeña.
 - **«URLs limpias» como fortaleza.** Es justo al revés: el sitio sirve
   `/contacto.html`. Es el punto 1, y es el único con fecha límite.
@@ -225,6 +224,12 @@ no deshacer por inercia.
   elemento entraba en pantalla.
 - **El bloque de cierre («¿Empezamos?») vive solo en `/proceso`.** Repetir la
   misma petición en cinco páginas la convierte en ruido.
+- **No se miden los sitios de los clientes** (2026-08-03). `npm run medir` sigue
+  existiendo y funcionando, pero las fichas de `/proyectos` se publican sin
+  banda de métricas. El foco del trabajo es este sitio, no el rendimiento de
+  proyectos ajenos que además pueden cambiar sin avisar y dejar publicada una
+  cifra falsa. `publishedMetrics()` ya cubre ese caso: sin `measuredAt` no
+  dibuja nada, así que no hay que tocar código para sostener esta decisión.
 
 ---
 
@@ -240,7 +245,7 @@ números que de verdad deciden:
 3. **Cotizador vs. formulario directo**, en leads que acaban en venta. No en
    leads: en ventas.
 4. **Plan estimado vs. plan vendido.** Si divergen, las reglas de `quote.ts`
-   están mal calibradas (punto 20).
+   están mal calibradas (punto 19).
 
 ---
 
