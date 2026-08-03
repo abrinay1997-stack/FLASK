@@ -7,6 +7,19 @@
 [build.environment]
   NODE_VERSION = "22"
 
+  # Netlify da por secreta TODA variable de entorno y falla el build si encuentra
+  # su valor en un archivo del repo. Con CHAT_PROVIDER eso es un falso positivo
+  # garantizado: su valor es literalmente la palabra `groq` o `anthropic`, que
+  # aparece en el README y en docs/chat.md porque documentarla es justamente el
+  # punto — se puso ahí para que nadie tenga que adivinar a qué proveedor se está
+  # llamando.
+  #
+  # Se excluye SOLO esa clave, no las rutas. Excluir README.md y docs/chat.md
+  # dejaría de vigilarlos para todo lo demás, incluida GROQ_API_KEY, que sí es un
+  # secreto de verdad y tiene que seguir saltando si alguien la pega en un
+  # archivo.
+  SECRETS_SCAN_OMIT_KEYS = "CHAT_PROVIDER"
+
 # ---------- FUNCIONES ----------
 # El chat vive en netlify/functions/chat.mts y se publica en /api/chat (la ruta
 # se declara con `export const config` dentro de la propia función).
