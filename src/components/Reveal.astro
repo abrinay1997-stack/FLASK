@@ -4,9 +4,15 @@
  *
  * - CSS transitions puros (más confiables que animations en browsers pausados).
  * - Above-the-fold: se revela inmediatamente al cargar.
- * - Below-the-fold: ScrollTrigger de GSAP + fallback IntersectionObserver.
+ * - Below-the-fold: IntersectionObserver, uno compartido por todos los nodos.
  * - Fallback CSS con animation-fill si nada dispara (1.5s).
  * - Respeta prefers-reduced-motion.
+ *
+ * Antes esto lo disparaba ScrollTrigger de GSAP y el IntersectionObserver era el
+ * plan B. Se invirtió: el plan B hacía el mismo trabajo con la API del navegador
+ * y GSAP costaba 43 KB comprimidos en las doce páginas. El observador no es un
+ * apaño — es más barato, no necesita `refresh()` tras cambiar el DOM y no hay
+ * que matarlo al navegar.
  */
 
 interface Props {
@@ -40,10 +46,33 @@ const styleVars = `--reveal-delay:${delay}s;--reveal-duration:${duration}s;--rev
 </Tag>
 
 <script>
-  import { prefersReducedMotion, registerPlugins, ScrollTrigger } from '../scripts/motion';
+  import { prefersReducedMotion } from '../scripts/motion';
+
+  /**
+   * Un solo observador para todos los nodos de la página, no uno por nodo: el
+   * navegador agrupa las entradas en una sola callback y no hay que acordarse de
+   * desconectar nada. `-12%` del borde inferior equivale al `top 88%` que
+   * disparaba antes ScrollTrigger, así que el momento del reveal no cambia.
+   */
+  let observer: IntersectionObserver | null = null;
 
   function markDone(el: HTMLElement) {
     el.setAttribute('data-reveal-done', '');
+  }
+
+  function getObserver(): IntersectionObserver {
+    if (observer) return observer;
+    observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          markDone(entry.target as HTMLElement);
+          observer!.unobserve(entry.target);
+        }
+      },
+      { rootMargin: '0px 0px -12% 0px' }
+    );
+    return observer;
   }
 
   function initReveals() {
@@ -55,13 +84,8 @@ const styleVars = `--reveal-delay:${delay}s;--reveal-duration:${duration}s;--rev
       return;
     }
 
-    let gsapReady = false;
-    try {
-      registerPlugins();
-      gsapReady = true;
-    } catch {}
-
     const vh = window.innerHeight || document.documentElement.clientHeight || 720;
+    const io = getObserver();
 
     nodes.forEach((el) => {
       const rect = el.getBoundingClientRect();
@@ -70,24 +94,7 @@ const styleVars = `--reveal-delay:${delay}s;--reveal-duration:${duration}s;--rev
       if (aboveTheFold) {
         // Marcar done ya — transition CSS anima suavemente
         markDone(el);
-      } else if (gsapReady) {
-        ScrollTrigger.create({
-          trigger: el,
-          start: 'top 88%',
-          once: true,
-          onEnter: () => markDone(el),
-        });
       } else {
-        // Fallback: IntersectionObserver puro
-        const io = new IntersectionObserver(
-          (entries) => {
-            if (entries[0]?.isIntersecting) {
-              markDone(el);
-              io.disconnect();
-            }
-          },
-          { rootMargin: '0px 0px -12% 0px' }
-        );
         io.observe(el);
       }
     });

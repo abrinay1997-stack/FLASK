@@ -54,7 +54,7 @@ Todo esto está argumentado en `docs/auditoria-conversion.md`.
 | 19 | **Search Console.** | Sitemap y canonical ya se emiten bien; falta darlos de alta y verificar. |
 | 20 | **Prueba con lector de pantalla real** (NVDA / VoiceOver). | Lo auditado es estructura, no experiencia. Es el único hueco de accesibilidad que queda. |
 | 21 | **La marca es solo tipográfica.** El rayo del favicon no aparece en el nav, ni en el footer, ni en la imagen social. Tampoco hay versión sobre fondo claro para facturas o propuestas. | — |
-| 22 | **URLs limpias sin `.html`** (`trailingSlash:'always'` + `format:'directory'`). | Cambiaría todas las rutas de `links.ts`. Hacerlo **antes** de que el sitio tenga enlaces externos apuntándole, no después. |
+| 22 | **URLs limpias sin `.html`** (`trailingSlash:'always'` + `format:'directory'`). | Cambiaría todas las rutas de `links.ts`. Hacerlo **antes** de que el sitio tenga enlaces externos apuntándole, no después. Ya no corre prisa por coherencia: sitemap y canonical dicen lo mismo (`.html`); esto es solo cosmética de la barra de direcciones. |
 | 23 | **El shader es un `requestAnimationFrame` permanente** mientras el hero está en pantalla. | Ya se pausa fuera del viewport y no arranca con reduce-motion. Si algún día importa la batería, se puede bajar a 30 fps sin que se note. |
 | 24 | **La carpeta `stitch_3d_web_creation_hero/` pesa 13 MB** y se versiona como archivo de referencias visuales. | Encarece cada clon del repo. Si esas fuentes ya no se van a usar, sacarlas a almacenamiento aparte. |
 

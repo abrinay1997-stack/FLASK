@@ -61,7 +61,7 @@ src/
 ├── layouts/        BaseLayout.astro — head, SEO, JSON-LD, nav y footer.
 ├── components/     Piezas reutilizables (.astro con estilos con scope).
 ├── data/           TODO el contenido y los precios. Ver abajo.
-├── scripts/        motion.ts — registro de GSAP y utilidades de animación.
+├── scripts/        motion.ts — utilidades de animación (sin librerías).
 ├── styles/         global.css — tokens de marca, navbar, hero, utilidades.
 └── assets/         Imágenes procesadas por astro:assets.
 
@@ -126,6 +126,7 @@ Se configuran en el panel de Netlify, **nunca en el repo**:
 | `ANTHROPIC_API_KEY` | Chat con Claude (tiene prioridad si está) |
 | `GROQ_API_KEY` | Alternativa más barata para el chat |
 | `CHAT_MODEL` | Opcional, para fijar el modelo |
+| `CHAT_MAX_PER_DAY` | Opcional, techo diario de mensajes del chat (300 por defecto) |
 
 Sin ninguna clave el endpoint sigue respondiendo: deriva a WhatsApp en vez de
 fallar.

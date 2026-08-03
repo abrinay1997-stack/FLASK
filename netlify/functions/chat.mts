@@ -96,7 +96,41 @@ function pickProvider(): Provider | null {
 }
 
 /* ------------------------------------------------------------------ *
- * Límite de peticiones (best-effort, por instancia)
+ * Quién puede llamar
+ * ------------------------------------------------------------------ */
+
+/**
+ * Solo se atiende lo que venga del propio sitio.
+ *
+ * El endpoint gasta la clave de Anthropic en cada llamada, así que sin esto
+ * cualquiera puede apuntar un script contra `/api/chat` y facturarnos sus
+ * conversaciones. Se compara contra el origen de la petición —no contra una
+ * lista fija— para que las previews de Netlify, que viven en otro subdominio,
+ * sigan funcionando sin mantener nada.
+ *
+ * Un `Origin` se puede falsificar con curl: esto no es autenticación, es quitar
+ * de en medio el abuso barato. Lo que acota el gasto de verdad es el tope
+ * diario de más abajo.
+ */
+function allowedOrigin(req: Request): boolean {
+  const self = new URL(req.url).origin;
+  const origin = req.headers.get('origin');
+  if (origin) return origin === self;
+
+  // Sin Origin (algunos navegadores en same-origin) miramos el Referer.
+  const referer = req.headers.get('referer');
+  if (referer) {
+    try {
+      return new URL(referer).origin === self;
+    } catch {
+      return false;
+    }
+  }
+  return false;
+}
+
+/* ------------------------------------------------------------------ *
+ * Límites de uso (best-effort, por instancia)
  * ------------------------------------------------------------------ */
 
 const hits = new Map<string, number[]>();
@@ -112,6 +146,31 @@ function rateLimited(ip: string): boolean {
   return prev.length > MAX_PER_WINDOW;
 }
 
+/**
+ * Techo de conversaciones al día para todo el sitio, no por visitante: es el
+ * único límite que pone una cifra máxima a la factura del mes.
+ *
+ * Vive en memoria y cada instancia lleva su propia cuenta, así que Netlify
+ * levantando varias lo multiplica. Es un tope aproximado a propósito: el
+ * alternativo —un contador compartido— pide almacenamiento externo y una
+ * llamada de red en cada mensaje, para proteger un endpoint que hoy responde
+ * preguntas sobre precios. Si algún día el chat pesa más, se sube a Netlify
+ * Blobs.
+ */
+const MAX_PER_DAY = Number(process.env.CHAT_MAX_PER_DAY || 300);
+let day = '';
+let dayCount = 0;
+
+function dailyCapReached(): boolean {
+  const today = new Date().toISOString().slice(0, 10);
+  if (today !== day) {
+    day = today;
+    dayCount = 0;
+  }
+  dayCount += 1;
+  return dayCount > MAX_PER_DAY;
+}
+
 /* ------------------------------------------------------------------ *
  * Handler
  * ------------------------------------------------------------------ */
@@ -124,6 +183,8 @@ const json = (data: unknown, status = 200) =>
 
 export default async (req: Request, context: Context) => {
   if (req.method !== 'POST') return json({ error: 'Método no permitido' }, 405);
+
+  if (!allowedOrigin(req)) return json({ error: 'Origen no permitido' }, 403);
 
   const ip = context.ip || req.headers.get('x-nf-client-connection-ip') || 'anon';
   if (rateLimited(ip)) {
@@ -163,6 +224,14 @@ export default async (req: Request, context: Context) => {
   if (!provider) {
     return json({
       reply: `El asistente todavía no está conectado. Escríbenos por WhatsApp al ${kb.site.whatsapp} y te contestamos directo.`,
+      degraded: true,
+    });
+  }
+
+  // Techo del día alcanzado: se deriva a la persona, no se devuelve un error.
+  if (dailyCapReached()) {
+    return json({
+      reply: `El asistente ya no atiende más consultas por hoy. Escríbenos por WhatsApp al ${kb.site.whatsapp} y te contestamos directo.`,
       degraded: true,
     });
   }

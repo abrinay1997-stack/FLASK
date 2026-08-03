@@ -17,8 +17,13 @@ uno. El resumen de las cinco más importantes está en el
 3. **Un solo `<h1>` por página.**
 4. **Cero placeholders en producción:** nada de `#`, `lorem`, `G-XXXXXXXXXX`.
 5. **Solo animar `transform` y `opacity`.** Todo lo demás provoca repintados.
-6. **Máximo dos secciones con `pin` por página**, y ningún `pin` en móvil sin
-   adaptar.
+6. **Sin librería de animación.** El movimiento se hace con transiciones CSS y
+   JavaScript solo decide cuándo dispararlas (`IntersectionObserver` en
+   `Reveal`). Aquí vivió GSAP + ScrollTrigger: pesaba 43 KB comprimidos —el 74 %
+   de todo el JS del sitio— y lo único que hacía era poner un atributo cuando un
+   elemento entraba en pantalla. En una página que vende abrir en menos de un
+   segundo, eso no se sostiene. Si algún día hace falta una línea de tiempo de
+   verdad (scrub, pin, morphing), se vuelve a evaluar entonces.
 7. **Un solo acento cromático:** naranja `--flash-orange #FF5100` para UI y para
    los acentos de texto; rojo `--ember-red #FF1E1E` reservado a fondos (shader
    del hero, vetas de las imágenes). El ember no debe aparecer en ningún texto.
