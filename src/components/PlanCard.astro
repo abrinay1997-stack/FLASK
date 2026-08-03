@@ -1,13 +1,16 @@
 ---
 import type { Plan } from '../data/plans';
-import { withBase } from '../data/links';
+import { routes } from '../data/links';
 
 interface Props {
   plan: Plan;
 }
 
 const { plan } = Astro.props;
-const cotizarHref = withBase(`contacto.html?plan=${plan.slug}`);
+// Se compone de `routes.contacto`, no de una ruta escrita a mano: así el día
+// que cambie el formato de URL —como pasó al quitar los `.html`— este enlace
+// cambia solo.
+const cotizarHref = `${routes.contacto}?plan=${plan.slug}`;
 ---
 
 <div class:list={['plan', { featured: plan.featured }]}>

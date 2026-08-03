@@ -19,19 +19,26 @@ export function withBase(path: string): string {
   return `${BASE}${clean}`;
 }
 
-/** Rutas internas nombradas — punto único de verdad. */
+/**
+ * Rutas internas nombradas — punto único de verdad.
+ *
+ * Todas terminan en barra porque el sitio se construye con
+ * `trailingSlash:'always'` (ver `astro.config.mjs`). La barra no es cosmética:
+ * es la URL que declara el canonical de cada página y la que emite el sitemap.
+ * Un enlace interno sin ella provoca una redirección extra en cada clic.
+ */
 export const routes = {
   home: BASE,
-  servicios: withBase('servicios.html'),
-  proyectos: withBase('proyectos.html'),
-  planes: withBase('planes.html'),
-  proceso: withBase('proceso.html'),
-  ayuda: withBase('ayuda.html'),
-  cotizador: withBase('cotizador.html'),
-  contacto: withBase('contacto.html'),
-  gracias: withBase('gracias.html'),
-  privacidad: withBase('privacidad.html'),
-  terminos: withBase('terminos.html'),
+  servicios: withBase('servicios/'),
+  proyectos: withBase('proyectos/'),
+  planes: withBase('planes/'),
+  proceso: withBase('proceso/'),
+  ayuda: withBase('ayuda/'),
+  cotizador: withBase('cotizador/'),
+  contacto: withBase('contacto/'),
+  gracias: withBase('gracias/'),
+  privacidad: withBase('privacidad/'),
+  terminos: withBase('terminos/'),
 };
 
 /** Ancla dentro de una ruta. */

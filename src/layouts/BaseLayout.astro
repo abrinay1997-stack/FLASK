@@ -44,16 +44,27 @@ const fullTitle = title.includes(site.name) ? title : `${title} — ${site.name}
 
 // URL canónica y OG:URL absolutas (necesitan `site` en astro.config)
 const origin = Astro.site ?? new URL('http://localhost:4321');
-// La home se sirve en la raíz del dominio; anunciarse como `/index.html` sería
-// declarar canónica una URL a la que no apunta ningún enlace del sitio.
-const canonicalPath = Astro.url.pathname.replace(/\/index\.html$/, '/');
+// Con `trailingSlash:'always'` el pathname ya llega como `/contacto/`, que es
+// exactamente la URL que emite el sitemap. La barra final se fuerza igualmente:
+// declarar canónica una URL distinta de la que se enlaza es entregarle a Google
+// dos direcciones para la misma página.
+const canonicalPath = Astro.url.pathname.endsWith('/')
+  ? Astro.url.pathname
+  : `${Astro.url.pathname}/`;
 const canonical = new URL(canonicalPath, origin).toString();
+/**
+ * Las páginas con `noindex` no declaran canonical, y la de 404 es el motivo:
+ * es el único archivo que NO se sirve como directorio —Netlify la busca en
+ * `/404.html`—, así que forzarle la barra final la hacía anunciarse como
+ * `/404/`, una URL que devuelve 404. Además, canonical y noindex juntos son
+ * señales contradictorias: una dice «indexa esta otra» y la otra «no indexes».
+ * Ninguna de las dos páginas afectadas (404 y gracias) gana nada con él.
+ */
+const emitCanonical = !noindex;
 const ogImage = new URL(withBase('og.png'), origin).toString();
 
 // Organization schema (JSON-LD) — se emite solo en la home para no duplicar
-const isHome =
-  Astro.url.pathname === import.meta.env.BASE_URL ||
-  Astro.url.pathname === `${import.meta.env.BASE_URL}index.html`;
+const isHome = canonicalPath === import.meta.env.BASE_URL;
 
 const orgSchema = {
   '@context': 'https://schema.org',
@@ -86,7 +97,7 @@ const schemas = isHome ? [orgSchema, ...jsonLd] : jsonLd;
     <meta name="color-scheme" content="dark" />
     {noindex && <meta name="robots" content="noindex, follow" />}
 
-    <link rel="canonical" href={canonical} />
+    {emitCanonical && <link rel="canonical" href={canonical} />}
 
     <!-- La fuente self-hosted del H1: sin preload el texto repinta al llegar -->
     <link rel="preload" href={archivo700} as="font" type="font/woff2" crossorigin />

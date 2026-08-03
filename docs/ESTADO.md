@@ -96,23 +96,17 @@ real, y el 2 es el que decide si el sitio convence o no.
 
 ## Bloque 1 — Antes de comprar el dominio
 
-Un solo punto, pero la ventana se cierra sola.
+Hecho el 2026-08-03. El sitio ya sirve `/contacto/` en vez de `/contacto.html`,
+con el canonical, el sitemap y `robots.txt` diciendo lo mismo.
 
-| # | Pendiente | Quién |
-|---|---|---|
-| 1 | **URLs limpias, sin `.html`.** Hoy `astro.config.mjs` usa `format:'file'` y el sitio se sirve en `/contacto.html`. Cambiarlo a `trailingSlash:'always'` + `format:'directory'` toca todas las rutas de `links.ts`. | `[código]` |
-
-**Por qué antes y no después.** Mientras nadie enlace al sitio desde fuera,
-cambiar las rutas no cuesta nada: se cambia y ya. En cuanto haya dominio propio,
-Google indexando y enlaces externos, el mismo cambio exige redirecciones 301,
-reindexación y aceptar una caída temporal de posiciones. Es la única tarea de
-toda la lista que se encarece por esperar.
-
-Ojo con dos cosas al hacerlo: `format:'file'` está puesto por compatibilidad con
-**Netlify Forms** (ver el comentario en `astro.config.mjs`), así que hay que
-comprobar que el formulario de `/contacto` siga recibiendo envíos; y el
-`canonical` y el `sitemap` tienen que quedar diciendo lo mismo que las rutas
-nuevas.
+**Queda una comprobación que solo se puede hacer en producción:** que el
+formulario de `/contacto` siga apareciendo en *Netlify → Forms → Active forms*
+después del primer despliegue con las rutas nuevas. Netlify detecta los
+formularios leyendo el HTML publicado, y ese HTML ahora vive en
+`contacto/index.html` en vez de `contacto.html`. En local el `<form>` conserva
+`data-netlify`, el honeypot y el `action="/gracias/"`, así que no hay motivo
+para que falle — pero es el punto 21 y conviene verificarlo antes que ningún
+otro. Ver también el punto 3 del bloque 2.
 
 ## Bloque 2 — Convertir promesa en prueba
 

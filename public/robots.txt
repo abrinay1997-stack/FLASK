@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
-Disallow: /gracias.html
+Disallow: /gracias/
 Disallow: /404.html
