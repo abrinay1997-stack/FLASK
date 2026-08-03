@@ -21,16 +21,20 @@
  * Se llega desde el navegador interno de Instagram, con una mano y sin
  * paciencia. Una explicación de dos líneas bajo un botón no se lee: empuja el
  * botón siguiente fuera de pantalla. Cada destino lleva una etiqueta y, como
- * mucho, un dato que ayude a decidir (precio, horario, cuántos sitios hay).
+ * mucho, un dato que ayude a decidir (precio, cuántos planes, cuántos sitios).
+ * Y el dato tiene que empujar: bajo el botón de WhatsApp estuvo el horario, que
+ * es lo único de esta página que restaba — un sábado le decía «cerrado» a quien
+ * ya iba a escribir. El horario está en /contacto, que es donde no frena a
+ * nadie.
  *
  * Nada de esto duplica datos: el teléfono sale de site.ts, las rutas de
- * links.ts, las redes de footer.ts, el precio de entrada de plans.ts y el número
- * de sitios publicados de projects.ts. Cuando esas fuentes cambien, esta página
- * cambia sola.
+ * links.ts, las redes de footer.ts, el precio de entrada y el número de planes
+ * de plans.ts, y los sitios publicados de projects.ts. Cuando esas fuentes
+ * cambien, esta página cambia sola.
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SceneBg from '../components/SceneBg.astro';
-import { site, contact, waLink } from '../data/site';
+import { site, waLink } from '../data/site';
 import { routes } from '../data/links';
 import { socials } from '../data/footer';
 import { plans } from '../data/plans';
@@ -46,8 +50,17 @@ const redesActivas = socials.filter((s) => s.href);
 // cambie de cifra, el botón de la bio no puede quedarse anunciando la vieja.
 const desde = `$${Math.min(...plans.map((p) => Number(p.price.replace(/[^\d]/g, '')))).toLocaleString('en-US')}`;
 
-// Prueba en tres palabras, con datos que se pueden comprobar abriendo el sitio.
-const credenciales = [site.location, `Desde ${desde}`, 'Listo en días'];
+/*
+ * Tres credenciales, cada una contra una objeción distinta: de dónde somos,
+ * cuánto cuesta empezar y qué recibes antes de pagar.
+ *
+ * La tercera fue «Listo en días» y se cambió: era vaga y no se podía concretar
+ * sin mentir —los plazos van de 72 horas a 20 días según el plan—, así que
+ * ocupaba el mejor sitio de la página sin decir nada. El precio y la fecha
+ * cerrados por escrito, en cambio, es justo lo que la agencia de al lado no
+ * ofrece, y es comprobable: está publicado en /planes.
+ */
+const credenciales = [site.location, `Desde ${desde}`, 'Precio y fecha cerrados'];
 
 const destinos = [
   {
@@ -57,20 +70,34 @@ const destinos = [
     primary: true,
   },
   {
-    href: waLink('Hola CuatroNodos, los vi en redes y quiero cotizar mi sitio'),
+    /*
+     * El mensaje termina abierto, con un hueco que se rellena solo al escribir.
+     * Un «quiero cotizar mi sitio» a secas obliga a contestar preguntando; con
+     * el rubro delante, la primera respuesta ya puede llevar precio, que es lo
+     * único que la persona vino a buscar.
+     */
+    href: waLink('Hola CuatroNodos, los vi en redes y quiero cotizar mi sitio. Mi negocio es: '),
     label: 'Escribir por WhatsApp',
-    hint: contact.horario,
+    // Cabe en una línea a 320px. Cualquier versión más larga («Dinos qué
+    // necesitas y te decimos precio») se parte en dos y el botón deja de
+    // leerse como botón.
+    hint: 'Te decimos el precio, sin rodeos',
     external: true,
   },
   {
     href: routes.planes,
+    // El precio de entrada ya lo dice la credencial de arriba: repetirlo aquí
+    // gastaba la única línea de este botón en un dato que ya se leyó.
     label: 'Planes y precios',
-    hint: `Desde ${desde} · precio cerrado`,
+    hint: `${plans.length} planes, precio público`,
   },
   {
+    // «Trabajo publicado» es como lo llama una agencia; el cliente lo llama
+    // «sitios que hicieron». Y lo que vende no es que existan, es que se pueden
+    // abrir y comprobar.
     href: routes.proyectos,
-    label: 'Trabajo publicado',
-    hint: `${projects.length} sitios en línea`,
+    label: 'Sitios que hicimos',
+    hint: `${projects.length} dominios que puedes abrir`,
   },
 ];
 ---
@@ -279,8 +306,11 @@ const destinos = [
     margin-top: 16px;
   }
   .smark-creds li {
-    /* Medidas ajustadas para que los tres quepan en una fila a 320px: en dos
-       filas dejan de leerse como una credencial y parecen etiquetas sueltas. */
+    /* Medidas apretadas a propósito: los tres caben en una fila a partir de
+       430px y en dos por debajo. La segunda fila va centrada, así que el grupo
+       se sigue leyendo como un bloque; lo que no puede pasar es que se parta
+       una credencial por dentro, y a 10px con este relleno no ocurre ni a
+       320px. */
     padding: 5px 9px;
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 999px;
