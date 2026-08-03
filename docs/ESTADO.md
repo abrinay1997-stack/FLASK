@@ -224,13 +224,27 @@ pasa a «Precio y fecha cerrados»; y «Trabajo publicado» pasa a «Sitios que
 hicimos», porque lo primero es como lo llama una agencia y lo segundo como lo
 llama el cliente.
 
-**Lo que quedó identificado y sin hacer:** cuando alguien termina el cotizador,
-el envío abre `wa.me` directamente y **no pasa por `/gracias/`, así que el píxel
-nunca dispara `Lead`** (`cotizador.astro:397`). El camino que mejor convierte del
-sitio es hoy invisible para Meta, que solo ve el `Lead` del formulario de
-`/contacto`. Y los cuatro botones de `/smark/` son indistinguibles en la
-analítica: no hay forma de saber cuál se toca, así que cualquier discusión sobre
-estos textos —incluida la de arriba— es criterio, no dato.
+**Hecho el 2026-08-03 (el `Lead` del cotizador):** terminar el cotizador abría
+`wa.me` y ahí se acababa todo, sin pasar por `/gracias/`, que es el único punto
+del sitio donde el píxel cuenta una conversión. O sea: el camino que mejor
+convierte —cuatro respuestas, una cifra aceptada y un mensaje ya redactado— era
+invisible para Meta, que solo veía el formulario de `/contacto`. Con publicidad
+encendida, eso es optimizar hacia visitas en vez de hacia clientes. Ahora el
+envío hace lo mismo que `/contacto`: WhatsApp en una pestaña nueva y esta se va
+a `/gracias/`. El evento **no** se dispara a mano en el cotizador a propósito —
+qué cuenta como `Lead` se decide en un solo sitio, el fragmento del píxel de
+`BaseLayout`, que mira la ruta; dispararlo también aquí contaría dos veces el
+mismo lead, y una conversión inflada engaña peor que una que falta. Si el
+navegador bloquea la pestaña, se manda el mensaje y se pierde la medición: el
+mismo orden de prioridades que ya tenía `/contacto`. Comprobado de punta a punta
+con el recorrido completo: se llega a `/gracias/` y se dispara exactamente un
+`PageView` y un `Lead`. De paso, `/gracias/` deja de decir «acabo de enviar el
+formulario» en su botón de WhatsApp, porque ahora se llega por dos caminos y ese
+texto solo describía uno.
+
+**Lo que sigue sin hacer:** los cuatro botones de `/smark/` son indistinguibles
+en la analítica — no hay forma de saber cuál se toca, así que cualquier
+discusión sobre esos textos es criterio, no dato.
 
 **Hecho el 2026-08-03:** el píxel de Meta está activo en las trece páginas, con
 `PageView` una vez por página —también al navegar sin recargar— y `Lead` en
