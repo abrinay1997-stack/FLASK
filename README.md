@@ -28,6 +28,7 @@ cuando no lo encuentra degrada solo a WhatsApp (ver [`docs/chat.md`](docs/chat.m
 | `npm run check` | `astro check` — tipos de TypeScript y diagnósticos de `.astro` |
 | `npm run medir:movil` | Auditoría de layout en móvil sobre `dist/` (requiere `npm run build` antes) |
 | `npm run medir` | Mide los proyectos publicados con Lighthouse |
+| `npm run capturas` | Captura la portada de cada proyecto en `src/assets/proyectos/` |
 | `npm run brand` | Regenera favicons y `og.png` en `public/` — solo al cambiar el branding |
 
 `npm run build` **no** comprueba tipos. Para eso está `npm run check`.
@@ -50,6 +51,21 @@ npm i -D playwright && npx playwright install chromium
 
 `npm run medir` necesita una API key gratuita de PageSpeed Insights; los pasos
 están en la cabecera de `scripts/measure-projects.mjs`.
+
+### Las capturas de `/proyectos`
+
+`npm run capturas` abre cada sitio de `src/data/projects.ts` y guarda su portada
+en `src/assets/proyectos/<slug>.jpg`. Usa el mismo Playwright que la auditoría de
+móvil. Acepta slugs sueltos para rehacer solo uno:
+
+```bash
+npm run capturas -- livesync-pro
+```
+
+Deja dos pasos a mano a propósito: **mirar** cada captura antes de publicarla —el
+script no distingue una portada de un aviso de cookies tapándola— y enlazarla en
+`projects.ts`, que es lo que decide qué se publica. Al terminar, el script imprime
+los imports listos para pegar.
 
 ---
 

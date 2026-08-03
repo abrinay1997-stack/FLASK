@@ -22,9 +22,13 @@
  *      se midió, se deja el array vacío y la banda no aparece.
  *   3. `capabilities` — qué del catálogo se aplicó, con el mismo vocabulario de
  *      modules.ts, para que el visitante ate el caso con lo que puede contratar.
- *   4. `image` — captura en `src/assets/proyectos/<slug>.png`, importada arriba
- *      y asignada. Sin captura, la tarjeta cae a un tratamiento tipográfico que
- *      ya se ve intencionado; no hace falta poner una imagen de relleno.
+ *   4. `image` — `npm run capturas` abre cada sitio de esta lista y deja la
+ *      portada en `src/assets/proyectos/<slug>.jpg`. Míralas antes de
+ *      publicarlas (el script no distingue una portada de un aviso de cookies
+ *      tapándola) y luego enlázalas: el import arriba y `image` en la ficha, que
+ *      es lo único que el script no hace por ti. Sin captura, la tarjeta cae a
+ *      un tratamiento tipográfico que ya se ve intencionado; no hace falta poner
+ *      una imagen de relleno.
  */
 
 export interface ProjectMetric {
