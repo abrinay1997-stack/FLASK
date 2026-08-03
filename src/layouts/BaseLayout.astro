@@ -44,7 +44,10 @@ const fullTitle = title.includes(site.name) ? title : `${title} — ${site.name}
 
 // URL canónica y OG:URL absolutas (necesitan `site` en astro.config)
 const origin = Astro.site ?? new URL('http://localhost:4321');
-const canonical = new URL(Astro.url.pathname, origin).toString();
+// La home se sirve en la raíz del dominio; anunciarse como `/index.html` sería
+// declarar canónica una URL a la que no apunta ningún enlace del sitio.
+const canonicalPath = Astro.url.pathname.replace(/\/index\.html$/, '/');
+const canonical = new URL(canonicalPath, origin).toString();
 const ogImage = new URL(withBase('og.png'), origin).toString();
 
 // Organization schema (JSON-LD) — se emite solo en la home para no duplicar

@@ -193,9 +193,10 @@ const sugerencias = [
           body: JSON.stringify({ messages: history.slice(-6) }),
         });
 
-        // 404/405 = no hay función desplegada: pasamos a modo atajo y no
-        // volvemos a intentarlo en esta sesión.
-        if (res.status === 404 || res.status === 405) {
+        // 404/405 = no hay función desplegada. 403 = el endpoint no reconoce
+        // este origen (un navegador que no manda ni Origin ni Referer). En los
+        // tres casos no hay nada que reintentar: pasamos a modo atajo.
+        if (res.status === 404 || res.status === 405 || res.status === 403) {
           endpointDown = true;
           dots.remove();
           offlineAnswer();

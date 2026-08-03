@@ -68,8 +68,15 @@ const itemListSchema = {
   </section>
 
   <!-- REJILLA DE PROYECTOS -->
-  <section class="proyectos" id="trabajo">
+  <section class="proyectos" id="trabajo" aria-labelledby="trabajo-title">
     <div class="container">
+      <!--
+        El diseño no pide un titular aquí —las tarjetas hablan solas—, pero sin
+        él la página saltaba del h1 al h3 de cada ficha y quien navega por
+        encabezados se encontraba el listado sin nombre.
+      -->
+      <h2 class="sr-only" id="trabajo-title">Sitios publicados</h2>
+
       <div class="proyectos-grid">
         {projects.map((project) => (
           <Reveal>

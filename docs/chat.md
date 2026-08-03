@@ -118,6 +118,7 @@ puede publicar un precio falso.
    - `GROQ_API_KEY` — alternativa más barata y rápida
 3. Opcional: `CHAT_MODEL` para fijar el modelo. Por defecto usa
    `claude-haiku-4-5-20251001` o `llama-3.3-70b-versatile` según el proveedor.
+   Opcional: `CHAT_MAX_PER_DAY` para mover el tope diario (300 por defecto).
 4. Despliega. La función queda en `/api/chat` y el widget la detecta sola.
 
 **Sin ninguna clave el sitio no se rompe:** el endpoint responde derivando a
@@ -125,9 +126,26 @@ WhatsApp. Puedes desplegar primero y conectar el modelo después.
 
 ### Coste y protección
 
-- Límite de 12 mensajes por minuto y por IP (por instancia de función).
+Cada llamada gasta tu clave, así que el endpoint se defiende en tres capas antes
+de hablar con el modelo:
+
+- **Solo atiende peticiones del propio sitio.** Se compara el `Origin` (o el
+  `Referer` si el navegador no manda `Origin`) contra el origen de la propia
+  petición, no contra una lista fija: así las previews de Netlify funcionan sin
+  mantener nada. Un `Origin` se falsifica con curl —esto no es autenticación—,
+  pero quita de en medio el abuso barato de apuntar un script a `/api/chat`.
+- **Tope diario para todo el sitio**, `CHAT_MAX_PER_DAY` (300 por defecto).
+  Alcanzado, deriva a WhatsApp en vez de devolver un error. Es la única cifra que
+  pone techo a la factura del mes.
+- **Límite de 12 mensajes por minuto y por IP.**
+
+Los dos contadores viven en memoria y cada instancia lleva la suya, así que
+Netlify levantando varias los multiplica. Son topes aproximados a propósito: un
+contador exacto pide almacenamiento externo y una llamada de red en cada mensaje.
+Si algún día el chat pesa más en la factura, se suben a Netlify Blobs.
+
 - Historial recortado a 6 mensajes: el coste por turno no crece con la conversación.
-- `max_tokens: 400` y `temperature: 0.2`.
+- `max_tokens: 260` y `temperature: 0.3`.
 - Prompt medido: **~357 tokens de media, 574 en el peor caso.** Un turno completo
   ronda los 600–800 tokens de entrada.
 

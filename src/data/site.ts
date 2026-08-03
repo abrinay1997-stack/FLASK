@@ -23,3 +23,28 @@ export const contact = {
 export function waLink(msg: string = contact.whatsappDefaultMsg): string {
   return `https://wa.me/${contact.whatsappRaw}?text=${encodeURIComponent(msg)}`;
 }
+
+/**
+ * A dónde va el formulario de /contacto.
+ *
+ *   'netlify'  → Netlify Forms recibe el POST y los envíos aparecen en el panel
+ *                de Netlify. Solo funciona sobre un despliegue de Netlify.
+ *   'whatsapp' → El navegador compone el mensaje con lo escrito y abre WhatsApp.
+ *                Funciona en cualquier alojamiento estático.
+ *
+ * Es una decisión declarada, no deducida. Antes se miraba `location.hostname` y
+ * se daba por Netlify todo lo que terminara en `netlify.app`: el día que el
+ * sitio estrenara dominio propio, el formulario habría vuelto a WhatsApp solo y
+ * en silencio, y los envíos habrían dejado de llegar sin que nadie lo notara.
+ *
+ * Este valor manda sobre TODO lo que depende del destino: los atributos del
+ * `<form>`, el texto de la tarjeta y del botón, y lo que declara la política de
+ * privacidad. Cambiarlo aquí cambia las tres cosas a la vez, así que el sitio no
+ * puede prometer WhatsApp mientras envía a otro sitio.
+ *
+ * Al cambiarlo a 'netlify', comprobar que el formulario esté dado de alta en
+ * Netlify (Forms → Active forms) y que llegue la notificación del primer envío.
+ */
+export type FormDestination = 'netlify' | 'whatsapp';
+
+export const formDestination: FormDestination = 'netlify';

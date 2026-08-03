@@ -3,20 +3,22 @@
  * Smooth scroll global con Lenis.
  * - Se inicializa una vez, se re-inicializa en astro:page-load (View Transitions).
  * - Respeta prefers-reduced-motion (no arranca Lenis, deja scroll nativo).
- * - Sincroniza con ScrollTrigger para que los pins/reveals no se rompan.
+ *
+ * Ya no hay nada que sincronizar: los reveals se disparan con
+ * IntersectionObserver, que lee la posición real del elemento y no depende de
+ * que nadie le avise de que el scroll se movió.
  */
 ---
 
 <script>
   import Lenis from 'lenis';
-  import { prefersReducedMotion, registerPlugins, refreshTriggers, killAllTriggers, ScrollTrigger } from '../scripts/motion';
+  import { prefersReducedMotion } from '../scripts/motion';
 
   let lenis: Lenis | null = null;
   let rafId: number | null = null;
 
   function initLenis() {
     if (prefersReducedMotion()) return;
-    registerPlugins();
 
     lenis = new Lenis({
       duration: 1.1,
@@ -26,14 +28,13 @@
       touchMultiplier: 1.4,
     });
 
-    // Sincronizar Lenis con ScrollTrigger
-    lenis.on('scroll', ScrollTrigger.update);
-    // @ts-ignore — GSAP ticker firma flexible
-    (window as any).gsap?.ticker.add?.((time: number) => lenis?.raf(time * 1000));
-    // @ts-ignore
-    (window as any).gsap?.ticker.lagSmoothing?.(0);
-
-    // Fallback si no hay gsap.ticker
+    /*
+     * Un solo motor de frames. Antes había dos: se enganchaba `lenis.raf` al
+     * ticker de GSAP y además se arrancaba este bucle "por si no había ticker",
+     * sin comprobar que lo hubiera. Con GSAP cargado, Lenis avanzaba dos veces
+     * por frame y con dos relojes distintos (el ticker en milisegundos, el rAF
+     * en su propio timestamp).
+     */
     function raf(time: number) {
       lenis?.raf(time);
       rafId = requestAnimationFrame(raf);
@@ -46,13 +47,11 @@
     lenis?.destroy();
     lenis = null;
     rafId = null;
-    killAllTriggers();
   }
 
   function boot() {
     destroyLenis();
     initLenis();
-    refreshTriggers();
   }
 
   // Inicial + cada navegación de View Transitions

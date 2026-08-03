@@ -1,14 +1,18 @@
 /**
  * Punto único de configuración de animación.
- * - Registra plugins de GSAP una sola vez.
- * - Detecta prefers-reduced-motion y expone `motionEnabled`.
- * - Compatible con View Transitions API de Astro (re-init en cada page load).
+ *
+ * Aquí vivía el registro de GSAP + ScrollTrigger. Se quitó: lo único que el
+ * sitio hacía con ellos era marcar un elemento como visible al entrar en
+ * pantalla, y eso lo resuelve `IntersectionObserver` sin cargar nada. GSAP
+ * pesaba 43 KB comprimidos —el 74 % de todo el JS del sitio— por ese trabajo,
+ * en una página cuyo argumento de venta es abrir en menos de un segundo.
+ *
+ * Regla que deja escrita esa decisión: **este sitio no carga una librería de
+ * animación.** El movimiento se hace con transiciones CSS y lo único que decide
+ * JavaScript es cuándo dispararlas. Si algún día hiciera falta una línea de
+ * tiempo de verdad (scrub, pin, morphing), se vuelve a evaluar; para reveals y
+ * scroll suave no hace falta.
  */
-
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
-let registered = false;
 
 /** Detecta si el usuario pidió reducir animaciones. */
 export function prefersReducedMotion(): boolean {
@@ -16,32 +20,8 @@ export function prefersReducedMotion(): boolean {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
-/** Detecta si es un dispositivo táctil (para desactivar cursor custom). */
+/** Detecta si es un dispositivo táctil (para desactivar efectos de hover). */
 export function isTouchDevice(): boolean {
   if (typeof window === 'undefined') return false;
   return window.matchMedia('(hover: none), (pointer: coarse)').matches;
 }
-
-/** Registra plugins de GSAP. Idempotente. */
-export function registerPlugins(): void {
-  if (registered) return;
-  gsap.registerPlugin(ScrollTrigger);
-  registered = true;
-}
-
-/**
- * Limpia todos los ScrollTrigger existentes.
- * Llamar antes de navegar entre páginas con View Transitions.
- */
-export function killAllTriggers(): void {
-  if (typeof window === 'undefined') return;
-  ScrollTrigger.getAll().forEach((t) => t.kill());
-}
-
-/** Refresca ScrollTrigger tras cambios de DOM (nueva página, resize, etc.). */
-export function refreshTriggers(): void {
-  if (typeof window === 'undefined') return;
-  ScrollTrigger.refresh();
-}
-
-export { gsap, ScrollTrigger };
