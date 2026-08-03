@@ -195,6 +195,57 @@ chat y sin scroll suave: 6,9 KB de HTML y 15,7 KB de JavaScript, contra 33,5 y
 39,7 de la home. Cuatro destinos y ni uno más — cada botón que se añada reparte
 peor los clics entre todos los demás.
 
+**Hecho el 2026-08-03 (segunda pasada, la visual):** la página se veía como una
+lista de botones sobre negro, que es exactamente lo que ya ofrece cualquier
+Linktree gratis. Ahora lleva la escena de `interfaz.png` a pantalla completa
+—con su propio encuadre y brillo en `smarkVisual`, porque el velo genérico de
+`<SceneBg>` la apagaba hasta hacerla invisible en vertical—, una tarjeta de
+vidrio encima, el rayo de la marca como avatar y el botón principal en naranja
+lleno desde el reposo: en un teléfono no hay hover, así que el estado apetecible
+tiene que ser el primero. El texto bajó de frases a datos: tres credenciales
+(`Panamá · Desde $295 · Listo en días`) y una línea por destino, con el precio
+de entrada sacado de `plans.ts` y el número de sitios de `projects.ts`, para que
+ningún dato de la bio pueda quedarse viejo. Cuesta 8,0 KB de HTML (antes 6,9) y
+entre 17 y 36 KB de imagen según la pantalla; el JavaScript sigue en cero
+propio. Sin desbordes horizontales entre 320 y 1440px.
+
+**Hecho el 2026-08-03 (tercera pasada, el copy):** revisados los cuatro botones
+por dónde termina cada uno, no por lo que prometen. El hallazgo que ordena el
+resto: **el cotizador no es un desvío del WhatsApp, es su mejor versión** —
+termina abriendo el mismo chat, pero con plan, extras, total, plazo, nombre y
+contacto ya escritos, así que llega alguien que ya aceptó una cifra en vez de un
+«hola». Por eso se queda de primero. Cambios: el horario sale de debajo del
+botón de WhatsApp (un sábado le decía «cerrado» a quien ya iba a escribir) y lo
+sustituye lo que gana quien escribe; el mensaje precargado termina en `Mi
+negocio es:`, un hueco que se rellena solo al escribir y hace que la primera
+respuesta pueda llevar precio; la tercera credencial deja de ser «Listo en días»
+—vaga e imposible de concretar sin mentir, los plazos van de 72 h a 20 días— y
+pasa a «Precio y fecha cerrados»; y «Trabajo publicado» pasa a «Sitios que
+hicimos», porque lo primero es como lo llama una agencia y lo segundo como lo
+llama el cliente.
+
+**Hecho el 2026-08-03 (el `Lead` del cotizador):** terminar el cotizador abría
+`wa.me` y ahí se acababa todo, sin pasar por `/gracias/`, que es el único punto
+del sitio donde el píxel cuenta una conversión. O sea: el camino que mejor
+convierte —cuatro respuestas, una cifra aceptada y un mensaje ya redactado— era
+invisible para Meta, que solo veía el formulario de `/contacto`. Con publicidad
+encendida, eso es optimizar hacia visitas en vez de hacia clientes. Ahora el
+envío hace lo mismo que `/contacto`: WhatsApp en una pestaña nueva y esta se va
+a `/gracias/`. El evento **no** se dispara a mano en el cotizador a propósito —
+qué cuenta como `Lead` se decide en un solo sitio, el fragmento del píxel de
+`BaseLayout`, que mira la ruta; dispararlo también aquí contaría dos veces el
+mismo lead, y una conversión inflada engaña peor que una que falta. Si el
+navegador bloquea la pestaña, se manda el mensaje y se pierde la medición: el
+mismo orden de prioridades que ya tenía `/contacto`. Comprobado de punta a punta
+con el recorrido completo: se llega a `/gracias/` y se dispara exactamente un
+`PageView` y un `Lead`. De paso, `/gracias/` deja de decir «acabo de enviar el
+formulario» en su botón de WhatsApp, porque ahora se llega por dos caminos y ese
+texto solo describía uno.
+
+**Lo que sigue sin hacer:** los cuatro botones de `/smark/` son indistinguibles
+en la analítica — no hay forma de saber cuál se toca, así que cualquier
+discusión sobre esos textos es criterio, no dato.
+
 **Hecho el 2026-08-03:** el píxel de Meta está activo en las trece páginas, con
 `PageView` una vez por página —también al navegar sin recargar— y `Lead` en
 `/gracias/`. `/privacidad` y la respuesta del chat sobre privacidad se redactan

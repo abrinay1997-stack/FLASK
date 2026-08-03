@@ -30,7 +30,7 @@ const engine = {
   })),
   modules: modules.map((m) => ({ name: m.name, money: parsePrice(m.price), stack: m.stack })),
   capabilities: CAPABILITIES,
-  routes: { contacto: routes.contacto, planes: routes.planes },
+  routes: { contacto: routes.contacto, planes: routes.planes, gracias: routes.gracias },
   whatsapp: contact.whatsappRaw,
 };
 ---
@@ -186,7 +186,7 @@ const engine = {
     plans: { slug: string; name: string; price: string; money: Money; delivery: string; desc: string }[];
     modules: { name: string; money: Money; stack: string }[];
     capabilities: Record<string, { includedFrom?: string; moduleName?: string }>;
-    routes: { contacto: string; planes: string };
+    routes: { contacto: string; planes: string; gracias: string };
     whatsapp: string;
   }
 
@@ -394,9 +394,30 @@ const engine = {
         .filter((l): l is string => l !== null)
         .join('\n');
 
+      /*
+       * WhatsApp en una pestaña nueva y esta se va a /gracias/, igual que el
+       * formulario de /contacto.
+       *
+       * No es cosmético: /gracias/ es el único punto del sitio donde el píxel
+       * dispara `Lead`. Antes esto terminaba aquí, con la pestaña abierta y
+       * nada más, así que el camino que mejor convierte —cuatro respuestas, una
+       * cifra aceptada y un mensaje ya redactado— era invisible para Meta, que
+       * solo veía el formulario. Con la publicidad encendida, eso es optimizar
+       * hacia visitas en vez de hacia clientes.
+       *
+       * El evento NO se dispara aquí a mano, a propósito: qué cuenta como
+       * conversión se decide en un solo sitio (el fragmento del píxel en
+       * BaseLayout, que mira la ruta). Dispararlo también aquí contaría dos
+       * veces el mismo lead, y una conversión inflada engaña peor que una que
+       * falta.
+       *
+       * Si el navegador bloquea la pestaña, manda el mensaje —que es lo que la
+       * persona pidió— y se pierde la medición. Ese orden de prioridades es el
+       * mismo que ya tiene /contacto.
+       */
       const url = `https://wa.me/${engine.whatsapp}?text=${encodeURIComponent(txt)}`;
       const tab = window.open(url, '_blank', 'noopener');
-      if (!tab) location.href = url;
+      location.href = tab ? engine.routes.gracias : url;
     }
 
     root.addEventListener('change', paint);

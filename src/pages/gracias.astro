@@ -2,6 +2,15 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { waLink } from '../data/site';
 import { routes } from '../data/links';
+
+/**
+ * A esta página se llega por DOS caminos, no por uno: el formulario de
+ * /contacto y, desde hoy, el final del cotizador. Por eso el texto no puede
+ * nombrar ninguno de los dos —«acabo de enviar el formulario» le sonaba a chino
+ * a quien acaba de mandar su cotización por WhatsApp—, y por eso importa que
+ * los dos pasen por aquí: es el único punto del sitio donde el píxel cuenta un
+ * `Lead`.
+ */
 ---
 
 <BaseLayout
@@ -20,7 +29,7 @@ import { routes } from '../data/links';
       <div class="simple-actions">
         <a
           class="btn btn-primary"
-          href={waLink('Hola CuatroNodos, acabo de enviar el formulario')}
+          href={waLink('Hola CuatroNodos, acabo de escribirles desde el sitio')}
           target="_blank"
           rel="noopener"
         >

@@ -69,6 +69,22 @@ export const sceneVisuals = {
   },
 } satisfies Record<string, Visual>;
 
+/**
+ * /smark/ — la escena a pantalla completa del enlace de la bio.
+ *
+ * Es la misma imagen que usa `/contacto`, pero con encuadre y brillo propios, y
+ * por eso tiene su entrada: allí es atmósfera detrás de un texto largo y va
+ * apagada; aquí es lo único que hay, se ve en vertical y en tres segundos, así
+ * que se encuadra sobre la esfera y sube casi al doble de brillo. La tarjeta de
+ * vidrio pone el contraste del texto, no el velo.
+ */
+export const smarkVisual: Visual = {
+  src: interfaz,
+  alt: 'Una mano de cristal oscuro tocando una esfera de datos incandescente.',
+  focus: '50% 46%',
+  dim: 0.85,
+};
+
 /** /proceso — banda cinemática entre el hero y los pasos. */
 export const procesoVisual: Visual = {
   src: flujo,
