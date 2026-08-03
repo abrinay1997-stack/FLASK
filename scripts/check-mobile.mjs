@@ -322,10 +322,17 @@ async function main() {
     return found;
   }
   const pages = (await findPages()).sort();
-  if (pages.length < 12) {
+  /*
+   * Suelo, no cuenta exacta: el sitio crece y esto no debería pedir
+   * mantenimiento cada vez que se añade una página. Lo que vigila es la caída
+   * brusca — si el descubrimiento se vuelve a romper, devolverá dos o tres, no
+   * once.
+   */
+  const MINIMO_PAGINAS = 10;
+  if (pages.length < MINIMO_PAGINAS) {
     console.error(
-      `Solo se encontraron ${pages.length} páginas en dist/ y el sitio tiene 12. ` +
-        'Revisa el descubrimiento antes de fiarte de este informe.',
+      `Solo se encontraron ${pages.length} páginas en dist/, menos del mínimo ` +
+        `esperado (${MINIMO_PAGINAS}). El descubrimiento está roto: no te fíes de este informe.`,
     );
     process.exitCode = 1;
   }

@@ -29,6 +29,20 @@ interface Props {
   bodyClass?: string;
   /** Schemas JSON-LD extra de la página (Service, FAQPage, …). */
   jsonLd?: Record<string, unknown>[];
+  /**
+   * Página sin chrome: ni nav, ni footer, ni chat, ni scroll suave. Solo el
+   * `<head>` completo y el contenido.
+   *
+   * Existe para `/smark/`, el enlace de la bio. Ahí el chrome no solo sobra,
+   * resta: la página tiene un único trabajo —repartir hacia un destino— y cada
+   * salida extra compite con los botones. Quitar el chat y Lenis además evita
+   * cargar su JavaScript en la única página que se abre casi siempre desde el
+   * navegador interno de una red social, con datos móviles y sin caché.
+   *
+   * El `<head>` se mantiene entero a propósito: título, OpenGraph e icono son
+   * justo lo que se ve al pegar el enlace en un chat o en una historia.
+   */
+  bare?: boolean;
 }
 
 const {
@@ -38,6 +52,7 @@ const {
   activePath,
   bodyClass,
   jsonLd = [],
+  bare = false,
 } = Astro.props;
 
 const fullTitle = title.includes(site.name) ? title : `${title} — ${site.name}`;
@@ -131,15 +146,16 @@ const schemas = isHome ? [orgSchema, ...jsonLd] : jsonLd;
     ))}
   </head>
   <body class={bodyClass}>
-    <a class="skip-link" href="#contenido">Saltar al contenido</a>
-    <Nav activePath={activePath} />
+    {/* Sin nav no hay nada que saltar: el enlace sobraría y confundiría. */}
+    {!bare && <a class="skip-link" href="#contenido">Saltar al contenido</a>}
+    {!bare && <Nav activePath={activePath} />}
     <main id="contenido">
       <slot />
     </main>
-    <Footer />
+    {!bare && <Footer />}
 
     <!-- Sistemas globales de motion. Se auto-inicializan y respetan reduce-motion. -->
-    <SmoothScroll />
-    <ChatWidget />
+    {!bare && <SmoothScroll />}
+    {!bare && <ChatWidget />}
   </body>
 </html>

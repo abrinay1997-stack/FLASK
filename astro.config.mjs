@@ -34,9 +34,20 @@ export default defineConfig({
   compressHTML: true,
   integrations: [
     sitemap({
-      // Fuera del sitemap lo que ya va con noindex: pedirle a Google que
-      // rastree una página que le decimos que no indexe es contradictorio.
-      filter: (page) => !/\/(gracias|404)\/?$/.test(page),
+      /*
+       * Fuera del sitemap lo que ya va con noindex: pedirle a Google que
+       * rastree una página que le decimos que no indexe es contradictorio.
+       *
+       * `smark` es el enlace de la bio en redes. Se llega a ella desde fuera,
+       * nunca desde el sitio, y no debe competir con la home como puerta de
+       * entrada en los resultados de búsqueda.
+       *
+       * Ojo: ninguna de las tres se bloquea en `robots.txt`. Sería
+       * contraproducente — un rastreador que no puede entrar tampoco puede leer
+       * el `noindex`, así que la página acabaría indexada igual, y encima sin
+       * descripción.
+       */
+      filter: (page) => !/\/(gracias|404|smark)\/?$/.test(page),
 
       /**
        * Con `trailingSlash:'always'` el sitemap ya emite las mismas URLs que

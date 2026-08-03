@@ -149,18 +149,17 @@ Todo esto es programable aquí y ninguna pieza necesita dinero.
 |---|---|---|
 | 20 | **Blog con Content Collections de Astro.** El motor se monta aquí y no cuesta nada; los artículos los escribes tú. Un competidor ya ranquea con «cuánto cuesta una página web en Panamá», que es exactamente la búsqueda de mayor intención del mercado. **Cero blogs vacíos:** el motor solo tiene sentido si van a existir posts. | `[código]` + `[tuyo]` |
 | 21 | **`LocalBusiness` además de `Organization`.** El schema que ya se emite es correcto pero genérico; `LocalBusiness` con área de servicio es el que compite en búsquedas locales. | `[código]` |
-| 22 | **Analítica.** Sin datos, todo este documento es criterio informado, no certeza. Hay opciones sin coste (Cloudflare Web Analytics es gratis y sin cookies, así que no obliga a banner). Decidir **antes** de anunciar el sitio. Toca `/privacidad` en el mismo commit. | `[cuenta]` |
-| 23 | **Search Console.** Sitemap y canonical ya se emiten bien; falta darlos de alta y verificar. Hacerlo **después** del punto 1, no antes. | `[cuenta]` |
+| 22 | **Search Console.** Sitemap y canonical ya se emiten bien; falta darlos de alta y verificar. Hacerlo **después** del punto 1, no antes. | `[cuenta]` |
 
 ## Bloque 5 — Técnico y marca
 
 | # | Pendiente | Quién |
 |---|---|---|
-| 24 | **Prueba con lector de pantalla real** (NVDA / VoiceOver). Lo auditado es estructura, no experiencia. Es el único hueco de accesibilidad que queda y no se puede cerrar desde el repo. | `[tuyo]` |
-| 25 | **El `<select>` de `/contacto` usa `appearance:none`** con la flecha en `background-image`. En Windows con alto contraste puede desaparecer. Riesgo bajo. | `[código]` |
-| 26 | **La marca es solo tipográfica.** El rayo del favicon no aparece en el nav, ni en el footer, ni en la imagen social, y no hay versión sobre fondo claro para facturas o propuestas. | `[código]` |
-| 27 | **El shader es un `requestAnimationFrame` permanente** mientras el hero está en pantalla. Es la única animación corriendo del sitio. Ya se pausa fuera del viewport y no arranca con reduce-motion; si algún día importa la batería, baja a 30 fps sin que se note. | `[código]` |
-| 28 | **Los 9 PNG de origen pesan 11,2 MB** y en WebP q90 pesarían 0,87 MB — un 92 % menos, imperceptible en pantalla porque se muestran al 32–50 % de opacidad bajo un velo. No afecta a lo que se sirve (Astro ya emite 1,19 MB de WebP), solo al peso del repo. | `[código]` |
+| 23 | **Prueba con lector de pantalla real** (NVDA / VoiceOver). Lo auditado es estructura, no experiencia. Es el único hueco de accesibilidad que queda y no se puede cerrar desde el repo. | `[tuyo]` |
+| 24 | **El `<select>` de `/contacto` usa `appearance:none`** con la flecha en `background-image`. En Windows con alto contraste puede desaparecer. Riesgo bajo. | `[código]` |
+| 25 | **La marca es solo tipográfica.** El rayo del favicon no aparece en el nav, ni en el footer, ni en la imagen social, y no hay versión sobre fondo claro para facturas o propuestas. | `[código]` |
+| 26 | **El shader es un `requestAnimationFrame` permanente** mientras el hero está en pantalla. Es la única animación corriendo del sitio. Ya se pausa fuera del viewport y no arranca con reduce-motion; si algún día importa la batería, baja a 30 fps sin que se note. | `[código]` |
+| 27 | **Los 9 PNG de origen pesan 11,2 MB** y en WebP q90 pesarían 0,87 MB — un 92 % menos, imperceptible en pantalla porque se muestran al 32–50 % de opacidad bajo un velo. No afecta a lo que se sirve (Astro ya emite 1,19 MB de WebP), solo al peso del repo. | `[código]` |
 
 ## Bloque 6 — Smartlink para redes sociales
 
@@ -176,8 +175,8 @@ tareas:
   página se ve quién llega y qué botón toca, y ahí se acaba: en cuanto pasan a
   `/planes` o al cotizador se vuelven invisibles. Para ver el camino completo
   —red social → Smartlink → planes → cotizador → contacto— el tag tiene que
-  estar en todo el sitio. Por eso el punto 22 deja de ser una tarea paralela y
-  pasa a ser prerequisito de esta.
+  estar en todo el sitio. Por eso GA4 se instala en todo el sitio (punto 28) y no
+  solo aquí: es la única forma de que el recorrido se vea entero.
 - **En el Smartlink no hay ninguna conversión que medir.** Solo un clic de
   salida. El píxel de Meta únicamente sirve para retargeting si dispara donde
   alguien completó algo, y eso es `/gracias/`.
@@ -186,18 +185,21 @@ tareas:
 
 | # | Pendiente | Quién |
 |---|---|---|
-| 29 | **La página en sí, en `/smark/`** (ruta decidida el 2026-08-03; va en la bio, así que una vez repartida no se cambia sin romper enlaces). Tarjeta suelta, sin nav ni footer: marca, una línea y los botones, cero distracción. Necesita una variante de `BaseLayout` que conserve el `<head>`, el SEO y el JSON-LD pero se salte el chrome. El contenido se compone de `site.ts`, `links.ts` y `plans.ts` — ni un dato duplicado, como el resto del sitio. | `[código]` |
-| 30 | **Que no se indexe ni se enlace.** `noindex` en la etiqueta y fuera del sitemap (el `filter` de `astro.config.mjs` ya excluye `gracias` y `404`). **No** meterla en `robots.txt`: si el rastreador no puede entrar, tampoco lee el `noindex`, y las dos cosas juntas se estorban. No se añade a `navLinks` ni al footer. | `[código]` |
-| 31 | **GA4 en todo el sitio.** Con una trampa que hay que resolver en el mismo momento: el sitio navega con View Transitions, así que GA4 cuenta la primera carga y **deja de contar** al cambiar de página. Hay que disparar la vista a mano en `astro:page-load` o todo el tráfico interno se pierde sin que nada parezca roto. El ID de medición es un identificador público, no un secreto — pero si se declara como variable de entorno hay que mirar el escáner de secretos de Netlify, que ya obligó a una excepción con `CHAT_PROVIDER`. | `[código]` + `[cuenta]` |
-| 32 | **Píxel de Meta**, con el evento de conversión en `/gracias/`. Mismo problema de View Transitions que el punto 31. | `[código]` + `[cuenta]` |
-| 33 | **`/privacidad` actualizada en el MISMO commit.** Hoy declara: «Del sitio web: ninguno. No usamos cookies propias, no hay herramientas de analítica instaladas y no creamos perfiles de navegación». En cuanto entre GA4 o el píxel, eso pasa a ser **falso**. El propio archivo ya lo dejó escrito en su cabecera: una política que no refleja lo que pasa no es un descuido de redacción, es una declaración falsa. Hay que decir qué se recoge, quién lo recibe (Google, Meta), para qué y cómo oponerse. Revisar también `/terminos`. | `[código]` |
-| 34 | **Decidir si hace falta banner de consentimiento.** El píxel de Meta pone cookies. Panamá (Ley 81 de 2019) es menos exigente que la UE, pero el tráfico de redes puede llegar de cualquier país. Un banner añade fricción y peso justo en la página que vende velocidad; no ponerlo es un riesgo acotado. Es decisión tuya, no técnica. | `[tuyo]` |
-| 35 | **Medir el coste en velocidad.** GA4 y el píxel rondan los 50 y 70 KB. El sitio vende abrir en menos de un segundo, así que la decisión de dejarlos se toma con el dato delante, no con la intuición: medir antes, medir después y comparar. | `[código]` |
+| 28 | **GA4 en todo el sitio.** Con una trampa que hay que resolver en el mismo momento: el sitio navega con View Transitions, así que GA4 cuenta la primera carga y **deja de contar** al cambiar de página. Hay que disparar la vista a mano en `astro:page-load` o todo el tráfico interno se pierde sin que nada parezca roto. El ID de medición es un identificador público, no un secreto — pero si se declara como variable de entorno hay que mirar el escáner de secretos de Netlify, que ya obligó a una excepción con `CHAT_PROVIDER`. | `[código]` + `[cuenta]` |
+| 29 | **Píxel de Meta**, con el evento de conversión en `/gracias/`. Mismo problema de View Transitions que el punto 28. | `[código]` + `[cuenta]` |
+| 30 | **`/privacidad` actualizada en el MISMO commit.** Hoy declara: «Del sitio web: ninguno. No usamos cookies propias, no hay herramientas de analítica instaladas y no creamos perfiles de navegación». En cuanto entre GA4 o el píxel, eso pasa a ser **falso**. El propio archivo ya lo dejó escrito en su cabecera: una política que no refleja lo que pasa no es un descuido de redacción, es una declaración falsa. Hay que decir qué se recoge, quién lo recibe (Google, Meta), para qué y cómo oponerse. Revisar también `/terminos`. | `[código]` |
+| 31 | **Decidir si hace falta banner de consentimiento.** El píxel de Meta pone cookies. Panamá (Ley 81 de 2019) es menos exigente que la UE, pero el tráfico de redes puede llegar de cualquier país. Un banner añade fricción y peso justo en la página que vende velocidad; no ponerlo es un riesgo acotado. Es decisión tuya, no técnica. | `[tuyo]` |
+| 32 | **Medir el coste en velocidad.** GA4 y el píxel rondan los 50 y 70 KB. El sitio vende abrir en menos de un segundo, así que la decisión de dejarlos se toma con el dato delante, no con la intuición: medir antes, medir después y comparar. | `[código]` |
 
-**Orden de ejecución.** La página (29–30) se puede hacer ya y funciona sin nada
-de lo demás. La analítica, el píxel y la privacidad (31–33) van juntos, en un
-solo commit, porque publicar cualquiera de los dos primeros sin el tercero deja
-el sitio declarando algo que no es cierto. Medir (35) va después.
+**Hecho el 2026-08-03:** la página existe en `/smark/`, con `noindex`, fuera del
+sitemap y sin un solo enlace desde el resto del sitio. Va sin nav, sin pie, sin
+chat y sin scroll suave: 6,9 KB de HTML y 15,7 KB de JavaScript, contra 33,5 y
+39,7 de la home. Cuatro destinos y ni uno más — cada botón que se añada reparte
+peor los clics entre todos los demás.
+
+**Orden de lo que queda.** La analítica, el píxel y la privacidad (29–31) van
+juntos, en un solo commit: publicar cualquiera de los dos primeros sin el
+tercero deja el sitio declarando algo que no es cierto. Medir (33) va después.
 
 **Cuándo pegarla en la bio:** cuando haya dominio propio. La página se construye
 ahora y vive en `cuatronodos.netlify.app/…`; el día que cambie `site` en
