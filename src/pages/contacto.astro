@@ -2,7 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SceneBg from '../components/SceneBg.astro';
 import Reveal from '../components/Reveal.astro';
-import { contact, waLink, site } from '../data/site';
+import { contact, waLink, site, formDestination } from '../data/site';
 import { planOptions } from '../data/plans';
 import { sobreVisuals } from '../data/images';
 import { routes } from '../data/links';
@@ -17,7 +17,13 @@ import { routes } from '../data/links';
  * Se ofrecen dos vías con peso distinto a propósito. WhatsApp arriba, porque es
  * la que de verdad usa la gente en Panamá y la que responde en minutos. El
  * formulario debajo, para quien prefiere escribir sin dar su número.
+ *
+ * El destino del formulario lo fija `formDestination` en src/data/site.ts, y de
+ * ahí sale todo lo demás: los atributos del `<form>`, el texto de la tarjeta y
+ * la etiqueta del botón. Se declara en un sitio para que el sitio no pueda
+ * prometer un camino y tomar otro.
  */
+const esWhatsApp = formDestination === 'whatsapp';
 ---
 
 <BaseLayout
@@ -88,27 +94,29 @@ import { routes } from '../data/links';
           <div class="ct-card">
             <h2>O déjanos tu mensaje</h2>
             <p class="ct-card-lead">
-              Al enviar se abre WhatsApp con el mensaje ya redactado; solo tienes que darle a
-              enviar. Nunca compartimos tus datos con terceros.
+              {esWhatsApp
+                ? 'Al enviar se abre WhatsApp con el mensaje ya redactado; solo tienes que darle a enviar. Nunca compartimos tus datos con terceros.'
+                : 'Lo recibimos al instante y te contestamos por donde nos digas. Nunca compartimos tus datos con terceros.'}
             </p>
 
             <!--
-              Doble camino a propósito:
-              · En Netlify, los atributos data-netlify capturan el POST.
-              · En GitHub Pages no hay backend, así que el script del final
-                compone un mensaje de WhatsApp con los campos.
+              Un solo camino, el que declare `formDestination`:
+              · 'netlify'  → los atributos data-netlify capturan el POST nativo.
+              · 'whatsapp' → el script del final intercepta el submit y compone
+                             el mensaje. Sin atributos de Netlify, para que el
+                             build no dé de alta un formulario que no se usa.
             -->
             <form
               name="contacto"
               method="POST"
               action={routes.gracias}
-              data-netlify="true"
-              data-netlify-honeypot="bot-field"
-              data-wa-fallback
+              data-netlify={esWhatsApp ? undefined : 'true'}
+              data-netlify-honeypot={esWhatsApp ? undefined : 'bot-field'}
+              data-destino={formDestination}
               data-wa-number={contact.whatsappRaw}
               data-gracias={routes.gracias}
             >
-              <input type="hidden" name="form-name" value="contacto" />
+              {!esWhatsApp && <input type="hidden" name="form-name" value="contacto" />}
               <p class="honeypot">
                 <label>No llenes este campo: <input name="bot-field" /></label>
               </p>
@@ -150,7 +158,7 @@ import { routes } from '../data/links';
               </div>
 
               <button type="submit" class="btn btn-primary ct-submit">
-                <span class="dot"></span> Enviar por WhatsApp
+                <span class="dot"></span> {esWhatsApp ? 'Enviar por WhatsApp' : 'Enviar mensaje'}
               </button>
 
               <p class="ct-note">
@@ -174,15 +182,6 @@ import { routes } from '../data/links';
     if (sel && [...sel.options].some((o) => o.value === plan)) sel.value = plan;
   }
 
-  /**
-   * GitHub Pages sirve archivos estáticos: no hay nada que reciba el POST. En
-   * vez de dejarlo muerto, componemos un mensaje de WhatsApp con lo escrito.
-   * En Netlify el handler se aparta y deja pasar el envío nativo.
-   */
-  function isNetlifyHost() {
-    return /(^|\.)netlify\.(app|com)$/.test(location.hostname);
-  }
-
   function buildWhatsAppMessage(form: HTMLFormElement) {
     const data = new FormData(form);
     const value = (name: string) => String(data.get(name) ?? '').trim();
@@ -201,14 +200,21 @@ import { routes } from '../data/links';
     return lines.join('\n');
   }
 
+  /**
+   * El destino viaja en el HTML desde `formDestination` (src/data/site.ts). Con
+   * cualquier destino que no sea 'whatsapp' no hay nada que interceptar: el POST
+   * nativo se va a donde apunte el `action`, y ni siquiera enganchamos el
+   * listener. Antes esto se decidía leyendo `location.hostname`, así que mudar
+   * de dominio cambiaba el comportamiento del formulario sin tocar una línea.
+   */
   function initContactForm() {
-    const form = document.querySelector<HTMLFormElement>('form[data-wa-fallback]');
+    const form = document.querySelector<HTMLFormElement>('form[data-destino]');
     if (!form || form.dataset.bound) return;
     form.dataset.bound = 'true';
 
-    form.addEventListener('submit', (event) => {
-      if (isNetlifyHost()) return; // Netlify Forms se encarga
+    if (form.dataset.destino !== 'whatsapp') return;
 
+    form.addEventListener('submit', (event) => {
       event.preventDefault();
 
       // Honeypot: si un bot lo llenó, fingimos éxito y no abrimos nada

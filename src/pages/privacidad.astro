@@ -1,17 +1,23 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { site, contact, waLink } from '../data/site';
+import { site, contact, waLink, formDestination } from '../data/site';
 import { routes } from '../data/links';
 
 /**
  * Esta política describe lo que el sitio hace HOY, no una plantilla genérica:
- * no hay analítica, no hay cookies propias y los formularios no guardan nada en
- * ningún servidor — componen un mensaje de WhatsApp en el navegador.
+ * no hay analítica y no hay cookies propias.
+ *
+ * Lo que pasa con el formulario de contacto depende de `formDestination`
+ * (src/data/site.ts), así que ese punto se redacta desde el mismo valor que
+ * gobierna el envío. Decir aquí que nada sale del navegador mientras el POST se
+ * va a un tercero no es un descuido de redacción: es una declaración falsa en el
+ * único documento del sitio que promete exactitud.
  *
  * Si algún día se instala analítica, se conecta un endpoint de correo o se
  * activan cookies, hay que actualizar este archivo EN EL MISMO commit.
  */
-const actualizado = '1 de agosto de 2026';
+const actualizado = '3 de agosto de 2026';
+const esWhatsApp = formDestination === 'whatsapp';
 ---
 
 <BaseLayout
@@ -46,16 +52,34 @@ const actualizado = '1 de agosto de 2026';
           de analítica instaladas y no creamos perfiles de navegación. Puedes recorrer todas las
           páginas sin que quede registro nuestro de tu visita.
         </p>
-        <p>
-          <strong>De los formularios:</strong> el formulario de contacto y el cotizador
-          <em>no envían tus datos a ningún servidor nuestro</em>. Lo que escribes se usa en tu
-          propio navegador para redactar un mensaje de WhatsApp que tú decides enviar o no. Hasta
-          que pulsas enviar en WhatsApp, esos datos no salen de tu dispositivo.
-        </p>
-        <p>
-          Cuando envías ese mensaje, recibimos lo que contenga: normalmente tu nombre, tu forma
-          de contacto y la descripción de tu proyecto.
-        </p>
+        {esWhatsApp ? (
+          <Fragment>
+            <p>
+              <strong>De los formularios:</strong> el formulario de contacto y el cotizador
+              <em>no envían tus datos a ningún servidor nuestro</em>. Lo que escribes se usa en tu
+              propio navegador para redactar un mensaje de WhatsApp que tú decides enviar o no.
+              Hasta que pulsas enviar en WhatsApp, esos datos no salen de tu dispositivo.
+            </p>
+            <p>
+              Cuando envías ese mensaje, recibimos lo que contenga: normalmente tu nombre, tu
+              forma de contacto y la descripción de tu proyecto.
+            </p>
+          </Fragment>
+        ) : (
+          <Fragment>
+            <p>
+              <strong>Del formulario de contacto:</strong> al enviarlo recibimos lo que hayas
+              escrito —tu nombre, tu correo, tu WhatsApp si lo pones, qué plan te interesa y la
+              descripción de tu negocio—. El envío lo procesa y almacena el servicio de
+              formularios de nuestro proveedor de alojamiento, y desde ahí lo leemos nosotros.
+            </p>
+            <p>
+              <strong>Del cotizador:</strong> nada. El cálculo ocurre entero en tu navegador y lo
+              que escribes al final se usa ahí mismo para redactar un mensaje de WhatsApp que tú
+              decides enviar o no. Hasta que pulsas enviar, esos datos no salen de tu dispositivo.
+            </p>
+          </Fragment>
+        )}
 
         <h2>3. Para qué los usamos</h2>
         <p>
@@ -69,6 +93,12 @@ const actualizado = '1 de agosto de 2026';
             <strong>El proveedor de alojamiento</strong> sirve las páginas y, como cualquier
             servidor web, puede registrar direcciones IP y peticiones en sus propios registros
             técnicos. Ese tratamiento se rige por la política del proveedor, no por la nuestra.
+            {!esWhatsApp && (
+              <Fragment>
+                {' '}Ese mismo proveedor es el que recibe y guarda los envíos del formulario de
+                contacto.
+              </Fragment>
+            )}
           </li>
           <li>
             <strong>WhatsApp (Meta)</strong> transporta los mensajes que nos envías. Al usar ese

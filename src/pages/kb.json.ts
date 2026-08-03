@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 
-import { site, contact } from '../data/site';
+import { site, contact, formDestination } from '../data/site';
 import { plans, diagnostico } from '../data/plans';
 import { modules } from '../data/modules';
 import { carePlans, careNote } from '../data/care';
@@ -372,9 +372,11 @@ export const GET: APIRoute = () => {
     topic: 'legal',
     q: ['que hacen con mis datos', 'privacidad', 'usan cookies', 'me van a spamear'],
     text:
-      'El sitio no usa cookies propias ni tiene analítica instalada. Los formularios no envían nada a ningún ' +
-      'servidor: redactan un mensaje de WhatsApp en tu navegador que tú decides enviar. Los datos solo se usan ' +
-      'para responderte y preparar tu propuesta.',
+      'El sitio no usa cookies propias ni tiene analítica instalada. ' +
+      (formDestination === 'whatsapp'
+        ? 'Los formularios no envían nada a ningún servidor: redactan un mensaje de WhatsApp en tu navegador que tú decides enviar. '
+        : 'El formulario de contacto se envía al servicio de formularios del alojamiento y lo leemos desde ahí; el cotizador no envía nada, redacta un mensaje de WhatsApp en tu navegador que tú decides enviar. ') +
+      'Los datos solo se usan para responderte y preparar tu propuesta.',
   });
 
   add({

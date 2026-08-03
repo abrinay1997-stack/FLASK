@@ -58,31 +58,42 @@ uno. El resumen de las cinco más importantes está en el
 
 Es el punto que más confusión ha generado, así que queda escrito.
 
-El `<form>` de `src/pages/contacto.astro` tiene dos caminos, y **cuál se usa lo
-decide el hostname**:
+El `<form>` de `src/pages/contacto.astro` tiene dos caminos, y **cuál se usa se
+declara en un solo sitio**:
 
-```js
-// src/pages/contacto.astro
-return /(^|\.)netlify\.(app|com)$/.test(location.hostname);
+```ts
+// src/data/site.ts
+export const formDestination: FormDestination = 'netlify';
 ```
 
-- **En un host `*.netlify.app`** (hoy) el interceptor se aparta y **Netlify Forms
-  recibe el `POST`**. Los envíos aparecen en el panel de Netlify, no en WhatsApp.
-- **En cualquier otro host** el script intercepta el `submit`, compone un mensaje
-  con los campos y abre `wa.me` con el texto ya redactado, redirigiendo a
-  `/gracias`.
-- Si el navegador bloquea el pop-up, navega a `wa.me` en la misma pestaña.
+- **`'netlify'`** (hoy) — el `<form>` sale con los atributos `data-netlify` y
+  **Netlify Forms recibe el `POST`**. Los envíos aparecen en el panel de Netlify.
+  El script ni siquiera engancha el listener.
+- **`'whatsapp'`** — el `<form>` sale sin atributos de Netlify, el script
+  intercepta el `submit`, compone un mensaje con los campos y abre `wa.me` con el
+  texto ya redactado, redirigiendo a `/gracias`. Si el navegador bloquea el
+  pop-up, navega a `wa.me` en la misma pestaña.
 - El honeypot `bot-field` se respeta en ambos caminos.
 
-> **Trampa conocida.** El día que el sitio pase a un dominio propio, ese `test`
-> devolverá `false` y el formulario volverá solo al camino de WhatsApp, sin que
-> nadie toque nada. Si para entonces los envíos se están recibiendo por Netlify
-> Forms, dejarán de llegar en silencio. Está anotado en el
-> [`ROADMAP.md`](../ROADMAP.md).
+**Ese valor gobierna tres cosas a la vez**, y por eso vive en `site.ts` y no en la
+página: los atributos del `<form>`, el copy visible (la bajada de la tarjeta y la
+etiqueta del botón — no puede decir "Enviar por WhatsApp" si el POST se va a
+Netlify) y lo que declara `/privacidad` sobre a dónde van tus datos. Cambiar el
+destino y dejar el texto viejo convierte la política de privacidad en una
+declaración falsa.
+
+> **Trampa que esto cerró.** Antes el camino lo decidía
+> `/(^|\.)netlify\.(app|com)$/.test(location.hostname)`. El día que el sitio
+> estrenara dominio propio, el `test` habría dado `false` y el formulario habría
+> vuelto solo al camino de WhatsApp: los envíos que llegaban por Netlify Forms
+> habrían dejado de llegar sin que nadie tocara nada y sin ningún síntoma
+> visible. La lección general es la regla 15 — una sola fuente de verdad — pero
+> aplicada al comportamiento, no al layout: **nada crítico se deduce del entorno
+> cuando se puede declarar.**
 
 Para recibir los envíos por **correo** en vez de por WhatsApp, la vía limpia es
-un endpoint externo (Formspree, Web3Forms): cambiar el `action` del form y quitar
-el interceptor.
+un endpoint externo (Formspree, Web3Forms): cambiar el `action` del form, añadir
+el destino a `FormDestination` y tratarlo en la página como uno más.
 
 ---
 
