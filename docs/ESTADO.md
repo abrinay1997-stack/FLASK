@@ -195,6 +195,20 @@ chat y sin scroll suave: 6,9 KB de HTML y 15,7 KB de JavaScript, contra 33,5 y
 39,7 de la home. Cuatro destinos y ni uno más — cada botón que se añada reparte
 peor los clics entre todos los demás.
 
+**Hecho el 2026-08-03 (segunda pasada, la visual):** la página se veía como una
+lista de botones sobre negro, que es exactamente lo que ya ofrece cualquier
+Linktree gratis. Ahora lleva la escena de `interfaz.png` a pantalla completa
+—con su propio encuadre y brillo en `smarkVisual`, porque el velo genérico de
+`<SceneBg>` la apagaba hasta hacerla invisible en vertical—, una tarjeta de
+vidrio encima, el rayo de la marca como avatar y el botón principal en naranja
+lleno desde el reposo: en un teléfono no hay hover, así que el estado apetecible
+tiene que ser el primero. El texto bajó de frases a datos: tres credenciales
+(`Panamá · Desde $295 · Listo en días`) y una línea por destino, con el precio
+de entrada sacado de `plans.ts` y el número de sitios de `projects.ts`, para que
+ningún dato de la bio pueda quedarse viejo. Cuesta 8,0 KB de HTML (antes 6,9) y
+entre 17 y 36 KB de imagen según la pantalla; el JavaScript sigue en cero
+propio. Sin desbordes horizontales entre 320 y 1440px.
+
 **Hecho el 2026-08-03:** el píxel de Meta está activo en las trece páginas, con
 `PageView` una vez por página —también al navegar sin recargar— y `Lead` en
 `/gracias/`. `/privacidad` y la respuesta del chat sobre privacidad se redactan

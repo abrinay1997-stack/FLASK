@@ -17,42 +17,60 @@
  * porque no hay nada más en pantalla. Si entra un destino, conviene que salga
  * otro.
  *
+ * REGLA AL ESCRIBIR AQUÍ: el texto se mide en palabras, no en frases.
+ * Se llega desde el navegador interno de Instagram, con una mano y sin
+ * paciencia. Una explicación de dos líneas bajo un botón no se lee: empuja el
+ * botón siguiente fuera de pantalla. Cada destino lleva una etiqueta y, como
+ * mucho, un dato que ayude a decidir (precio, horario, cuántos sitios hay).
+ *
  * Nada de esto duplica datos: el teléfono sale de site.ts, las rutas de
- * links.ts y las redes de footer.ts. Cuando esas fuentes cambien, esta página
+ * links.ts, las redes de footer.ts, el precio de entrada de plans.ts y el número
+ * de sitios publicados de projects.ts. Cuando esas fuentes cambien, esta página
  * cambia sola.
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
+import SceneBg from '../components/SceneBg.astro';
 import { site, contact, waLink } from '../data/site';
 import { routes } from '../data/links';
 import { socials } from '../data/footer';
+import { plans } from '../data/plans';
+import { projects } from '../data/projects';
+import { smarkVisual } from '../data/images';
 
 // Solo las redes que ya existen. `footer.ts` marca con `href` las que están
 // activas; mientras no lo tengan, aquí no se dibuja nada — un enlace de la bio
 // que lleva a un perfil vacío es peor que no ofrecerlo.
 const redesActivas = socials.filter((s) => s.href);
 
+// El precio de entrada se calcula, no se escribe: el día que el plan más barato
+// cambie de cifra, el botón de la bio no puede quedarse anunciando la vieja.
+const desde = `$${Math.min(...plans.map((p) => Number(p.price.replace(/[^\d]/g, '')))).toLocaleString('en-US')}`;
+
+// Prueba en tres palabras, con datos que se pueden comprobar abriendo el sitio.
+const credenciales = [site.location, `Desde ${desde}`, 'Listo en días'];
+
 const destinos = [
   {
     href: routes.cotizador,
-    label: 'Calcular el precio de mi sitio',
-    hint: 'Cuatro preguntas y ves la cifra. Sin dejar tus datos.',
+    label: 'Calcular mi precio',
+    hint: '4 preguntas · sin dar datos',
     primary: true,
   },
   {
     href: waLink('Hola CuatroNodos, los vi en redes y quiero cotizar mi sitio'),
-    label: 'Escribirnos por WhatsApp',
+    label: 'Escribir por WhatsApp',
     hint: contact.horario,
     external: true,
   },
   {
     href: routes.planes,
-    label: 'Ver planes y precios',
-    hint: 'Desde $295, publicados y cerrados por escrito.',
+    label: 'Planes y precios',
+    hint: `Desde ${desde} · precio cerrado`,
   },
   {
     href: routes.proyectos,
     label: 'Trabajo publicado',
-    hint: 'Sitios reales, con su dirección para comprobarlos.',
+    hint: `${projects.length} sitios en línea`,
   },
 ];
 ---
@@ -65,11 +83,27 @@ const destinos = [
   bodyClass="smark-body"
 >
   <section class="smark">
+    {/*
+      La escena va a pantalla completa y encendida: es lo único que esta página
+      tiene para impactar en el primer segundo, y aquí no compite con ningún
+      titular largo. `eager` porque está por encima del pliegue — cargarla tarde
+      sería mostrar un rectángulo negro justo en la entrada.
+    */}
+    <SceneBg visual={smarkVisual} side="center" eager />
+    <span class="smark-glow" aria-hidden="true"></span>
+
     <div class="smark-card">
       <header class="smark-head">
+        <span class="smark-mark" aria-hidden="true">
+          <svg viewBox="0 0 64 64" focusable="false">
+            <path d="M37.5 6 18 35.5h11.2L26.5 58 46 28.5H34.8L37.5 6Z" />
+          </svg>
+        </span>
         <h1 class="smark-brand">{site.name}<span class="dot">.</span></h1>
         <p class="smark-tagline">{site.tagline}</p>
-        <p class="smark-meta">Agencia web · {site.location}</p>
+        <ul class="smark-creds">
+          {credenciales.map((c) => <li>{c}</li>)}
+        </ul>
       </header>
 
       <nav class="smark-links" aria-label="Enlaces de CuatroNodos">
@@ -80,8 +114,11 @@ const destinos = [
             target={d.external ? '_blank' : undefined}
             rel={d.external ? 'noopener' : undefined}
           >
-            <span class="smark-link-label">{d.label}</span>
-            <span class="smark-link-hint">{d.hint}</span>
+            <span class="smark-link-text">
+              <span class="smark-link-label">{d.label}</span>
+              <span class="smark-link-hint">{d.hint}</span>
+            </span>
+            <span class="smark-link-arrow" aria-hidden="true">→</span>
           </a>
         ))}
       </nav>
@@ -108,8 +145,10 @@ const destinos = [
 </BaseLayout>
 
 <style>
-  /* Sin nav ni pie, la tarjeta manda: se centra en la pantalla y respira. */
+  /* Sin nav ni pie, la tarjeta manda: se centra en la pantalla y respira.
+     `position:relative` es requisito de <SceneBg>, que se pega al inset. */
   .smark {
+    position: relative;
     min-height: 100svh;
     display: flex;
     align-items: center;
@@ -117,16 +156,99 @@ const destinos = [
     /* La regla global `section{padding:120px 0}` aquí sobra: el centrado ya da
        el aire, y con ella la tarjeta se salía de pantalla en móviles bajos. */
     padding: 40px 22px;
+    overflow: hidden;
   }
+
+  /*
+    El velo de <SceneBg> se reemplaza aquí, y es la única página donde pasa.
+
+    El componente cierra el centro para abrir un carril de lectura, porque en el
+    resto del sitio el texto va suelto sobre la imagen. Aquí el texto vive dentro
+    de una tarjeta que ya trae su propio fondo, así que ese velo solo estaba
+    apagando lo único que se ve: se cambia por una viñeta que oscurece los bordes
+    y deja el centro encendido. En móvil el componente aplica además un velo
+    plano al 66 % —pensado para texto a sangre— que aquí borraba la escena
+    entera; esta regla, más específica, gana también dentro de esa consulta.
+  */
+  .smark :global(.scene-bg[data-side] .scene-scrim) {
+    background:
+      radial-gradient(ellipse 78% 62% at 50% 48%, transparent 0%, rgba(16, 1, 1, 0.42) 58%, rgba(16, 1, 1, 0.9) 100%),
+      linear-gradient(180deg, rgba(16, 1, 1, 0.72) 0%, transparent 26%, transparent 70%, rgba(16, 1, 1, 0.88) 100%);
+  }
+
+  /* Zoom lentísimo sobre la escena: en una página sin scroll ni contenido que
+     descubrir, es lo único que la separa de una captura de pantalla. Solo
+     `transform` (regla 5), y se apaga con reduce-motion más abajo. */
+  .smark :global(.scene-bg img) {
+    animation: smark-drift 26s ease-in-out infinite alternate both;
+  }
+  @keyframes smark-drift {
+    from {
+      transform: scale(1);
+    }
+    to {
+      transform: scale(1.09);
+    }
+  }
+
+  /* Halo cálido bajo la tarjeta: separa el vidrio del fondo y da profundidad
+     sin meter otro color al sistema (es el mismo naranja de acento, al 12 %). */
+  .smark-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 0;
+    width: min(720px, 130vw);
+    aspect-ratio: 1;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(255, 81, 0, 0.16) 0%, transparent 62%);
+    pointer-events: none;
+  }
+
   .smark-card {
+    position: relative;
+    z-index: 1;
     width: 100%;
-    max-width: 460px;
+    max-width: 440px;
+    padding: 30px 26px 22px;
+    /* Vidrio sobre la escena: el fondo se sigue viendo, pero el texto tiene su
+       propio contraste y no depende del recorte de la imagen. El `blur` es
+       progresivo — sin soporte, queda el color sólido, que ya es legible. */
+    background: rgba(16, 1, 1, 0.72);
+    backdrop-filter: blur(18px) saturate(120%);
+    -webkit-backdrop-filter: blur(18px) saturate(120%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 28px;
+    box-shadow:
+      0 30px 80px rgba(0, 0, 0, 0.55),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
   }
 
   .smark-head {
     text-align: center;
-    margin-bottom: 38px;
+    margin-bottom: 26px;
   }
+
+  /* El rayo del favicon, como avatar. En un enlace de bio la marca se reconoce
+     antes por el icono que por el nombre: es el mismo que ve el visitante en la
+     foto de perfil de la red desde la que llega. */
+  .smark-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 58px;
+    height: 58px;
+    margin-bottom: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 18px;
+    background: rgba(16, 1, 1, 0.7);
+  }
+  .smark-mark svg {
+    width: 26px;
+    height: 26px;
+    fill: var(--flash-orange);
+  }
+
   .smark-brand {
     /* Fluido, no fijo: a 30px con 0.16em de separación la marca no cabe en 320px
        y el punto naranja quedaba cortado contra el borde. El `clamp` la baja a
@@ -140,36 +262,57 @@ const destinos = [
     color: var(--flash-orange);
   }
   .smark-tagline {
-    margin-top: 14px;
+    margin-top: 12px;
     font-size: 17px;
     font-weight: 300;
     color: var(--soft-white);
   }
-  .smark-meta {
-    margin-top: 8px;
-    font-size: 12px;
+
+  /* Tres datos sueltos en vez de un párrafo: se leen de un vistazo y son los que
+     deciden la compra —dónde estamos, cuánto cuesta empezar, cuándo está. */
+  .smark-creds {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 16px;
+  }
+  .smark-creds li {
+    /* Medidas ajustadas para que los tres quepan en una fila a 320px: en dos
+       filas dejan de leerse como una credencial y parecen etiquetas sueltas. */
+    padding: 5px 9px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 999px;
+    font-size: 10px;
     font-weight: 400;
-    letter-spacing: 0.14em;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--studio-gray);
   }
 
   .smark-links {
     display: grid;
-    gap: 12px;
+    gap: 10px;
   }
   .smark-link {
-    display: block;
-    padding: 18px 22px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 20px;
     border: 1px solid rgba(255, 255, 255, 0.14);
     border-radius: 18px;
-    background: rgba(255, 255, 255, 0.02);
+    background: rgba(255, 255, 255, 0.03);
     transition: border-color 0.25s, background 0.25s, transform 0.25s;
   }
   .smark-link:hover {
     border-color: var(--flash-orange);
-    background: rgba(255, 81, 0, 0.06);
+    background: rgba(255, 81, 0, 0.08);
     transform: translateY(-2px);
+  }
+  .smark-link-text {
+    flex: 1;
+    min-width: 0;
   }
   .smark-link-label {
     display: block;
@@ -178,28 +321,48 @@ const destinos = [
   }
   .smark-link-hint {
     display: block;
-    margin-top: 4px;
-    font-size: 13px;
+    margin-top: 3px;
+    font-size: 12.5px;
     font-weight: 300;
     color: var(--studio-gray);
   }
+  .smark-link-arrow {
+    flex: none;
+    font-size: 16px;
+    color: var(--studio-gray);
+    transition: transform 0.25s, color 0.25s;
+  }
+  .smark-link:hover .smark-link-arrow {
+    transform: translateX(4px);
+    color: var(--flash-orange);
+  }
 
-  /* El destino principal se distingue por relleno, no por otro color: el sitio
-     tiene un solo acento y meter un segundo tono aquí lo rompería. */
+  /*
+    El destino principal va en naranja lleno desde el primer momento, no en
+    blanco esperando el hover: en un teléfono no hay hover, así que el estado
+    «apetecible» tiene que ser el de reposo. Es el único bloque de color de la
+    página, y el acento del sitio — no entra un segundo tono.
+  */
   .smark-link.primary {
-    background: var(--soft-white);
-    border-color: var(--soft-white);
+    background: var(--flash-orange);
+    border-color: var(--flash-orange);
+    padding: 18px 20px;
   }
   .smark-link.primary .smark-link-label {
     color: var(--deep-black);
+    font-size: 17px;
     font-weight: 600;
   }
-  .smark-link.primary .smark-link-hint {
-    color: rgba(16, 1, 1, 0.66);
+  .smark-link.primary .smark-link-hint,
+  .smark-link.primary .smark-link-arrow {
+    color: rgba(16, 1, 1, 0.7);
   }
   .smark-link.primary:hover {
-    background: var(--flash-orange);
-    border-color: var(--flash-orange);
+    background: var(--ember-red);
+    border-color: var(--ember-red);
+  }
+  .smark-link.primary:hover .smark-link-arrow {
+    color: rgba(16, 1, 1, 0.7);
   }
 
   .smark-social {
@@ -207,7 +370,7 @@ const destinos = [
     display: flex;
     justify-content: center;
     gap: 8px;
-    margin-top: 26px;
+    margin-top: 22px;
   }
   .smark-social a {
     display: flex;
@@ -230,7 +393,7 @@ const destinos = [
   }
 
   .smark-foot {
-    margin-top: 30px;
+    margin-top: 18px;
     text-align: center;
   }
   .smark-foot a {
@@ -247,9 +410,61 @@ const destinos = [
     color: var(--flash-orange);
   }
 
+  /* Entrada en cascada, solo con `opacity` y `transform` (regla 5) y sin una
+     línea de JavaScript: aquí no hay scroll que observar, todo está en pantalla
+     desde el principio. */
+  .smark-card > * {
+    animation: smark-in 0.6s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+  }
+  .smark-card > *:nth-child(2) {
+    animation-delay: 0.08s;
+  }
+  .smark-card > *:nth-child(3) {
+    animation-delay: 0.16s;
+  }
+  .smark-card > *:nth-child(4) {
+    animation-delay: 0.22s;
+  }
+  @keyframes smark-in {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+  }
+
+  /* A 320px el carril interior baja de 260px y las etiquetas se parten en dos
+     líneas: un botón de dos renglones deja de leerse como botón. Se recorta el
+     relleno antes que el texto. */
+  @media (max-width: 360px) {
+    .smark {
+      padding: 32px 14px;
+    }
+    .smark-card {
+      padding: 24px 18px 18px;
+      border-radius: 24px;
+    }
+    .smark-link {
+      gap: 10px;
+      padding: 14px 16px;
+    }
+    .smark-link-label {
+      font-size: 15px;
+    }
+    .smark-link.primary {
+      padding: 16px 16px;
+    }
+    .smark-link.primary .smark-link-label {
+      font-size: 16px;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .smark-link:hover {
       transform: none;
+    }
+    .smark-card > *,
+    .smark :global(.scene-bg img) {
+      animation: none;
     }
   }
 </style>
