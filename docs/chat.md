@@ -116,9 +116,25 @@ puede publicar un precio falso.
 2. En **Site settings → Environment variables**, añade **una** de estas:
    - `ANTHROPIC_API_KEY` — si está, tiene prioridad; mejores respuestas
    - `GROQ_API_KEY` — alternativa más barata y rápida
-3. Opcional: `CHAT_MODEL` para fijar el modelo. Por defecto usa
-   `claude-haiku-4-5-20251001` o `llama-3.3-70b-versatile` según el proveedor.
-   Opcional: `CHAT_MAX_PER_DAY` para mover el tope diario (300 por defecto).
+3. Opcionales:
+   - `CHAT_PROVIDER` — `groq` o `anthropic` para fijar cuál se usa e ignorar el
+     otro. **Léete el aviso de abajo antes de darlo por innecesario.**
+   - `CHAT_MODEL` — fija el modelo. Solo se aplica cuando hay una única clave
+     configurada; con dos están `ANTHROPIC_MODEL` y `GROQ_MODEL`, porque el
+     mismo nombre de modelo no existe en las dos APIs. Por defecto usa
+     `claude-haiku-4-5-20251001` o `llama-3.3-70b-versatile`.
+   - `CHAT_MAX_PER_DAY` — mueve el tope diario (300 por defecto).
+
+> **El entorno puede traer claves que tú no pusiste.** Pasó en producción: con
+> solo `GROQ_API_KEY` en el panel, la función encontró un `ANTHROPIC_API_KEY`
+> inyectado por la plataforma, le dio prioridad y se comió un `401 invalid
+> x-api-key` en cada mensaje — mientras la clave de Groq, buena, no se llegaba a
+> mirar. Si sabes qué proveedor quieres, dilo con `CHAT_PROVIDER` en vez de
+> deducirlo de qué variables haya sueltas.
+
+Si fallan todos los proveedores configurados, el chat deriva a WhatsApp. Cada
+intento fallido queda en el registro de la función con el nombre del proveedor y
+la respuesta que dio.
 4. Despliega. La función queda en `/api/chat` y el widget la detecta sola.
 
 **Sin ninguna clave el sitio no se rompe:** el endpoint responde derivando a

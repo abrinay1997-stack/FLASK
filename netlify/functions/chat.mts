@@ -48,19 +48,51 @@ async function loadKb(origin: string): Promise<Kb> {
  * ------------------------------------------------------------------ */
 
 interface Provider {
+  name: string;
   url: string;
   headers: Record<string, string>;
   body: (system: string, msgs: ChatMessage[]) => unknown;
   extract: (json: any) => string;
 }
 
-function pickProvider(): Provider | null {
-  const groq = process.env.GROQ_API_KEY;
-  const anthropic = process.env.ANTHROPIC_API_KEY;
+/**
+ * Los proveedores configurados, en orden de preferencia.
+ *
+ * Devuelve una lista y no uno solo porque antes elegía uno y se quedaba con él:
+ * con las dos claves presentes y la de Anthropic inservible, el chat contestaba
+ * "se me cayó la conexión" a todo el mundo mientras la clave de Groq, buena, no
+ * se llegaba a mirar. Tener un repuesto que no entra a jugar no es tener
+ * repuesto.
+ *
+ * Y las claves no siempre las pone uno: el entorno de Netlify puede traer un
+ * `ANTHROPIC_API_KEY` inyectado por la plataforma que no aparece en la lista de
+ * variables del panel y que la API rechaza si se le manda directamente. Por eso
+ * existe `CHAT_PROVIDER`: con 'groq' o 'anthropic' se fija cuál se usa y se
+ * ignora todo lo demás, en vez de descubrir por los registros a quién se está
+ * llamando de verdad.
+ *
+ * El orden por defecto se mantiene: Anthropic primero, que con el mismo
+ * andamiaje da mejores respuestas. Lo que cambia es que si falla se prueba el
+ * siguiente.
+ */
+function pickProviders(): Provider[] {
+  const forzado = process.env.CHAT_PROVIDER?.trim().toLowerCase();
+  const anthropic = forzado && forzado !== 'anthropic' ? undefined : process.env.ANTHROPIC_API_KEY;
+  const groq = forzado && forzado !== 'groq' ? undefined : process.env.GROQ_API_KEY;
 
-  // Anthropic primero si está: con el mismo andamiaje da mejores respuestas.
+  /*
+   * CHAT_MODEL solo manda cuando hay una sola clave configurada. Con dos, el
+   * mismo nombre de modelo no existe en las dos APIs, así que aplicarlo a ambas
+   * garantizaría romper la de repuesto justo cuando hace falta. Para fijar el
+   * modelo de un proveedor concreto están ANTHROPIC_MODEL y GROQ_MODEL.
+   */
+  const generico = [anthropic, groq].filter(Boolean).length === 1 ? process.env.CHAT_MODEL : undefined;
+
+  const out: Provider[] = [];
+
   if (anthropic) {
-    return {
+    out.push({
+      name: 'anthropic',
       url: 'https://api.anthropic.com/v1/messages',
       headers: {
         'content-type': 'application/json',
@@ -68,31 +100,32 @@ function pickProvider(): Provider | null {
         'anthropic-version': '2023-06-01',
       },
       body: (system, msgs) => ({
-        model: process.env.CHAT_MODEL || 'claude-haiku-4-5-20251001',
+        model: process.env.ANTHROPIC_MODEL || generico || 'claude-haiku-4-5-20251001',
         max_tokens: 260,
         temperature: 0.3,
         system,
         messages: msgs,
       }),
       extract: (j) => j?.content?.[0]?.text ?? '',
-    };
+    });
   }
 
   if (groq) {
-    return {
+    out.push({
+      name: 'groq',
       url: 'https://api.groq.com/openai/v1/chat/completions',
       headers: { 'content-type': 'application/json', authorization: `Bearer ${groq}` },
       body: (system, msgs) => ({
-        model: process.env.CHAT_MODEL || 'llama-3.3-70b-versatile',
+        model: process.env.GROQ_MODEL || generico || 'llama-3.3-70b-versatile',
         max_tokens: 260,
         temperature: 0.3,
         messages: [{ role: 'system', content: system }, ...msgs],
       }),
       extract: (j) => j?.choices?.[0]?.message?.content ?? '',
-    };
+    });
   }
 
-  return null;
+  return out;
 }
 
 /* ------------------------------------------------------------------ *
@@ -206,7 +239,7 @@ export default async (req: Request, context: Context) => {
   if (!lastUser?.content.trim()) return json({ error: 'Falta el mensaje' }, 400);
 
   const origin = new URL(req.url).origin;
-  const provider = pickProvider();
+  const proveedores = pickProviders();
 
   let kb: Kb;
   try {
@@ -221,7 +254,7 @@ export default async (req: Request, context: Context) => {
   }
 
   // Sin clave configurada el chat no se cae: deriva a WhatsApp.
-  if (!provider) {
+  if (proveedores.length === 0) {
     return json({
       reply: `El asistente todavía no está conectado. Escríbenos por WhatsApp al ${kb.site.whatsapp} y te contestamos directo.`,
       degraded: true,
@@ -240,45 +273,51 @@ export default async (req: Request, context: Context) => {
   const system = buildSystem(kb, facts);
 
   let reply = '';
-  let fallo = 'network';
-  try {
-    const res = await fetch(provider.url, {
-      method: 'POST',
-      headers: provider.headers,
-      body: JSON.stringify(provider.body(system, messages)),
-      signal: AbortSignal.timeout(20_000),
-    });
+  let fallo = 'sin_proveedores';
 
-    if (!res.ok) {
-      /*
-       * El motivo real vive aquí y en ningún otro sitio: una clave mal pegada,
-       * una cuota agotada y un modelo retirado dan los tres el mismo "se me cayó
-       * la conexión" en pantalla. Sin este log había que adivinar. Va al registro
-       * de la función (Netlify → Functions → chat), que solo ve quien administra
-       * el sitio; al visitante nunca se le enseña el error del proveedor.
-       */
-      const detalle = (await res.text().catch(() => '')).slice(0, 500);
-      console.error(`[chat] ${provider.url} devolvió ${res.status}: ${detalle}`);
-      fallo = `http_${res.status}`;
-      throw new Error(fallo);
+  // Se prueban en orden y se sale con el primero que conteste. Con una sola
+  // clave configurada el comportamiento es idéntico al de antes.
+  for (const provider of proveedores) {
+    try {
+      const res = await fetch(provider.url, {
+        method: 'POST',
+        headers: provider.headers,
+        body: JSON.stringify(provider.body(system, messages)),
+        signal: AbortSignal.timeout(20_000),
+      });
+
+      if (!res.ok) {
+        /*
+         * El motivo real vive aquí y en ningún otro sitio: una clave mal pegada,
+         * una cuota agotada y un modelo retirado dan los tres el mismo "se me cayó
+         * la conexión" en pantalla. Sin este log había que adivinar. Va al registro
+         * de la función (Netlify → Functions → chat), que solo ve quien administra
+         * el sitio; al visitante nunca se le enseña el error del proveedor.
+         */
+        const detalle = (await res.text().catch(() => '')).slice(0, 500);
+        console.error(`[chat] ${provider.name} devolvió ${res.status}: ${detalle}`);
+        fallo = `${provider.name}_http_${res.status}`;
+        continue;
+      }
+
+      reply = trimReply(provider.extract(await res.json()).trim());
+      if (reply) break;
+
+      console.error(`[chat] ${provider.name} respondió vacío`);
+      fallo = `${provider.name}_vacio`;
+    } catch (err) {
+      console.error(`[chat] fallo llamando a ${provider.name}:`, err);
+      fallo = `${provider.name}_network`;
     }
+  }
 
-    reply = trimReply(provider.extract(await res.json()).trim());
-  } catch (err) {
-    if (fallo === 'network') console.error('[chat] fallo llamando al proveedor:', err);
+  if (!reply) {
     return json({
       reply: `Se me cayó la conexión. Escríbenos por WhatsApp al ${kb.site.whatsapp} y te respondemos al momento.`,
       degraded: true,
       // Solo el código, nunca el cuerpo del error: sirve para diagnosticar desde
       // las herramientas del navegador sin publicar nada del proveedor.
       code: fallo,
-    });
-  }
-
-  if (!reply) {
-    return json({
-      reply: `No supe responder eso. Escríbenos por WhatsApp al ${kb.site.whatsapp}.`,
-      degraded: true,
     });
   }
 
