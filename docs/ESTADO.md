@@ -185,11 +185,9 @@ tareas:
 
 | # | Pendiente | Quién |
 |---|---|---|
-| 28 | **GA4 en todo el sitio.** Con una trampa que hay que resolver en el mismo momento: el sitio navega con View Transitions, así que GA4 cuenta la primera carga y **deja de contar** al cambiar de página. Hay que disparar la vista a mano en `astro:page-load` o todo el tráfico interno se pierde sin que nada parezca roto. El ID de medición es un identificador público, no un secreto — pero si se declara como variable de entorno hay que mirar el escáner de secretos de Netlify, que ya obligó a una excepción con `CHAT_PROVIDER`. | `[código]` + `[cuenta]` |
-| 29 | **Píxel de Meta**, con el evento de conversión en `/gracias/`. Mismo problema de View Transitions que el punto 28. | `[código]` + `[cuenta]` |
-| 30 | **`/privacidad` actualizada en el MISMO commit.** Hoy declara: «Del sitio web: ninguno. No usamos cookies propias, no hay herramientas de analítica instaladas y no creamos perfiles de navegación». En cuanto entre GA4 o el píxel, eso pasa a ser **falso**. El propio archivo ya lo dejó escrito en su cabecera: una política que no refleja lo que pasa no es un descuido de redacción, es una declaración falsa. Hay que decir qué se recoge, quién lo recibe (Google, Meta), para qué y cómo oponerse. Revisar también `/terminos`. | `[código]` |
-| 31 | **Decidir si hace falta banner de consentimiento.** El píxel de Meta pone cookies. Panamá (Ley 81 de 2019) es menos exigente que la UE, pero el tráfico de redes puede llegar de cualquier país. Un banner añade fricción y peso justo en la página que vende velocidad; no ponerlo es un riesgo acotado. Es decisión tuya, no técnica. | `[tuyo]` |
-| 32 | **Medir el coste en velocidad.** GA4 y el píxel rondan los 50 y 70 KB. El sitio vende abrir en menos de un segundo, así que la decisión de dejarlos se toma con el dato delante, no con la intuición: medir antes, medir después y comparar. | `[código]` |
+| 28 | **GA4 en todo el sitio.** Falta solo el identificador de medición (`G-…`), de Analytics → Administrar → Flujos de datos. Se pega en `ga4MeasurementId` (`src/data/analytics.ts`) y el resto ya está resuelto: la etiqueta se emite sola, `/privacidad` y la respuesta del chat se redactan del mismo valor, y el disparo por navegación usa el mismo `astro:after-swap` que ya funciona con el píxel. Hasta entonces el recorrido solo se ve en Meta. | `[tuyo]` + `[código]` |
+| 29 | **Decidir si hace falta banner de consentimiento.** El píxel de Meta pone cookies. Panamá (Ley 81 de 2019) es menos exigente que la UE, pero el tráfico de redes puede llegar de cualquier país. Un banner añade fricción y peso justo en la página que vende velocidad; no ponerlo es un riesgo acotado. Es decisión tuya, no técnica. | `[tuyo]` |
+| 30 | **Medir el coste en velocidad.** GA4 y el píxel rondan los 50 y 70 KB. El sitio vende abrir en menos de un segundo, así que la decisión de dejarlos se toma con el dato delante, no con la intuición: medir antes, medir después y comparar. | `[código]` |
 
 **Hecho el 2026-08-03:** la página existe en `/smark/`, con `noindex`, fuera del
 sitemap y sin un solo enlace desde el resto del sitio. Va sin nav, sin pie, sin
@@ -197,9 +195,14 @@ chat y sin scroll suave: 6,9 KB de HTML y 15,7 KB de JavaScript, contra 33,5 y
 39,7 de la home. Cuatro destinos y ni uno más — cada botón que se añada reparte
 peor los clics entre todos los demás.
 
-**Orden de lo que queda.** La analítica, el píxel y la privacidad (29–31) van
-juntos, en un solo commit: publicar cualquiera de los dos primeros sin el
-tercero deja el sitio declarando algo que no es cierto. Medir (33) va después.
+**Hecho el 2026-08-03:** el píxel de Meta está activo en las trece páginas, con
+`PageView` una vez por página —también al navegar sin recargar— y `Lead` en
+`/gracias/`. `/privacidad` y la respuesta del chat sobre privacidad se redactan
+ahora desde `data/analytics.ts`, así que no pueden quedarse diciendo que no hay
+analítica mientras la haya.
+
+**Lo que queda:** el identificador de GA4 (punto 28), decidir lo del banner
+(29) y medir el coste en velocidad (30).
 
 **Cuándo pegarla en la bio:** cuando haya dominio propio. La página se construye
 ahora y vive en `cuatronodos.netlify.app/…`; el día que cambie `site` en

@@ -20,6 +20,7 @@ import ChatWidget from '../components/ChatWidget.astro';
 
 import { site, contact } from '../data/site';
 import { withBase, routes } from '../data/links';
+import { metaPixelId } from '../data/analytics';
 
 interface Props {
   title: string;
@@ -99,6 +100,46 @@ const orgSchema = {
 };
 
 const schemas = isHome ? [orgSchema, ...jsonLd] : jsonLd;
+
+/**
+ * Píxel de Meta.
+ *
+ * DOS COSAS QUE NO SON EL FRAGMENTO QUE DA FACEBOOK, y son a propósito:
+ *
+ * 1. `PageView` se dispara en la carga inicial Y en `astro:after-swap`. El
+ *    sitio navega con View Transitions: sin la segunda llamada, Meta contaría
+ *    la primera página de cada visita y ni una más, y todo el recorrido interno
+ *    —que es justo lo que se quiere medir— sería invisible. Se usa
+ *    `after-swap`, que salta solo al cambiar de página, y NO `page-load`, que
+ *    salta también en la carga inicial: con ese se contaría dos veces la
+ *    primera página de cada visita.
+ *
+ * 2. En `/gracias/` se dispara además `Lead`. Es el único punto del sitio donde
+ *    alguien ha completado algo, así que es el único evento que sirve para
+ *    medir conversiones y construir públicos parecidos. Un píxel que solo
+ *    registra visitas no da para nada de eso.
+ *
+ * La ruta de gracias se interpola de `routes`, no se escribe a mano: la regla 1
+ * del proyecto vale también dentro de un `<script>`, y esa ruta ya cambió una
+ * vez al quitar los `.html`.
+ */
+const metaPixelSnippet = `
+!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+document,'script','https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', ${JSON.stringify(metaPixelId)});
+(function () {
+  var gracias = ${JSON.stringify(routes.gracias)};
+  function medir() {
+    fbq('track', 'PageView');
+    if (location.pathname === gracias) fbq('track', 'Lead');
+  }
+  medir();
+  document.addEventListener('astro:after-swap', medir);
+})();
+`.trim();
 ---
 
 <!DOCTYPE html>
@@ -144,8 +185,28 @@ const schemas = isHome ? [orgSchema, ...jsonLd] : jsonLd;
     {schemas.map((schema) => (
       <script is:inline type="application/ld+json" set:html={JSON.stringify(schema)} />
     ))}
+
+    {/* Sin identificador no se emite nada: ver el porqué en data/analytics.ts */}
+    {metaPixelId && <script is:inline set:html={metaPixelSnippet} />}
   </head>
   <body class={bodyClass}>
+    {/*
+      Respaldo del píxel para navegadores con JavaScript desactivado. Va tal
+      cual lo distribuye Meta. Alcance real muy pequeño —sin JavaScript aquí no
+      funcionan ni el cotizador, ni el chat, ni el menú de móvil—, pero no
+      cuesta nada y es la única señal que dejaría esa visita.
+    */}
+    {metaPixelId && (
+      <noscript>
+        <img
+          height="1"
+          width="1"
+          style="display:none"
+          alt=""
+          src={`https://www.facebook.com/tr?id=${metaPixelId}&ev=PageView&noscript=1`}
+        />
+      </noscript>
+    )}
     {/* Sin nav no hay nada que saltar: el enlace sobraría y confundiría. */}
     {!bare && <a class="skip-link" href="#contenido">Saltar al contenido</a>}
     {!bare && <Nav activePath={activePath} />}

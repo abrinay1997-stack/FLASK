@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 
 import { site, contact, formDestination } from '../data/site';
+import { metaPixelId, ga4MeasurementId } from '../data/analytics';
 import { plans, diagnostico } from '../data/plans';
 import { modules } from '../data/modules';
 import { carePlans, careNote } from '../data/care';
@@ -37,6 +38,19 @@ export interface KbFact {
   /** La respuesta, ya redactada. El modelo la parafrasea, no la deduce. */
   text: string;
 }
+
+/**
+ * Qué herramientas de medición hay activas, derivado de `data/analytics.ts`.
+ * Vive aquí y no dentro del hecho para que se lea de un vistazo qué gobierna la
+ * respuesta sobre privacidad, que es la única del bot con consecuencias legales.
+ */
+const medicionNombres = [
+  metaPixelId && 'el píxel de Meta',
+  ga4MeasurementId && 'Google Analytics',
+]
+  .filter(Boolean)
+  .join(' y ');
+const medicionActiva = medicionNombres.length > 0;
 
 export const GET: APIRoute = () => {
   const facts: KbFact[] = [];
@@ -385,7 +399,14 @@ export const GET: APIRoute = () => {
     topic: 'legal',
     q: ['que hacen con mis datos', 'privacidad', 'usan cookies', 'me van a spamear'],
     text:
-      'No usamos cookies propias ni tenemos analítica instalada en el sitio. ' +
+      // Se compone del mismo dato que decide qué se carga, igual que hace
+      // /privacidad. Escribirlo a mano fue justo lo que estuvo a punto de dejar
+      // al chat afirmando que no había analítica el día que se instaló el píxel.
+      (medicionActiva
+        ? 'No guardamos nada en servidores nuestros, pero el sitio usa herramientas de medición de terceros (' +
+          medicionNombres +
+          ') que registran la visita con cookies. Puedes bloquearlas con cualquier bloqueador de rastreadores y el sitio funciona igual. '
+        : 'No usamos cookies propias ni tenemos analítica instalada en el sitio. ') +
       (formDestination === 'whatsapp'
         ? 'Los formularios no envían nada a ningún servidor: redactan un mensaje de WhatsApp en tu navegador que tú decides enviar. '
         : 'El formulario de contacto se envía al servicio de formularios del alojamiento y lo leemos desde ahí; el cotizador no envía nada, redacta un mensaje de WhatsApp en tu navegador que tú decides enviar. ') +
