@@ -38,6 +38,13 @@ Lo que sigue verde y conviene no romper:
 - **Un solo `<h1>` por página** en las ocho, y **cero saltos de nivel** de
   encabezado.
 - **Cero imágenes sin `alt`.** Las decorativas van con `alt=""` y `aria-hidden`.
+- **Ningún objetivo táctil por debajo de 24 px** (WCAG 2.5.8 AA) en las diez
+  páginas, a 1440 y a 390. Lo que el barrido sigue señalando y **no** es fallo:
+  el honeypot de `/contacto` (oculto a propósito, inalcanzable con puntero y con
+  teclado), los cuatro `input` de 1×1 del cotizador —el objetivo real es la
+  etiqueta que los envuelve, que sí mide de sobra— y los enlaces de WhatsApp de
+  `/privacidad` y `/terminos`, que caen en la excepción explícita de la norma
+  para enlaces dentro de una frase.
 - **`prefers-reduced-motion: reduce` → 0 animaciones** en la home. No es que se
   aceleren: el navegador no reporta ninguna. Sin la preferencia son 13
   declaradas y **1 corriendo** (la flecha de «Scroll»).
@@ -101,14 +108,13 @@ encabezados, animaciones) salen de `document.getAnimations()` y
 
 | # | Pendiente | Nota |
 |---|---|---|
-| 19 | **Cinco enlaces del bloque de prueba de la home miden 16–18 px de alto**, por debajo del mínimo de 24 px de WCAG 2.5.8 (AA): los cuatro dominios de `.proof-list` y el «Ver los proyectos →» de `.proof-link`. Medido a 390 px el 2026-08-03. | Es el mismo fallo que se corrigió en el nav, el footer y el chat; el bloque de prueba se añadió después y lo reintrodujo. Se arregla con `padding-block` en `.proof-list a` y `.proof-link` hasta llegar a 24 px, como ya hacen `.brand` y `.foot-static`. Es el único fallo de accesibilidad medible que queda. |
-| 20 | **Prueba con lector de pantalla real** (NVDA / VoiceOver). | Lo auditado es estructura, no experiencia. Es el otro hueco de accesibilidad, y no se puede cerrar desde el repo. |
-| 21 | **El `<select>` de `/contacto` usa `appearance:none`** con la flecha dibujada en `background-image`. | Funciona, pero en Windows con alto contraste la flecha puede desaparecer. Riesgo bajo; conviene saberlo. |
-| 22 | **Medir el sitio en vivo.** LCP, INP y CLS reales sobre el CDN. | `npm run medir` ya lo hace para los proyectos publicados; falta apuntarlo también al propio sitio. |
-| 23 | **Search Console.** | Sitemap y canonical ya se emiten bien y dicen lo mismo; falta darlos de alta y verificar. |
-| 24 | **La marca es solo tipográfica.** El rayo del favicon no aparece en el nav, ni en el footer, ni en la imagen social. Tampoco hay versión sobre fondo claro para facturas o propuestas. | Todo el sistema asume fondo oscuro. |
-| 25 | **URLs limpias sin `.html`** (`trailingSlash:'always'` + `format:'directory'`). | Cambiaría todas las rutas de `links.ts`. Hacerlo **antes** de que el sitio tenga enlaces externos apuntándole, no después. No corre prisa por coherencia —sitemap y canonical ya dicen lo mismo—: es cosmética de la barra de direcciones. |
-| 26 | **El shader es un `requestAnimationFrame` permanente** mientras el hero está en pantalla. Es la única animación corriendo del sitio, y el mayor consumo de la home. | Ya se pausa fuera del viewport y no arranca con reduce-motion, que es lo correcto. Si algún día importa la batería, se puede bajar a 30 fps sin que se note. |
+| 19 | **Prueba con lector de pantalla real** (NVDA / VoiceOver). | Lo auditado es estructura, no experiencia. Es el único hueco de accesibilidad que queda, y no se puede cerrar desde el repo. |
+| 20 | **El `<select>` de `/contacto` usa `appearance:none`** con la flecha dibujada en `background-image`. | Funciona, pero en Windows con alto contraste la flecha puede desaparecer. Riesgo bajo; conviene saberlo. |
+| 21 | **Medir el sitio en vivo.** LCP, INP y CLS reales sobre el CDN. | `npm run medir` ya lo hace para los proyectos publicados; falta apuntarlo también al propio sitio. |
+| 22 | **Search Console.** | Sitemap y canonical ya se emiten bien y dicen lo mismo; falta darlos de alta y verificar. |
+| 23 | **La marca es solo tipográfica.** El rayo del favicon no aparece en el nav, ni en el footer, ni en la imagen social. Tampoco hay versión sobre fondo claro para facturas o propuestas. | Todo el sistema asume fondo oscuro. |
+| 24 | **URLs limpias sin `.html`** (`trailingSlash:'always'` + `format:'directory'`). | Cambiaría todas las rutas de `links.ts`. Hacerlo **antes** de que el sitio tenga enlaces externos apuntándole, no después. No corre prisa por coherencia —sitemap y canonical ya dicen lo mismo—: es cosmética de la barra de direcciones. |
+| 25 | **El shader es un `requestAnimationFrame` permanente** mientras el hero está en pantalla. Es la única animación corriendo del sitio, y el mayor consumo de la home. | Ya se pausa fuera del viewport y no arranca con reduce-motion, que es lo correcto. Si algún día importa la batería, se puede bajar a 30 fps sin que se note. |
 
 ---
 

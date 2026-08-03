@@ -284,7 +284,13 @@ import { routes } from '../data/links';
     list-style: none;
     flex: 1;
   }
+  /* El padding vertical no es estético: un enlace de 15px mide 16px de alto, y
+     WCAG 2.5.8 (AA) pide 24px de objetivo táctil. Mismo arreglo que ya llevan
+     .brand del nav y .foot-static del footer. Si algún día se toca el
+     font-size, hay que volver a comprobar que el total siga pasando de 24. */
   .proof-list a {
+    display: inline-block;
+    padding-block: 6px;
     font-size: 15px;
     font-weight: 500;
     letter-spacing: 0.01em;
@@ -297,6 +303,8 @@ import { routes } from '../data/links';
     text-underline-offset: 4px;
   }
   .proof-link {
+    display: inline-block;
+    padding-block: 6px;
     flex-shrink: 0;
     font-size: 13px;
     letter-spacing: 0.08em;
