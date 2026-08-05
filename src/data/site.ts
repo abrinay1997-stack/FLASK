@@ -1,5 +1,5 @@
 export const site = {
-  name: 'CuatroNodos',
+  name: 'PanaClaw',
   tagline: 'Sitios rápidos. Código tuyo.',
   description:
     'Agencia web en Panamá. Sitios que abren en menos de un segundo, entregados en días y que quedan a tu nombre. Desde $295.',
@@ -15,7 +15,7 @@ export const site = {
 export const contact = {
   whatsapp: '+507 6227 2025',
   whatsappRaw: '50762272025',
-  whatsappDefaultMsg: 'Hola CuatroNodos, quiero cotizar mi sitio web',
+  whatsappDefaultMsg: 'Hola PanaClaw, quiero cotizar mi sitio web',
   horario: 'Lun–Vie · 9:00 – 18:00',
   timezone: 'Hora de Panamá (GMT-5)',
 } as const;

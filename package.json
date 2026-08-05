@@ -1,7 +1,7 @@
 {
-  "name": "cuatronodos",
+  "name": "panaclaw",
   "version": "1.0.0",
-  "description": "Sitio web de CuatroNodos — agencia de sitios Jamstack en Panamá.",
+  "description": "Sitio web de PanaClaw — agencia de sitios Jamstack en Panamá.",
   "type": "module",
   "private": true,
   "scripts": {
@@ -17,14 +17,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/abrinay1997-stack/CUATRONODOS.git"
+    "url": "git+https://github.com/abrinay1997-stack/PanaClaw.git"
   },
-  "author": "CuatroNodos",
+  "author": "PanaClaw",
   "license": "UNLICENSED",
   "bugs": {
-    "url": "https://github.com/abrinay1997-stack/CUATRONODOS/issues"
+    "url": "https://github.com/abrinay1997-stack/PanaClaw/issues"
   },
-  "homepage": "https://github.com/abrinay1997-stack/CUATRONODOS#readme",
+  "homepage": "https://github.com/abrinay1997-stack/PanaClaw#readme",
   "dependencies": {
     "@astrojs/sitemap": "^3.7.3",
     "@fontsource/archivo": "^5.3.0",

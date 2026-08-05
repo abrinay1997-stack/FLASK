@@ -117,10 +117,10 @@ propia**. Todo lo de aquí convierte afirmación en evidencia.
 
 | # | Pendiente | Quién |
 |---|---|---|
-| 2 | **Medir el propio sitio y publicarlo.** El sitio vende velocidad y no enseña la suya. Apuntar `npm run medir` a `cuatronodos.netlify.app` y poner la cifra donde se lee. Es autoevidencia y ya la tienes. | `[código]` |
+| 2 | **Medir el propio sitio y publicarlo.** El sitio vende velocidad y no enseña la suya. Apuntar `npm run medir` a `panaclaw.netlify.app` y poner la cifra donde se lee. Es autoevidencia y ya la tienes. | `[código]` |
 | 3 | **Estructura de testimonios.** Hoy no existe ni el sitio donde ponerlos. Se puede dejar montado —tipo, componente, tarjeta— para que publicar uno sea añadir un objeto a un array. Los textos y los permisos son tuyos. | `[código]` + `[tuyo]` |
 | 4 | **Quién está detrás.** El bloque vive en `/proceso` y está vacío. En un servicio de confianza el anonimato es una barrera de compra: la objeción real del comprador no es el precio, es «¿y este quién es?». | `[tuyo]` |
-| 5 | **Qué significa «CuatroNodos».** El nombre no se explica en ninguna página. Es una línea de origen de marca y hoy es storytelling desaprovechado. | `[tuyo]` |
+| 5 | **Qué significa «PanaClaw».** El nombre no se explica en ninguna página. Es una línea de origen de marca y hoy es storytelling desaprovechado. | `[tuyo]` |
 | 6 | **Reversión de riesgo.** La palabra «garantizado» aparece una vez en todo el sitio y es sobre PageSpeed ≥ 90: una especificación técnica, no una promesa comercial. Hoy el cliente pone el 50 % por adelantado y asume el 100 % del riesgo. Algo acotado y cumplible («si el primer diseño no te convence, devolvemos el adelanto») elimina de golpe la objeción más cara. | `[tuyo]` |
 | 7 | **La estadística sin fuente.** «Cuatro de cada diez personas se van de una página que tarda más de tres segundos» (`services.ts`). No lleva fuente, y el sitio entero se vende sobre no publicar datos sin verificar. O se cita, o se suaviza. | `[código]` |
 | 8 | **Datos legales visibles** (aviso de operación, RUC). Para un pago de $850–$1 200 por adelantado, la formalidad se lee como seguridad. | `[tuyo]` |
@@ -256,7 +256,7 @@ analítica mientras la haya.
 (29) y medir el coste en velocidad (30).
 
 **Cuándo pegarla en la bio:** cuando haya dominio propio. La página se construye
-ahora y vive en `cuatronodos.netlify.app/…`; el día que cambie `site` en
+ahora y vive en `panaclaw.netlify.app/…`; el día que cambie `site` en
 `astro.config.mjs` funciona sin tocar nada más. Pero repartir un `.netlify.app`
 en redes es exactamente el problema de credibilidad que se quiere evitar.
 

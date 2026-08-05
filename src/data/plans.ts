@@ -16,7 +16,7 @@ export interface Plan {
 export const plans: Plan[] = [
   {
     slug: 'corporate',
-    name: 'CuatroNodos Corporate',
+    name: 'PanaClaw Corporate',
     price: '$850',
     delivery: 'Entrega 8–12 días',
     featured: true,
@@ -33,7 +33,7 @@ export const plans: Plan[] = [
   },
   {
     slug: 'launch',
-    name: 'CuatroNodos Launch',
+    name: 'PanaClaw Launch',
     price: '$450',
     delivery: 'Entrega 4–5 días',
     desc: 'Una sola página, larga y diseñada desde cero. Para quien invierte en publicidad y necesita un sitio donde esa inversión se convierta en clientes.',
@@ -47,7 +47,7 @@ export const plans: Plan[] = [
   },
   {
     slug: 'commerce',
-    name: 'CuatroNodos Commerce',
+    name: 'PanaClaw Commerce',
     price: '$1,200',
     delivery: 'Entrega 15–20 días',
     desc: 'Todo lo de Corporate, más tu catálogo, tu carrito y el cobro en línea. Pensado para el negocio panameño que quiere vender sin depender de las redes.',
@@ -61,7 +61,7 @@ export const plans: Plan[] = [
   },
   {
     slug: 'start',
-    name: 'CuatroNodos Start',
+    name: 'PanaClaw Start',
     price: '$295',
     delivery: 'Entrega 72 h',
     desc: 'Una página con lo esencial, lista en 72 horas. Para emprender, para un evento o para dejar de mandar a tus clientes a un perfil de Instagram.',
@@ -77,7 +77,7 @@ export const plans: Plan[] = [
 
 export const diagnostico = {
   slug: 'diagnostico',
-  name: 'Diagnóstico CuatroNodos',
+  name: 'Diagnóstico PanaClaw',
   price: '$49',
   desc: 'Te decimos qué tan lento va tu sitio hoy, las 3 razones concretas por las que estás perdiendo clientes en él, y qué hacer con cada una. Informe y llamada de 30 minutos en 48 horas.',
 } as const;
