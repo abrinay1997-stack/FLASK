@@ -1,5 +1,5 @@
 ---
-import { contact, waLink, site } from '../data/site';
+import { waLink, site } from '../data/site';
 import { routes } from '../data/links';
 
 /**
@@ -92,7 +92,7 @@ const sugerencias = [
   </section>
 </div>
 
-<script is:inline define:vars={{ whatsapp: waLink(), telefono: contact.whatsapp, cotizador: routes.cotizador }}>
+<script is:inline define:vars={{ whatsapp: waLink(), cotizador: routes.cotizador }}>
   (() => {
     const root = document.querySelector('[data-chat]');
     if (!root || root.dataset.bound) return;
@@ -163,7 +163,7 @@ const sugerencias = [
       return bubble(
         'El asistente aún no está conectado en esta versión del sitio. Te paso las dos vías rápidas:',
         'bot',
-        `<a class="chat-action" href="${whatsapp}" target="_blank" rel="noopener">WhatsApp ${telefono}</a>` +
+        `<a class="chat-action" href="${whatsapp}" target="_blank" rel="noopener">Escríbenos por WhatsApp</a>` +
           `<a class="chat-action" href="${cotizador}">Cotizar en 4 preguntas</a>`
       );
     }

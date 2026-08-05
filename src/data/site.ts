@@ -13,8 +13,19 @@ export const site = {
 } as const;
 
 export const contact = {
-  whatsapp: '+507 6227 2025',
-  whatsappRaw: '50762272025',
+  /*
+   * El número queda en un solo lugar del proyecto — `waLink()` y todos los
+   * botones lo componen desde acá. Cambiarlo aquí lo cambia en las 13 páginas
+   * a la vez, en el chat, en el cotizador y en el schema JSON-LD.
+   *
+   * NO SE MUESTRA EN LA UI. La `whatsapp` con formato legible queda por si
+   * hace falta para un panel administrativo o un correo interno, pero el
+   * sitio no la imprime a la vista en ningún sitio: los botones dicen
+   * «WhatsApp» sin dígitos. Decisión de marca — el número solo aparece
+   * cuando el usuario ya está adentro del chat, no como reclamo público.
+   */
+  whatsapp: '+507 6227 3096',
+  whatsappRaw: '50762273096',
   whatsappDefaultMsg: 'Hola PanaClaw, quiero cotizar mi sitio web',
   horario: 'Lun–Vie · 9:00 – 18:00',
   timezone: 'Hora de Panamá (GMT-5)',
