@@ -35,7 +35,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SceneBg from '../components/SceneBg.astro';
 import { site, waLink } from '../data/site';
-import { routes } from '../data/links';
+import { routes, withBase } from '../data/links';
 import { socials } from '../data/footer';
 import { plans } from '../data/plans';
 import { projects } from '../data/projects';
@@ -121,10 +121,15 @@ const destinos = [
 
     <div class="smark-card">
       <header class="smark-head">
+        {/*
+         * El avatar de la tarjeta usa el mismo archivo que la pestaña del
+         * navegador: cuando la marca cambia, cambian los dos a la vez sin tener
+         * que acordarse. Antes el SVG del rayo iba embebido a mano — quedó como
+         * dos fuentes de verdad para la misma imagen, y la primera vez que se
+         * cambió el favicon esta tarjeta se olvidó.
+         */}
         <span class="smark-mark" aria-hidden="true">
-          <svg viewBox="0 0 64 64" focusable="false">
-            <path d="M37.5 6 18 35.5h11.2L26.5 58 46 28.5H34.8L37.5 6Z" />
-          </svg>
+          <img src={withBase('favicon.svg')} alt="" width="30" height="30" />
         </span>
         <h1 class="smark-brand">{site.name}<span class="dot">.</span></h1>
         <p class="smark-tagline">{site.tagline}</p>
@@ -256,7 +261,7 @@ const destinos = [
     margin-bottom: 26px;
   }
 
-  /* El rayo del favicon, como avatar. En un enlace de bio la marca se reconoce
+  /* El logo del favicon, como avatar. En un enlace de bio la marca se reconoce
      antes por el icono que por el nombre: es el mismo que ve el visitante en la
      foto de perfil de la red desde la que llega. */
   .smark-mark {
@@ -270,10 +275,10 @@ const destinos = [
     border-radius: 18px;
     background: rgba(16, 1, 1, 0.7);
   }
-  .smark-mark svg {
-    width: 26px;
-    height: 26px;
-    fill: var(--flash-orange);
+  .smark-mark img {
+    width: 30px;
+    height: 30px;
+    /* El favicon ya viene pintado de naranja; nada más que hacer aquí. */
   }
 
   .smark-brand {
