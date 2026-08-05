@@ -298,7 +298,9 @@ export const GET: APIRoute = () => {
       'quiero hablar con alguien',
     ],
     text:
-      `Hablas directo con quien programa tu sitio, por WhatsApp al ${contact.whatsapp}, ` +
+      // Deliberadamente sin el número: la respuesta del chat lleva al chat,
+      // no a memorizar un teléfono. El widget además ofrece el botón directo.
+      `Hablas directo con quien programa tu sitio, por WhatsApp, ` +
       `en horario ${contact.horario} (${contact.timezone}). ` +
       `Operamos desde ${site.location}, 100 % en remoto para todo el país.`,
   });
