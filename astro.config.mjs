@@ -10,7 +10,7 @@ import sitemap from '@astrojs/sitemap';
  *   la URL de abajo por la real (Settings → Domain management en Netlify).
  */
 export default defineConfig({
-  site: 'https://cuatronodos.netlify.app',
+  site: 'https://panaclaw.netlify.app',
   /**
    * URLs de directorio: `/contacto/`, no `/contacto.html`.
    *
