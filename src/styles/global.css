@@ -123,21 +123,29 @@ a{color:inherit;text-decoration:none;}
   background:rgba(255,255,255,.08);
 }
 .brand{
+  /* Alineación al centro (no a la baseline): el logo no tiene línea de base y
+     con `baseline` se hundía respecto al texto. `gap` es el aire entre el
+     icono y el wordmark, medido para que se lean como un solo bloque sin
+     empastarse. */
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  color:var(--soft-white);
+  justify-self:start;
+  flex-shrink:0;
+  /* Padding menor a la izquierda ahora que el logo aporta peso visual propio;
+     el vertical mantiene el objetivo táctil por encima de 24 px (WCAG 2.5.8). */
+  padding:8px 0 8px 13px;
+  transition:padding .28s ease;
+}
+.brand-logo{display:block;flex:none;transition:width .28s ease, height .28s ease;}
+.brand-name{
   font-weight:700;
   font-size:17px;
   letter-spacing:.20em;
   line-height:1;
   text-transform:uppercase;
-  display:inline-flex;
-  align-items:baseline;
-  gap:1px;
-  color:var(--soft-white);
-  justify-self:start;
-  flex-shrink:0;
-  /* El padding vertical no es decorativo: sin él la marca mide 14 px de alto y
-     queda por debajo del mínimo táctil de 24 px (WCAG 2.5.8). */
-  padding:12px 0 12px 17px;
-  transition:font-size .28s ease, padding .28s ease;
+  transition:font-size .28s ease;
 }
 .brand .dot{color:var(--flash-orange);}
 .nav-cta{
@@ -196,7 +204,9 @@ a{color:inherit;text-decoration:none;}
   padding:5px;
   background:rgba(9,1,1,.93);
 }
-.floating-nav.is-scrolled .brand{font-size:15px;padding:10px 0 10px 15px;}
+.floating-nav.is-scrolled .brand{padding:6px 0 6px 11px;gap:8px;}
+.floating-nav.is-scrolled .brand-logo{width:24px;height:24px;}
+.floating-nav.is-scrolled .brand-name{font-size:15px;}
 .floating-nav.is-scrolled .nav-links a{padding:8px 13px;}
 .floating-nav.is-scrolled .nav-cta{padding:9px 18px;font-size:12px;}
 @media(prefers-reduced-motion:reduce){
@@ -632,6 +642,10 @@ h2.section-title .muted{color:var(--studio-gray);}
   .hero .handle{margin-left:14px;padding-left:14px;border-left:1px solid rgba(255,255,255,.14);}
   .hero .hero-inner{padding-block:40px 60px;}
   .hero .year+.handle{margin-bottom:22px;}
-  .brand{font-size:14px;padding:11px 0 11px 8px;}
+  /* En móvil el pill ya lleva CTA y toggle: el brand tiene que ceder aire.
+     Logo un pelín más chico y wordmark también, sin bajar del objetivo táctil. */
+  .brand{gap:8px;padding:6px 0 6px 9px;}
+  .brand-logo{width:24px;height:24px;}
+  .brand-name{font-size:14px;}
   .nav-cta{padding:8px 14px;font-size:12px;}
 }

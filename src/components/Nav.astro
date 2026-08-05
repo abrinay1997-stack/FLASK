@@ -1,6 +1,6 @@
 ---
 import { navLinks } from '../data/services';
-import { routes } from '../data/links';
+import { routes, withBase } from '../data/links';
 
 interface Props {
   activePath?: string;
@@ -17,7 +17,15 @@ const { activePath = '' } = Astro.props;
 -->
 <header class="floating-nav" transition:persist="nav">
   <div class="nav-pill">
-    <a href={routes.home} class="brand" aria-label="PanaClaw — inicio">PanaClaw<span class="dot">.</span></a>
+    {/*
+      El avatar y el wordmark viajan juntos. El <img> se sirve del mismo
+      public/favicon.svg que la pestaña — cuando la marca cambia, cambian los
+      dos a la vez sin acordarse.
+    */}
+    <a href={routes.home} class="brand" aria-label="PanaClaw — inicio">
+      <img src={withBase('favicon.svg')} alt="" width="28" height="28" class="brand-logo" />
+      <span class="brand-name">PanaClaw<span class="dot">.</span></span>
+    </a>
 
     <nav id="nav-principal" aria-label="Navegación principal">
       <ul class="nav-links">
