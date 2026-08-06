@@ -51,7 +51,7 @@ Tres decisiones de formato, todas pensadas para modelos pequeños:
 3. **`prices` es la lista blanca de cifras.** Es lo que permite bloquear
    importes inventados sin depender del prompt.
 
-Estado actual: **38 hechos, 13,5 kB, 17 importes en lista blanca.**
+Estado actual (2026-08-06): **55 hechos, 21,5 kB, 17 importes en lista blanca.**
 
 ### 2. `netlify/functions/_retrieval.mts` — la lógica determinista
 
@@ -59,10 +59,27 @@ Recuperación léxica con normalización (sin acentos, sin signos, sin palabras
 vacías). Las `q` puntúan el triple que el cuerpo del hecho; a igualdad gana el
 hecho más corto, que es el más específico.
 
-**Por qué léxica y no vectorial:** con 38 hechos, los embeddings añadirían una
+**Por qué léxica y no vectorial:** con 55 hechos, los embeddings añadirían una
 dependencia externa, latencia y coste por consulta para resolver un problema que
-no tenemos. Medido: **22 de 22 consultas de prueba recuperan el hecho correcto**,
-21 de ellas en primera posición.
+no tenemos.
+
+**Medido el 2026-08-06 contra 24 preguntas de cliente:** las 15 sobre el negocio
+—precios, planes, plazos, módulos, mantenimiento, propiedad del código,
+privacidad, ejemplos— recuperan el hecho correcto. El fallo está en otro sitio, y
+conviene entenderlo bien porque cambia dónde se arregla: **no es que falte
+información, es que la recuperación siempre devuelve algo.**
+
+«¿Tienen testimonios?» devolvía el módulo *Portal de clientes*, porque comparten
+la palabra «clientes». Un acierto falso es peor que un hueco: la regla 1 del
+prompt («responde solo con el contexto») solo salta cuando el contexto viene
+vacío, y con un hecho plausible delante el modelo responde en vez de admitir que
+no lo sabe.
+
+**Un umbral de puntuación no lo arregla**, y está medido: las puntuaciones de los
+aciertos y de los falsos positivos se solapan —«¿el código es mío?» puntúa 4,
+igual que «¿tienen testimonios?»—, así que cualquier corte rompería respuestas
+correctas antes que las malas. Lo que sí funciona es escribir las frases: un
+hecho que diga qué hay, aunque lo que haya sea «todavía no».
 
 Aquí también vive `invalidPrices()`, la barandilla.
 
@@ -177,18 +194,51 @@ Si algún día el chat pesa más en la factura, se suben a Netlify Blobs.
 
 ## Cómo mejorarlo (por orden de rendimiento)
 
-1. **Añadir frases de intención a `kb.json.ts`.** Es la palanca más barata y la
-   que más sube la precisión. Cuando el bot no encuentre algo, casi siempre la
-   causa es vocabulario que falta, no el modelo. Ya pasó una vez: "quiero vender
-   en línea" no recuperaba el plan Commerce hasta que se añadió ese vocabulario.
-2. **Revisar `sources` en las respuestas.** El endpoint devuelve qué hechos usó.
-   Si la respuesta es mala, mira primero si la recuperación trajo lo correcto —
-   suele ser ahí, no en el modelo.
-3. **Registrar preguntas sin respuesta.** Las consultas que recuperan 0 hechos
-   son la lista de lo que le falta a la KB. Hoy no se registran: es el siguiente
-   paso natural.
-4. **Solo entonces, cambiar de modelo.** Es lo último que hay que tocar, no lo
-   primero.
+**La regla que ordena todo lo demás:** cuando una respuesta sale mal, mira
+primero **qué hechos trajo la recuperación** —el endpoint los devuelve en
+`sources`— antes de tocar el prompt o el modelo. Casi siempre el problema está
+ahí. Cambiar de modelo es lo último, no lo primero: mejora el tono, no la
+exactitud, y ese reparto es deliberado.
+
+1. **Añadir frases de intención a `kb.json.ts`.** La palanca más barata y la que
+   más sube la precisión. La recuperación es léxica: solo encuentra lo que está
+   escrito. Ya pasó tres veces — "quiero vender en línea" no recuperaba el plan
+   Commerce, "¿qué planes tienen?" no recuperaba el rango de precios y "¿tienen
+   oficina?" no recuperaba el hecho de contacto que ya lo respondía.
+
+2. **Escribir el hecho aunque la respuesta sea "todavía no".** Es la lección de
+   la auditoría del 2026-08-06 y la menos evidente. La recuperación **siempre
+   devuelve algo**: para lo que el sitio no cubre, devuelve el hecho que más
+   palabras comparta, y el modelo lo usa. «¿Tienen testimonios?» contestaba con
+   el módulo *Portal de clientes*. Un hueco declarado responde mejor que un
+   acierto falso — y de paso deja por escrito qué le falta al sitio.
+
+3. **No pongas un umbral de puntuación.** Parece la solución obvia y está medida
+   como mala: los aciertos y los falsos positivos se solapan, así que el corte
+   rompe respuestas buenas antes que las malas. Si algún día hace falta separar
+   "sé esto" de "no sé esto", el camino es exigir que el mejor hecho comparta un
+   token con las `q` (no solo con el cuerpo), no bajar una barrera numérica.
+
+4. **Registrar las preguntas que recuperan poco o nada.** Sigue sin hacerse, y
+   ahora se sabe qué tendría que registrar: no solo las de 0 hechos —que son
+   pocas— sino las que puntúan bajo, que son las que producen los aciertos
+   falsos. Es la lista de la compra de la KB, escrita por los clientes.
+
+### Cómo se audita
+
+La recuperación es código puro y sin dependencias del DOM, así que se prueba sin
+levantar Netlify ni gastar una llamada al modelo:
+
+```js
+import { retrieve } from './netlify/functions/_retrieval.mts';
+const kb = JSON.parse(readFileSync('dist/kb.json', 'utf8'));
+retrieve(kb, '¿tienen testimonios?', 3);   // → qué hechos vería el modelo
+```
+
+Se corre contra una lista de preguntas como las que llegan de verdad —incluidas
+las que el sitio **no** puede responder, que son las que enseñan algo— y se mira
+el hecho que sale primero. Requiere `npm run build` antes, porque lee `kb.json`
+del build.
 
 ## Lo que este chat no hace, a propósito
 
