@@ -106,7 +106,7 @@ const engine = {
                 {i === steps.length - 1 ? 'Ver mi precio' : 'Siguiente'}
               </button>
               {step.multiple && (
-                <button type="button" class="cot-skip" data-next>
+                <button type="button" class="cot-skip" data-skip>
                   Ninguna de estas
                 </button>
               )}
@@ -272,7 +272,7 @@ const engine = {
       // Un paso obligatorio no avanza hasta que haya respuesta; los múltiples sí
       const step = engine.steps[current]!;
       const chosen = root.querySelectorAll(`input[name="${step.id}"]:checked`).length;
-      const next = stepEls[current]!.querySelector<HTMLButtonElement>('button[data-next]:not(.cot-skip)')!;
+      const next = stepEls[current]!.querySelector<HTMLButtonElement>('button[data-next]')!;
       next.disabled = !step.multiple && chosen === 0;
       refreshPrices();
     }
@@ -434,12 +434,28 @@ const engine = {
       location.href = tab ? engine.routes.gracias : url;
     }
 
+    const avanzar = () => (current === stepEls.length - 1 ? show() : go(current + 1));
+
     root.addEventListener('change', paint);
     root.addEventListener('click', (e) => {
       const t = e.target as HTMLElement;
-      if (t.closest('[data-next]')) {
-        if (current === stepEls.length - 1) show();
-        else go(current + 1);
+      if (t.closest('[data-skip]')) {
+        /*
+         * "Ninguna de estas" tiene que desmarcar, no solo avanzar. Compartía el
+         * atributo con "Siguiente", así que lo único que hacía era pasar de
+         * paso: quien marcaba dos capacidades y luego se arrepentía llegaba al
+         * resultado con las dos cobradas —hasta $1,050 de más— y con ellas
+         * escritas en el mensaje de WhatsApp. Un botón que dice "ninguna" y
+         * cobra dos es peor que no tener el botón.
+         */
+        const step = engine.steps[current]!;
+        root
+          .querySelectorAll<HTMLInputElement>(`input[name="${step.id}"]:checked`)
+          .forEach((input) => (input.checked = false));
+        paint();
+        avanzar();
+      } else if (t.closest('[data-next]')) {
+        avanzar();
       } else if (t.closest('[data-back]')) {
         go(current - 1);
       }
