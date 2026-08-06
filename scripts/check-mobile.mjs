@@ -24,14 +24,9 @@
  *
  *   npm i -D playwright && npx playwright install chromium
  */
-import { createServer } from 'node:http';
-import { readFile, stat } from 'node:fs/promises';
-import { execSync } from 'node:child_process';
-import { join, extname, dirname } from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
-
-const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const DIST = join(ROOT, 'dist');
+import { stat } from 'node:fs/promises';
+import { join } from 'node:path';
+import { DIST, loadPlaywright, serveDist } from './_harness.mjs';
 
 /* ------------------------------------------------------------------ *
  * Presupuestos. Son cepos, no aspiraciones: se fijan un pelo por encima
@@ -53,68 +48,6 @@ const BUDGET = {
 
 const NAV_WIDTHS = [320, 360, 390, 430, 768, 900, 1024, 1120, 1280, 1440, 1920];
 const PHONES = ['iPhone SE', 'iPhone 13', 'iPhone 14 Pro Max'];
-
-/* ------------------------------------------------------------------ *
- * Playwright: del proyecto si está, si no del sistema
- * ------------------------------------------------------------------ */
-async function loadPlaywright() {
-  try {
-    return await import('playwright');
-  } catch {}
-  try {
-    const globalRoot = execSync('npm root -g', { encoding: 'utf8' }).trim();
-    return await import(pathToFileURL(join(globalRoot, 'playwright', 'index.mjs')).href);
-  } catch {}
-  console.error(
-    'Falta Playwright. Instálalo con:\n' +
-      '  npm i -D playwright && npx playwright install chromium'
-  );
-  process.exit(2);
-}
-
-/* ------------------------------------------------------------------ *
- * Servidor estático mínimo para dist/ (evita otra dependencia)
- * ------------------------------------------------------------------ */
-const MIME = {
-  '.html': 'text/html; charset=utf-8',
-  '.css': 'text/css; charset=utf-8',
-  '.js': 'text/javascript; charset=utf-8',
-  '.mjs': 'text/javascript; charset=utf-8',
-  '.json': 'application/json; charset=utf-8',
-  '.svg': 'image/svg+xml',
-  '.png': 'image/png',
-  '.jpg': 'image/jpeg',
-  '.jpeg': 'image/jpeg',
-  '.webp': 'image/webp',
-  '.avif': 'image/avif',
-  '.woff2': 'font/woff2',
-  '.woff': 'font/woff',
-  '.ico': 'image/x-icon',
-  '.xml': 'application/xml; charset=utf-8',
-  '.txt': 'text/plain; charset=utf-8',
-};
-
-function serveDist() {
-  const server = createServer(async (req, res) => {
-    try {
-      let p = decodeURIComponent(new URL(req.url, 'http://x').pathname);
-      if (p === '/' || p.endsWith('/')) p += 'index.html';
-      const file = join(DIST, p);
-      if (!file.startsWith(DIST)) {
-        res.writeHead(403).end();
-        return;
-      }
-      const body = await readFile(file);
-      res.writeHead(200, { 'Content-Type': MIME[extname(file)] ?? 'application/octet-stream' });
-      res.end(body);
-    } catch {
-      res.writeHead(404).end('404');
-    }
-  });
-  return new Promise((resolve) => {
-    server.listen(0, '127.0.0.1', () => resolve({ server, port: server.address().port }));
-  });
-}
 
 /* ------------------------------------------------------------------ *
  * Comprobaciones
