@@ -146,6 +146,125 @@ export const CAPABILITIES: Record<string, CapabilityRule> = {
 };
 
 /* ------------------------------------------------------------------ *
+ * Resolución del plan
+ * ------------------------------------------------------------------ */
+
+const rank = (slug: PlanSlug) => PLAN_ORDER.indexOf(slug);
+
+export type Answers = Record<string, string[]>;
+
+/** El paso donde se marcan capacidades. Lo demás fija el plan. */
+const CAPABILITY_STEP = 'capacidades';
+
+const planBySlug = (slug: PlanSlug) => plans.find((p) => p.slug === slug)!;
+
+/**
+ * El plan es el mayor que exija cualquiera de las respuestas: recomendar por
+ * debajo de lo que la persona pidió sería cotizar algo que no le sirve.
+ *
+ * `excepto` deja fuera una capacidad concreta del cálculo, que es como se
+ * averigua qué aporta ella sola. Sin eso no se puede distinguir «esto ya lo
+ * tienes» de «esto es lo que te lo está dando».
+ */
+function resolverPlan(
+  answers: Answers,
+  opciones: { soloPasosDePlan?: boolean; excepto?: string } = {}
+): { slug: PlanSlug; driver: string } {
+  let slug: PlanSlug = 'start';
+  let driver = '';
+  for (const step of steps) {
+    if (opciones.soloPasosDePlan && step.id === CAPABILITY_STEP) continue;
+    const picked = answers[step.id] ?? [];
+    for (const opt of step.options) {
+      if (step.id === CAPABILITY_STEP && opt.value === opciones.excepto) continue;
+      if (picked.includes(opt.value) && opt.requiresPlan && rank(opt.requiresPlan) > rank(slug)) {
+        slug = opt.requiresPlan;
+        driver = opt.label.toLowerCase();
+      }
+    }
+  }
+  return { slug, driver };
+}
+
+/**
+ * El plan que fijan los pasos 1 y 2, sin mirar las capacidades.
+ *
+ * Es la vara con la que se decide qué opciones se bloquean, y tiene que ser
+ * esta y no el plan final: si una capacidad se bloqueara por el plan al que
+ * ella misma sube, quedaría marcada y sin poder desmarcarse — encerrando a la
+ * persona en el plan caro. Con dos capacidades que se justifican mutuamente
+ * (blog y CMS piden las dos Corporate) el enredo es peor. Mirando solo los
+ * pasos anteriores, lo que se bloquea nunca depende de algo que se pueda tocar
+ * en esa misma pantalla, y desmarcarlo es siempre seguro.
+ */
+export const basePlanSlug = (answers: Answers): PlanSlug =>
+  resolverPlan(answers, { soloPasosDePlan: true }).slug;
+
+/* ------------------------------------------------------------------ *
+ * Estado de cada capacidad
+ * ------------------------------------------------------------------ */
+
+/**
+ * Las cuatro respuestas posibles a la única pregunta que le importa a quien
+ * está marcando: ¿qué me cuesta a mí esto, ahora mismo?
+ */
+export type CapabilityState =
+  /** El plan base ya la trae. Marcarla no decide nada: se bloquea. */
+  | { kind: 'bloqueada' }
+  /** Sale gratis por otra capacidad marcada, que sí se puede desmarcar. */
+  | { kind: 'gratis' }
+  /** Se cobra aparte. */
+  | { kind: 'modulo'; delta: Money }
+  /** Marcarla cambia de plan: el precio es la diferencia, no el del plan nuevo. */
+  | { kind: 'sube-plan'; delta: Money; to: Plan };
+
+const restar = (a: Money, b: Money): Money => ({ min: a.min - b.min, max: a.max - b.max });
+
+export function capabilityState(cap: string, answers: Answers): CapabilityState | null {
+  const rule = CAPABILITIES[cap];
+  const opt = steps.find((s) => s.id === CAPABILITY_STEP)?.options.find((o) => o.value === cap);
+  if (!rule || !opt) return null;
+
+  if (rule.includedFrom && rank(basePlanSlug(answers)) >= rank(rule.includedFrom)) {
+    return { kind: 'bloqueada' };
+  }
+
+  // El plan que habría sin ESTA capacidad: lo que de verdad mide su aporte.
+  const sinEsta = resolverPlan(answers, { excepto: cap }).slug;
+
+  if (rule.includedFrom && rank(sinEsta) >= rank(rule.includedFrom)) return { kind: 'gratis' };
+
+  if (opt.requiresPlan && rank(opt.requiresPlan) > rank(sinEsta)) {
+    const destino = planBySlug(opt.requiresPlan);
+    return {
+      kind: 'sube-plan',
+      delta: restar(parsePrice(destino.price), parsePrice(planBySlug(sinEsta).price)),
+      to: destino,
+    };
+  }
+
+  if (rule.moduleName) {
+    const mod = modules.find((m) => m.name === rule.moduleName);
+    if (mod) return { kind: 'modulo', delta: parsePrice(mod.price) };
+  }
+  return null;
+}
+
+/** El texto que ve el cliente para cada estado. */
+export function capabilityLabel(state: CapabilityState): string {
+  switch (state.kind) {
+    case 'bloqueada':
+      return 'Ya incluido';
+    case 'gratis':
+      return 'Incluido';
+    case 'modulo':
+      return `+${formatMoney(state.delta)}`;
+    case 'sube-plan':
+      return `+${formatMoney(state.delta)} · pasa a ${state.to.name.replace('PanaClaw ', '')}`;
+  }
+}
+
+/* ------------------------------------------------------------------ *
  * Etiquetas de precio para las opciones
  * ------------------------------------------------------------------ */
 
@@ -156,25 +275,24 @@ export const CAPABILITIES: Record<string, CapabilityRule> = {
  * gratis, el entusiasmo no encuentra freno y el total aparece de golpe al
  * final. Una cifra de cuatro dígitos sin aviso previo no se lee como
  * presupuesto, se lee como sorpresa — y la sorpresa mata la venta.
+ *
+ * Las capacidades pasan por `capabilityState`, así que la etiqueta depende de
+ * lo ya contestado: «Cobrar en línea» decía «Incluido en Commerce» —que se lee
+ * como gratis— cuando desde Corporate son 350 dólares más.
  */
-export function optionPriceLabel(stepId: string, value: string): string | null {
+export function optionPriceLabel(
+  stepId: string,
+  value: string,
+  answers: Answers = {}
+): string | null {
   if (stepId === 'urgencia') return null;
 
   const opt = steps.find((s) => s.id === stepId)?.options.find((o) => o.value === value);
   if (!opt) return null;
 
-  if (stepId === 'capacidades') {
-    const rule = CAPABILITIES[value];
-    if (!rule) return null;
-    if (rule.moduleName) {
-      const mod = modules.find((m) => m.name === rule.moduleName);
-      if (mod) return `+${formatMoney(parsePrice(mod.price))}`;
-    }
-    if (rule.includedFrom) {
-      const plan = plans.find((p) => p.slug === rule.includedFrom);
-      return plan ? `Incluido en ${plan.name.replace('PanaClaw ', '')}` : null;
-    }
-    return null;
+  if (stepId === CAPABILITY_STEP) {
+    const state = capabilityState(value, answers);
+    return state ? capabilityLabel(state) : null;
   }
 
   // Pasos que fijan el plan: enseñamos desde cuánto arranca esa elección
@@ -202,38 +320,31 @@ export interface QuoteResult {
   total: Money;
   delivery: string;
   urgencia: string;
+  /** Solo cuando pidió "Ya" y el plan tarda más de una semana. */
+  urgenciaAviso?: string;
 }
 
-const rank = (slug: PlanSlug) => PLAN_ORDER.indexOf(slug);
-
-export type Answers = Record<string, string[]>;
+/**
+ * Días que anuncia un plazo escrito ("Entrega 15–20 días" → 20, "Entrega 72 h"
+ * → 3). Se lee del propio texto para que cambiar un plazo en `plans.ts` no
+ * obligue a tocar nada más.
+ */
+function diasDePlazo(delivery: string): number {
+  const nums = delivery.match(/\d+/g)?.map(Number) ?? [];
+  if (!nums.length) return 0;
+  const mayor = Math.max(...nums);
+  return /\bh\b|hora/i.test(delivery) ? mayor / 24 : mayor;
+}
 
 export function computeQuote(answers: Answers): QuoteResult | null {
   const objetivo = answers.objetivo?.[0];
   const alcance = answers.alcance?.[0];
   if (!objetivo || !alcance) return null;
 
-  const capacidades = answers.capacidades ?? [];
+  const capacidades = answers[CAPABILITY_STEP] ?? [];
 
-  // El plan es el mayor que exija cualquiera de las respuestas. Recomendar por
-  // debajo de lo que la persona pidió sería cotizar algo que no le sirve.
-  let slug: PlanSlug = 'start';
-  let driver = '';
-  const bump = (req: PlanSlug | undefined, why: string) => {
-    if (req && rank(req) > rank(slug)) {
-      slug = req;
-      driver = why;
-    }
-  };
-
-  for (const step of steps) {
-    const picked = answers[step.id] ?? [];
-    for (const opt of step.options) {
-      if (picked.includes(opt.value)) bump(opt.requiresPlan, opt.label.toLowerCase());
-    }
-  }
-
-  const plan = plans.find((p) => p.slug === slug)!;
+  const { slug, driver } = resolverPlan(answers);
+  const plan = planBySlug(slug);
   const lines: QuoteLine[] = [
     { label: plan.name, price: parsePrice(plan.price), note: plan.delivery },
   ];
@@ -241,7 +352,7 @@ export function computeQuote(answers: Answers): QuoteResult | null {
   for (const cap of capacidades) {
     const rule = CAPABILITIES[cap];
     const option = steps
-      .find((s) => s.id === 'capacidades')!
+      .find((s) => s.id === CAPABILITY_STEP)!
       .options.find((o) => o.value === cap);
     if (!rule || !option) continue;
 
@@ -269,6 +380,17 @@ export function computeQuote(answers: Answers): QuoteResult | null {
     steps.find((s) => s.id === 'urgencia')!.options.find((o) => o.value === answers.urgencia?.[0])
       ?.label ?? '';
 
+  /*
+   * El paso de urgencia dice que no cambia el precio —y es cierto— pero
+   * tampoco cambiaba nada visible: se podía pedir "esta semana" y recibir un
+   * plazo de 15 a 20 días sin que nadie lo mencionara. Esto solo constata la
+   * tensión; prometer prioridad es una decisión comercial, no del cotizador.
+   */
+  const urgenciaAviso =
+    answers.urgencia?.[0] === 'ya' && diasDePlazo(plan.delivery) > 7
+      ? `Marcaste "Ya", y este plan va en ${plan.delivery.replace(/^Entrega /, '')}.`
+      : undefined;
+
   return {
     plan,
     reason,
@@ -276,5 +398,6 @@ export function computeQuote(answers: Answers): QuoteResult | null {
     total,
     delivery: extras > 0 ? `${plan.delivery}, más el plazo de cada capacidad` : plan.delivery,
     urgencia: urgenciaLabel,
+    urgenciaAviso,
   };
 }

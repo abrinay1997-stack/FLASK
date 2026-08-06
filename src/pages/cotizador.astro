@@ -1,10 +1,8 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { steps, parsePrice, optionPriceLabel, CAPABILITIES } from '../data/quote';
-import { plans, diagnostico } from '../data/plans';
-import { modules } from '../data/modules';
+import { steps, optionPriceLabel } from '../data/quote';
+import { diagnostico } from '../data/plans';
 import { routes } from '../data/links';
-import { contact } from '../data/site';
 
 /**
  * El precio se enseña ANTES de pedir datos, a propósito.
@@ -14,25 +12,13 @@ import { contact } from '../data/site';
  * funciona mejor: cuatro respuestas ya invertidas + una cifra concreta delante
  * hacen que pedir el contacto deje de ser un peaje y pase a ser el paso obvio
  * para recibir la versión escrita.
+ *
+ * El cálculo vive entero en `src/data/quote.ts`, y el script de abajo lo
+ * IMPORTA en vez de reimplementarlo. Antes había dos copias del algoritmo —una
+ * aquí y otra allí, esta última sin que la llamara nadie— con un comentario
+ * prometiendo que darían el mismo resultado. Dos implementaciones y solo una
+ * ejecutándose es divergencia silenciosa garantizada.
  */
-
-// El motor completo viaja al navegador como JSON: el cálculo del cliente y el
-// de /planes salen de los mismos datos, así que no pueden desviarse.
-const engine = {
-  steps,
-  plans: plans.map((p) => ({
-    slug: p.slug,
-    name: p.name,
-    price: p.price,
-    money: parsePrice(p.price),
-    delivery: p.delivery,
-    desc: p.desc,
-  })),
-  modules: modules.map((m) => ({ name: m.name, money: parsePrice(m.price), stack: m.stack })),
-  capabilities: CAPABILITIES,
-  routes: { contacto: routes.contacto, planes: routes.planes, gracias: routes.gracias },
-  whatsapp: contact.whatsappRaw,
-};
 ---
 
 <BaseLayout
@@ -63,6 +49,20 @@ const engine = {
         </div>
       </div>
 
+      <!--
+        Sin JavaScript el cotizador es HTML muerto: se ve el primer paso con el
+        botón deshabilitado y ahí se acaba. No se va a rehacer sin JS —el
+        cálculo en vivo es el producto— pero dejar a alguien en una pantalla
+        que no responde sí se arregla con dos líneas.
+      -->
+      <noscript>
+        <p class="cot-noscript">
+          El cotizador necesita JavaScript para calcular en vivo. Los precios están
+          publicados igual en <a href={routes.planes}>planes</a>, y por
+          <a href={routes.contacto}>contacto</a> te lo pasamos por escrito.
+        </p>
+      </noscript>
+
       <form class="cot-form" data-quote novalidate>
         {steps.map((step, i) => (
           <fieldset class="cot-step" data-step={step.id} hidden={i > 0}>
@@ -84,11 +84,7 @@ const engine = {
                     <span class="cot-opt-hint">{opt.hint}</span>
                   </span>
                   {optionPriceLabel(step.id, opt.value) && (
-                    <span
-                      class="cot-opt-price"
-                      data-opt-price={opt.value}
-                      data-base={optionPriceLabel(step.id, opt.value)}
-                    >
+                    <span class="cot-opt-price" data-opt-price={opt.value}>
                       {optionPriceLabel(step.id, opt.value)}
                     </span>
                   )}
@@ -106,7 +102,7 @@ const engine = {
                 {i === steps.length - 1 ? 'Ver mi precio' : 'Siguiente'}
               </button>
               {step.multiple && (
-                <button type="button" class="cot-skip" data-next>
+                <button type="button" class="cot-skip" data-skip>
                   Ninguna de estas
                 </button>
               )}
@@ -116,10 +112,17 @@ const engine = {
       </form>
 
       <!-- RESULTADO -->
-      <div class="cot-result" data-result hidden aria-live="polite">
+      <!--
+        Sin `aria-live` en el bloque entero: al aparecer hacía que un lector de
+        pantalla releyera plan, líneas, total y formulario de una tacada, y de
+        paso competía con el `aria-live` del contador de pasos. Lo que sí hay
+        es foco en el titular, que es el patrón estándar para "la vista cambió"
+        y además deja el teclado donde toca.
+      -->
+      <div class="cot-result" data-result hidden>
         <div class="cot-result-head">
           <span class="eyebrow">Tu estimación</span>
-          <h2 data-plan-name>—</h2>
+          <h2 data-plan-name tabindex="-1">—</h2>
           <p class="cot-reason" data-reason></p>
         </div>
 
@@ -132,6 +135,7 @@ const engine = {
           </div>
           <div class="cot-total-meta">
             <span data-delivery></span>
+            <span class="cot-urgencia" data-urgencia hidden></span>
             <span class="cot-disclaimer">
               Estimación, no factura. La propuesta escrita confirma alcance, cronograma y cifra final.
             </span>
@@ -160,7 +164,13 @@ const engine = {
             <button type="button" class="btn btn-primary" data-send>
               <span class="dot"></span> Enviar y recibir la propuesta
             </button>
-            <button type="button" class="btn btn-ghost" data-restart>Empezar de nuevo</button>
+            <!--
+              Cambiar una respuesta CONSERVA las cuatro. Antes la única salida
+              era empezar de cero, así que corregir una coma costaba rehacerlo
+              todo, justo en el momento de mayor intención de compra.
+            -->
+            <button type="button" class="btn btn-ghost" data-edit>Cambiar una respuesta</button>
+            <button type="button" class="cot-skip" data-restart>Empezar de nuevo</button>
           </div>
 
           <p class="cot-alt">
@@ -175,93 +185,116 @@ const engine = {
   </section>
 </BaseLayout>
 
-<script type="application/json" data-quote-engine set:html={JSON.stringify(engine)} is:inline />
-
 <script>
-  interface Money { min: number; max: number }
-  interface Opt { value: string; label: string; hint: string; requiresPlan?: string }
-  interface Step { id: string; question: string; help: string; multiple: boolean; options: Opt[] }
-  interface Engine {
-    steps: Step[];
-    plans: { slug: string; name: string; price: string; money: Money; delivery: string; desc: string }[];
-    modules: { name: string; money: Money; stack: string }[];
-    capabilities: Record<string, { includedFrom?: string; moduleName?: string }>;
-    routes: { contacto: string; planes: string; gracias: string };
-    whatsapp: string;
-  }
-
-  const ORDER = ['start', 'launch', 'corporate', 'commerce'];
+  import {
+    steps,
+    computeQuote,
+    capabilityState,
+    capabilityLabel,
+    formatMoney,
+    type Answers,
+  } from '../data/quote';
+  import { routes } from '../data/links';
+  import { contact } from '../data/site';
+  import { prefersReducedMotion } from '../scripts/motion';
 
   /**
-   * El algoritmo replica `computeQuote` de src/data/quote.ts porque el cálculo
-   * tiene que ocurrir en el navegador sin backend. Los DATOS no se duplican:
-   * precios, planes, módulos y reglas de capacidad llegan serializados del
-   * build en `engine`. Si cambia una regla, cambia en los dos sitios a la vez.
+   * El cálculo NO se reimplementa aquí: se importa de `src/data/quote.ts` y
+   * Vite lo empaqueta con la página. Antes había dos copias del algoritmo, y la
+   * de `quote.ts` no la llamaba nadie: el archivo prometía en su cabecera que
+   * las dos darían el mismo resultado y solo una llegaba a ejecutarse jamás.
    */
-  const money = (m: Money) => {
-    const f = (n: number) => `$${n.toLocaleString('en-US')}`;
-    return m.min === m.max ? f(m.min) : `${f(m.min)} – ${f(m.max)}`;
-  };
+  const CAPACIDADES = 'capacidades';
+
+  /**
+   * `scrollIntoView({behavior:'smooth'})` IGNORA el `scroll-behavior:auto` que
+   * la hoja de estilos pone bajo `prefers-reduced-motion`: el argumento
+   * explícito gana a la CSS. Era el único sitio del sitio donde la preferencia
+   * no se respetaba, y solo se ve midiendo el scroll cuadro a cuadro.
+   */
+  const llevarA = (el: Element, block: ScrollLogicalPosition) =>
+    el.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block });
 
   function initCotizador() {
     const found = document.querySelector<HTMLFormElement>('[data-quote]');
-    const raw = document.querySelector<HTMLScriptElement>('[data-quote-engine]');
-    if (!found || !raw || found.dataset.bound) return;
+    if (!found || found.dataset.bound) return;
     found.dataset.bound = 'true';
     const root: HTMLFormElement = found;
 
-    const engine: Engine = JSON.parse(raw.textContent || '{}');
     const stepEls = [...root.querySelectorAll<HTMLFieldSetElement>('.cot-step')];
     const result = document.querySelector<HTMLElement>('[data-result]')!;
     const bar = document.querySelector<HTMLElement>('[data-bar]')!;
     const count = document.querySelector<HTMLElement>('[data-count]')!;
     const progress = document.querySelector<HTMLElement>('.cot-progress')!;
+    const running = document.querySelector<HTMLElement>('[data-running]')!;
 
     let current = 0;
 
-    const answers = (): Record<string, string[]> => {
-      const out: Record<string, string[]> = {};
-      for (const step of engine.steps) {
-        out[step.id] = [...root.querySelectorAll<HTMLInputElement>(`input[name="${step.id}"]:checked`)].map(
-          (i) => i.value
-        );
+    const answers = (): Answers => {
+      const out: Answers = {};
+      for (const step of steps) {
+        out[step.id] = [
+          ...root.querySelectorAll<HTMLInputElement>(`input[name="${step.id}"]:checked`),
+        ].map((i) => i.value);
       }
       return out;
     };
 
+    const inputDe = (value: string) =>
+      root.querySelector<HTMLInputElement>(`input[name="${CAPACIDADES}"][value="${value}"]`);
+
     /**
-     * Reetiqueta las capacidades según el plan que llevan las respuestas
-     * actuales, y actualiza el total corriendo.
+     * Pinta cada capacidad según lo que le cuesta a quien está mirando, y
+     * bloquea las que el plan ya trae.
      *
-     * Es contextual a propósito: "Blog y SEO" cuesta o no cuesta según el plan
-     * al que hayan llevado las respuestas anteriores. Enseñar un precio fijo
-     * cuando en realidad viene incluido sería cobrar de mentira.
+     * Una casilla marcable que dice "Incluido" pide un clic que no decide nada:
+     * ni cambia el precio ni el plan, solo añade ruido al resultado y al
+     * mensaje de WhatsApp. Se apagan.
+     *
+     * Se desmarcan al bloquearlas, y eso es seguro por cómo está definido
+     * `capabilityState`: solo se bloquea lo que cubre el plan de los pasos 1 y
+     * 2, que ninguna capacidad puede bajar. Bloquear mirando el plan final
+     * encerraría a la persona en el plan caro — marcas "Cobrar en línea",
+     * subes a Commerce, y esa misma opción quedaría incluida, marcada y sin
+     * poder desmarcarse.
      */
     function refreshPrices() {
-      const q = compute();
+      const capStep = steps.find((s) => s.id === CAPACIDADES)!;
 
-      document.querySelectorAll<HTMLElement>('[data-opt-price]').forEach((el) => {
-        const value = el.dataset.optPrice!;
-        const rule = engine.capabilities[value];
-        if (!rule) return; // pasos de plan: su etiqueta no cambia
+      for (const opt of capStep.options) {
+        if (capabilityState(opt.value, answers())?.kind !== 'bloqueada') continue;
+        const input = inputDe(opt.value);
+        if (input?.checked) input.checked = false;
+      }
 
-        if (rule.includedFrom && ORDER.indexOf(q.plan.slug) >= ORDER.indexOf(rule.includedFrom)) {
-          el.textContent = 'Incluido';
-          el.classList.add('is-free');
-        } else {
-          el.textContent = el.dataset.base!;
-          el.classList.remove('is-free');
-        }
-      });
+      const a = answers();
+      for (const opt of capStep.options) {
+        const el = document.querySelector<HTMLElement>(`[data-opt-price="${opt.value}"]`);
+        const state = capabilityState(opt.value, a);
+        if (!el || !state) continue;
+
+        const bloqueada = state.kind === 'bloqueada';
+        el.textContent = capabilityLabel(state);
+        /*
+         * La clase la decide el estado, no la primera letra del texto. Antes el
+         * formato salía de un `:not([data-base^='+'])` en la hoja de estilos:
+         * cambiar "Desde" por otra palabra lo rompía sin que nada avisara.
+         */
+        el.className =
+          'cot-opt-price' +
+          (bloqueada || state.kind === 'gratis' ? ' is-free' : '') +
+          (state.kind === 'sube-plan' ? ' is-delta' : '');
+
+        const input = inputDe(opt.value);
+        if (input) input.disabled = bloqueada;
+        input?.closest('.cot-opt')?.classList.toggle('is-locked', bloqueada);
+      }
 
       // El total aparece en cuanto hay plan, no al final: ver la cifra subir es
       // lo que evita llegar al resultado con una sorpresa de cuatro dígitos.
-      const running = document.querySelector<HTMLElement>('[data-running]')!;
-      const hasPlan = (answers().objetivo?.length ?? 0) > 0 && (answers().alcance?.length ?? 0) > 0;
-      running.hidden = !hasPlan;
-      if (hasPlan) {
-        document.querySelector('[data-running-total]')!.textContent = money(q.total);
-      }
+      const q = computeQuote(a);
+      running.hidden = q === null;
+      if (q) document.querySelector('[data-running-total]')!.textContent = formatMoney(q.total);
     }
 
     function paint() {
@@ -270,9 +303,9 @@ const engine = {
       bar.style.transform = `scaleX(${pct / 100})`;
       count.textContent = `Paso ${current + 1} de ${stepEls.length}`;
       // Un paso obligatorio no avanza hasta que haya respuesta; los múltiples sí
-      const step = engine.steps[current]!;
+      const step = steps[current]!;
       const chosen = root.querySelectorAll(`input[name="${step.id}"]:checked`).length;
-      const next = stepEls[current]!.querySelector<HTMLButtonElement>('button[data-next]:not(.cot-skip)')!;
+      const next = stepEls[current]!.querySelector<HTMLButtonElement>('button[data-next]')!;
       next.disabled = !step.multiple && chosen === 0;
       refreshPrices();
     }
@@ -285,54 +318,12 @@ const engine = {
       stepEls[current]!.querySelector<HTMLElement>('legend')?.focus();
     }
 
-    function compute() {
-      const a = answers();
-      let slug = 'start';
-      let driver = '';
-      for (const step of engine.steps) {
-        for (const opt of step.options) {
-          if (a[step.id]?.includes(opt.value) && opt.requiresPlan) {
-            if (ORDER.indexOf(opt.requiresPlan) > ORDER.indexOf(slug)) {
-              slug = opt.requiresPlan;
-              driver = opt.label.toLowerCase();
-            }
-          }
-        }
-      }
-      const plan = engine.plans.find((p) => p.slug === slug)!;
-      const capStep = engine.steps.find((s) => s.id === 'capacidades')!;
-
-      const lines: { label: string; price: Money | null; note: string }[] = [
-        { label: plan.name, price: plan.money, note: plan.delivery },
-      ];
-
-      for (const cap of a.capacidades ?? []) {
-        const rule = engine.capabilities[cap];
-        const opt = capStep.options.find((o) => o.value === cap);
-        if (!rule || !opt) continue;
-        if (rule.includedFrom && ORDER.indexOf(slug) >= ORDER.indexOf(rule.includedFrom)) {
-          lines.push({ label: opt.label, price: null, note: `Incluido en ${plan.name}` });
-        } else if (rule.moduleName) {
-          const mod = engine.modules.find((m) => m.name === rule.moduleName);
-          if (mod) lines.push({ label: opt.label, price: mod.money, note: mod.stack });
-        }
-      }
-
-      const total = lines.reduce(
-        (acc, l) => (l.price ? { min: acc.min + l.price.min, max: acc.max + l.price.max } : acc),
-        { min: 0, max: 0 }
-      );
-
-      return { plan, driver, lines, total, extras: lines.length - 1, a };
-    }
-
     function show() {
-      const q = compute();
+      const q = computeQuote(answers());
+      if (!q) return;
 
       document.querySelector('[data-plan-name]')!.textContent = q.plan.name;
-      document.querySelector('[data-reason]')!.textContent = q.driver
-        ? `Lo pide "${q.driver}". Es el plan más pequeño que lo cubre.`
-        : 'Es el plan más pequeño que cubre lo que marcaste.';
+      document.querySelector('[data-reason]')!.textContent = q.reason;
 
       const list = document.querySelector('[data-lines]')!;
       list.innerHTML = '';
@@ -340,19 +331,32 @@ const engine = {
         const li = document.createElement('li');
         li.className = 'cot-line';
         li.innerHTML =
-          `<span class="cot-line-label">${l.label}<small>${l.note}</small></span>` +
-          `<span class="cot-line-price${l.price ? '' : ' is-free'}">${l.price ? money(l.price) : 'Incluido'}</span>`;
+          `<span class="cot-line-label">${l.label}<small>${l.note ?? ''}</small></span>` +
+          `<span class="cot-line-price${l.price ? '' : ' is-free'}">${
+            l.price ? formatMoney(l.price) : 'Incluido'
+          }</span>`;
         list.appendChild(li);
       }
 
-      document.querySelector('[data-total]')!.textContent = money(q.total);
-      document.querySelector('[data-delivery]')!.textContent =
-        q.extras > 0 ? `${q.plan.delivery}, más el plazo de cada capacidad` : q.plan.delivery;
+      document.querySelector('[data-total]')!.textContent = formatMoney(q.total);
+      document.querySelector('[data-delivery]')!.textContent = q.delivery;
+
+      /*
+       * El paso de urgencia dice que no cambia el precio, y es verdad, pero
+       * tampoco cambiaba nada visible: se podía pedir "esta semana" y recibir
+       * un plazo de 15–20 días sin una palabra. El aviso solo constata la
+       * tensión —no promete prioridad, que es una decisión comercial y no del
+       * cotizador.
+       */
+      const aviso = document.querySelector<HTMLElement>('[data-urgencia]')!;
+      aviso.hidden = !q.urgenciaAviso;
+      aviso.textContent = q.urgenciaAviso ?? '';
 
       root.hidden = true;
       progress.hidden = true;
       result.hidden = false;
-      result.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      llevarA(result, 'start');
+      document.querySelector<HTMLElement>('[data-plan-name]')!.focus();
     }
 
     function send() {
@@ -368,23 +372,38 @@ const engine = {
         (nombre ? viaEl : nombreEl).focus();
         return;
       }
+      /*
+       * Comprobación mínima, no un validador. Antes pasaba una sola letra y el
+       * mensaje llegaba con un contacto inservible: se pierde el lead sin que
+       * nadie se entere. Se acepta cualquier forma de escribir un teléfono
+       * —con espacios, guiones o prefijo— porque rechazar un número bueno
+       * cuesta más que aceptar uno raro.
+       */
+      const pareceCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(via);
+      const pareceTelefono = via.replace(/\D/g, '').length >= 7;
+      if (!pareceCorreo && !pareceTelefono) {
+        err.textContent = 'Eso no parece un WhatsApp ni un correo. Revísalo y te escribimos.';
+        err.hidden = false;
+        viaEl.focus();
+        return;
+      }
       err.hidden = true;
 
-      const q = compute();
-      const urgencia = engine.steps
-        .find((s) => s.id === 'urgencia')!
-        .options.find((o) => o.value === q.a.urgencia?.[0])?.label;
+      const q = computeQuote(answers());
+      if (!q) return;
 
       // `null` marca líneas que se descartan; '' son saltos de párrafo a conservar.
       const txt = [
         `Hola PanaClaw, usé el cotizador y esto me salió:`,
         '',
         `Plan: ${q.plan.name}`,
-        ...q.lines.slice(1).map((l) => `+ ${l.label}: ${l.price ? money(l.price) : 'incluido'}`),
+        ...q.lines
+          .slice(1)
+          .map((l) => `+ ${l.label}: ${l.price ? formatMoney(l.price) : 'incluido'}`),
         '',
-        `Total estimado: ${money(q.total)}`,
+        `Total estimado: ${formatMoney(q.total)}`,
         `Plazo: ${q.plan.delivery}`,
-        urgencia ? `Lo necesito: ${urgencia}` : null,
+        q.urgencia ? `Lo necesito: ${q.urgencia}` : null,
         '',
         `Nombre: ${nombre}`,
         `Contacto: ${via}`,
@@ -415,40 +434,84 @@ const engine = {
        * persona pidió— y se pierde la medición. Ese orden de prioridades es el
        * mismo que ya tiene /contacto.
        */
-      const url = `https://wa.me/${engine.whatsapp}?text=${encodeURIComponent(txt)}`;
-      const tab = window.open(url, '_blank', 'noopener');
-      location.href = tab ? engine.routes.gracias : url;
+      const url = `https://wa.me/${contact.whatsappRaw}?text=${encodeURIComponent(txt)}`;
+      /*
+       * `window.open(…, 'noopener')` devuelve null SIEMPRE, por especificación:
+       * con esa opción no hay handle que entregar. Aquí el valor decide si esta
+       * pestaña se va a /gracias/ o al propio WhatsApp, así que pedirlo así
+       * dejaba el camino entero roto en silencio: se abría la pestaña nueva y
+       * ADEMÁS esta se iba a wa.me, o sea dos pestañas idénticas, ningún paso
+       * por /gracias/ y por tanto ni un solo `Lead` contado. El código parecía
+       * correcto —de ahí que se diera por comprobado— y solo se ve abriendo un
+       * navegador de verdad; por eso ahora hay un arnés que lo vigila.
+       *
+       * Se abre sin la opción y se corta el `opener` a mano: mismo aislamiento
+       * frente a la pestaña de WhatsApp, y sí devuelve la referencia.
+       */
+      const tab = window.open(url, '_blank');
+      if (tab) tab.opener = null;
+      location.href = tab ? routes.gracias : url;
     }
+
+    const avanzar = () => (current === stepEls.length - 1 ? show() : go(current + 1));
 
     root.addEventListener('change', paint);
     root.addEventListener('click', (e) => {
       const t = e.target as HTMLElement;
-      if (t.closest('[data-next]')) {
-        if (current === stepEls.length - 1) show();
-        else go(current + 1);
+      if (t.closest('[data-skip]')) {
+        /*
+         * "Ninguna de estas" tiene que desmarcar, no solo avanzar. Compartía el
+         * atributo con "Siguiente", así que lo único que hacía era pasar de
+         * paso: quien marcaba dos capacidades y luego se arrepentía llegaba al
+         * resultado con las dos cobradas —hasta $1,050 de más— y con ellas
+         * escritas en el mensaje de WhatsApp. Un botón que dice "ninguna" y
+         * cobra dos es peor que no tener el botón.
+         */
+        const step = steps[current]!;
+        root
+          .querySelectorAll<HTMLInputElement>(`input[name="${step.id}"]:checked`)
+          .forEach((input) => (input.checked = false));
+        paint();
+        avanzar();
+      } else if (t.closest('[data-next]')) {
+        avanzar();
       } else if (t.closest('[data-back]')) {
         go(current - 1);
       }
     });
 
-    document.querySelector('[data-send]')?.addEventListener('click', send);
-    document.querySelector('[data-restart]')?.addEventListener('click', () => {
-      root.reset();
+    function volverAlFormulario() {
       result.hidden = true;
       root.hidden = false;
       progress.hidden = false;
       go(0);
-      progress.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      llevarA(progress, 'center');
+    }
+
+    document.querySelector('[data-send]')?.addEventListener('click', send);
+    document.querySelector('[data-edit]')?.addEventListener('click', volverAlFormulario);
+    document.querySelector('[data-restart]')?.addEventListener('click', () => {
+      root.reset();
+      volverAlFormulario();
     });
 
     paint();
   }
 
-  document.addEventListener('astro:page-load', initCotizador);
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initCotizador, { once: true });
-  } else {
-    initCotizador();
+  /*
+   * Este script se vuelve a ejecutar en cada visita a la página —así funcionan
+   * las transiciones de vista— pero `document` sobrevive a la navegación. Sin
+   * el guardia se registraba un `astro:page-load` más en cada visita: inertes
+   * todos por el `dataset.bound`, pero acumulándose igual.
+   *
+   * La llamada directa basta para la primera carga: los módulos van diferidos,
+   * así que el DOM ya está listo cuando esto corre.
+   */
+  const hooks = window as unknown as { __cotizadorHook?: boolean };
+  initCotizador();
+  if (!hooks.__cotizadorHook) {
+    hooks.__cotizadorHook = true;
+    document.addEventListener('astro:page-load', initCotizador);
   }
 </script>
 
@@ -623,8 +686,7 @@ const engine = {
     white-space: nowrap;
     text-align: right;
   }
-  .cot-opt-price.is-free,
-  .cot-opt-price:not([data-base^='+']):not([data-base^='D']) {
+  .cot-opt-price.is-free {
     font-size: 12.5px;
     font-weight: 500;
     letter-spacing: 0.1em;
@@ -633,6 +695,44 @@ const engine = {
     white-space: normal;
     max-width: 12ch;
     line-height: 1.3;
+  }
+  /* "+$350 · pasa a Commerce" no cabe en una línea y sigue siendo un precio:
+     mismo peso que los demás, pero con permiso para partirse. */
+  .cot-opt-price.is-delta {
+    white-space: normal;
+    max-width: 15ch;
+    line-height: 1.35;
+  }
+
+  /*
+    Capacidad que el plan ya trae: marcarla no cambiaría nada, así que se apaga.
+    El atenuado va con colores explícitos y NO con `opacity`, que arrastraría
+    también al texto secundario —ya en gris— por debajo del 4.5:1 que pide AA.
+    Medido sobre el fondo real: #BABABA da 9.7:1 y #8A8A8A da 5.5:1.
+  */
+  .cot-opt.is-locked {
+    cursor: default;
+    border-color: rgba(255, 255, 255, 0.06);
+    background: transparent;
+  }
+  .cot-opt.is-locked:hover {
+    border-color: rgba(255, 255, 255, 0.06);
+    background: transparent;
+  }
+  .cot-opt.is-locked .cot-opt-label {
+    color: var(--studio-gray);
+  }
+  .cot-opt.is-locked .cot-opt-hint {
+    color: #8a8a8a;
+  }
+  /* Gris y no naranja: el naranja es el color de lo que pide un clic, y aquí
+     justamente no hay nada que hacer. */
+  .cot-opt.is-locked .cot-opt-price {
+    color: var(--studio-gray);
+  }
+  /* Sin casilla: no hay nada que marcar ni desmarcar. */
+  .cot-opt.is-locked .cot-tick {
+    display: none;
   }
   .cot-tick {
     flex-shrink: 0;
@@ -661,6 +761,35 @@ const engine = {
     border: solid var(--deep-black);
     border-width: 0 2px 2px 0;
     transform: translateY(-1px) rotate(45deg);
+  }
+
+  /* El nav flota sobre la página: sin esto, mover el foco al enunciado deja la
+     pregunta justo debajo de la barra y medio tapada. */
+  .cot-step legend,
+  .cot-result {
+    scroll-margin-top: 130px;
+  }
+
+  .cot-noscript {
+    max-width: 60ch;
+    padding: 20px 22px;
+    border: 1px solid rgba(255, 81, 0, 0.35);
+    border-radius: 14px;
+    font-size: 16px;
+    font-weight: 300;
+    line-height: 1.55;
+    color: var(--studio-gray);
+  }
+  .cot-noscript a {
+    color: var(--flash-orange);
+  }
+
+  .cot-urgencia {
+    display: block;
+    margin-top: 8px;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--soft-white);
   }
 
   .cot-nav {

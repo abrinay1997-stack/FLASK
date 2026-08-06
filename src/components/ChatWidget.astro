@@ -37,7 +37,7 @@ const sugerencias = [
         <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5Z" />
       </svg>
     </span>
-    <span class="chat-launcher-label">Preguntar</span>
+    <span class="chat-launcher-label">Asistente</span>
   </button>
 
   <section class="chat-panel" id="chat-panel" data-chat-panel hidden aria-label="Asistente de PanaClaw">
@@ -125,7 +125,49 @@ const sugerencias = [
       toggle.focus();
     };
 
-    toggle.addEventListener('click', () => (panel.hidden ? open() : close()));
+    /**
+     * La llamada de atención del lanzador.
+     *
+     * Tres límites, y ninguno es cosmético:
+     *
+     *  · **Se para sola.** Dos tandas y se acabó. Una animación permanente
+     *    sería la segunda del sitio que no para nunca —hoy solo lo hace el
+     *    shader del hero— y un botón que no deja de moverse pasa de invitar a
+     *    molestar en menos de un minuto.
+     *  · **No vuelve si ya abriste el chat.** Quien ya sabe que está ahí no
+     *    necesita que se lo recuerden; se guarda en la sesión, no para
+     *    siempre, para que mañana vuelva a saludar.
+     *  · **Con `prefers-reduced-motion` no ocurre nada.** No se acelera: no
+     *    existe. Es la regla 4 del proyecto.
+     *
+     * Y espera 12 segundos: aparecer moviéndose nada más cargar compite con
+     * lo que la persona vino a leer.
+     */
+    const YA_ABIERTO = 'panaclaw:chat-abierto';
+    let llamadas = 0;
+
+    function llamarLaAtencion() {
+      if (!panel.hidden || sessionStorage.getItem(YA_ABIERTO)) return;
+      toggle.classList.add('is-calling');
+      // La clase se quita al terminar para que la siguiente tanda vuelva a
+      // dispararla: reasignarla sin quitarla no reinicia una animación CSS.
+      setTimeout(() => toggle.classList.remove('is-calling'), 3400);
+      if (++llamadas < 2) setTimeout(llamarLaAtencion, 35000);
+    }
+
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setTimeout(llamarLaAtencion, 12000);
+    }
+
+    toggle.addEventListener('click', () => {
+      if (panel.hidden) {
+        sessionStorage.setItem(YA_ABIERTO, '1');
+        toggle.classList.remove('is-calling');
+        open();
+      } else {
+        close();
+      }
+    });
     closeBtn.addEventListener('click', close);
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && !panel.hidden) close();
@@ -248,6 +290,7 @@ const sugerencias = [
 
   /* ---------- LANZADOR ---------- */
   .chat-launcher {
+    position: relative;
     display: inline-flex;
     align-items: center;
     gap: 10px;
@@ -282,6 +325,40 @@ const sugerencias = [
   .chat.is-open .chat-launcher {
     opacity: 0;
     pointer-events: none;
+  }
+
+  /* ---------- LLAMADA DE ATENCIÓN ---------- *
+     Un halo que se expande y se apaga, más una vibración corta del botón.
+     Las dos son `transform` y `opacity` y nada más: es la regla del sitio, y
+     animar `box-shadow` obligaría a repintar en cada cuadro justo en la
+     página que vende abrir en menos de un segundo. */
+  .chat-launcher::after {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 999px;
+    border: 1px solid var(--flash-orange);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .chat-launcher.is-calling::after {
+    animation: chat-halo 1.6s ease-out 2;
+  }
+  .chat-launcher.is-calling {
+    animation: chat-vibra 1.6s ease-out 2;
+  }
+  @keyframes chat-halo {
+    0% { opacity: 0.9; transform: scale(1); }
+    70% { opacity: 0; transform: scale(1.28); }
+    100% { opacity: 0; transform: scale(1.28); }
+  }
+  @keyframes chat-vibra {
+    0%, 62%, 100% { transform: translate3d(0, 0, 0); }
+    66% { transform: translate3d(-3px, 0, 0); }
+    70% { transform: translate3d(3px, 0, 0); }
+    74% { transform: translate3d(-2px, 0, 0); }
+    78% { transform: translate3d(2px, 0, 0); }
+    82% { transform: translate3d(0, 0, 0); }
   }
 
   /* ---------- PANEL ---------- */
@@ -546,6 +623,9 @@ const sugerencias = [
 
   @media (prefers-reduced-motion: reduce) {
     .chat-launcher:hover { transform: none; }
+    /* La llamada de atención se apaga entera, no se acelera. */
+    .chat-launcher.is-calling,
+    .chat-launcher.is-calling::after { animation: none; }
     .chat-log :global(.chat-msg.is-thinking span) { animation: none; opacity: 0.6; }
   }
 </style>

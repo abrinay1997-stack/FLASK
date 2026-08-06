@@ -50,7 +50,7 @@ export function tokens(s: string): string[] {
  *
  * Las `q` pesan el triple que el cuerpo: son las formas concretas en que
  * sabemos que la gente pregunta por esa cosa. Es recuperación léxica y no
- * vectorial a propósito — con 38 hechos, los embeddings añadirían una
+ * vectorial a propósito — con 55 hechos, los embeddings añadirían una
  * dependencia externa, latencia y coste para resolver un problema que no
  * tenemos.
  */

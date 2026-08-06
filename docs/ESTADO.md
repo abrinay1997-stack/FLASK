@@ -31,21 +31,30 @@ Cada pendiente lleva quién lo desbloquea:
 
 ---
 
-## Lo medido — 2026-08-03
+## Lo medido — 2026-08-06
 
-Sobre el build de producción servido en local (`npm run build && npm run preview`),
-Chromium headless a 1440×900 y 390×844.
+Sobre el build de producción servido en local, Chromium headless a 1440×900 y
+390×844. **Acción** = un `<a href>` o un `<button>` dentro de `<main>` con caja
+visible; **sin scroll** = las que caen por encima del borde inferior de la
+primera pantalla.
 
 | Página | Alto (escritorio / móvil) | Acciones en `<main>` | Sin scroll (escr. / móv.) |
 |---|---|---|---|
-| `/` | 3 607 / 4 927 px | 17 | 3 / 5 |
-| `/servicios` | 4 765 / 5 675 px | 1 | 0 / 0 |
-| `/planes` | 5 281 / **7 911** px | 13 | 0 / 1 |
-| `/proceso` | 5 990 / 6 713 px | 2 | 0 / 0 |
-| `/proyectos` | 3 332 / 4 421 px | 10 | 2 / 1 |
-| `/contacto` | 1 777 / 3 051 px | 4 | 3 / 1 |
-| `/cotizador` | 2 031 / 2 381 px | 1 | 0 / 0 |
-| `/ayuda` | 3 632 / 4 692 px | 6 | 4 / 4 |
+| `/` | 3 602 / 4 991 px | 17 | 3 / 5 |
+| `/servicios` | 4 777 / 5 733 px | 1 | 0 / 0 |
+| `/planes` | 5 394 / **8 195** px | 16 | 0 / 1 |
+| `/proceso` | 6 028 / 6 743 px | 2 | 0 / 0 |
+| `/proyectos` | 3 316 / 4 451 px | 10 | 2 / 1 |
+| `/contacto` | 1 761 / 3 111 px | 4 | 3 / 1 |
+| `/cotizador` | 2 015 / 2 411 px | 1 | 0 / 0 |
+| `/ayuda` | 3 616 / 4 703 px | 6 | 4 / 4 |
+
+**Estos números no se comparan uno a uno con los del 2026-08-03.** Aquella
+medición no dejó escrito qué contaba como acción, así que las diferencias
+pequeñas —`/planes` de 13 a 16— pueden ser de método y no del sitio. La regla de
+conteo queda arriba justamente para que la próxima sí sea comparable. Lo que no
+cambia: `/planes` sigue siendo la página con más acciones compitiendo y la más
+larga en móvil, que es lo que dice el punto 15.
 
 Lo que sigue verde y conviene no romper:
 
@@ -59,9 +68,11 @@ Lo que sigue verde y conviene no romper:
   etiqueta que los envuelve, que sí mide de sobra— y los enlaces de WhatsApp de
   `/privacidad` y `/terminos`, que caen en la excepción explícita de la norma
   para enlaces dentro de una frase.
-- **`prefers-reduced-motion: reduce` → 0 animaciones** en la home. No es que se
-  aceleren: el navegador no reporta ninguna. Sin la preferencia son 13
-  declaradas y **1 corriendo** (la flecha de «Scroll»).
+- **`prefers-reduced-motion: reduce` → 0 animaciones** en la home, ni al cargar
+  ni pasados trece segundos. No es que se aceleren: el navegador no reporta
+  ninguna. Sin la preferencia, en el segundo 13 son 15 declaradas y **3
+  corriendo**: la flecha de «Scroll» y las dos del lanzador del chat, que se
+  para solo tras dos tandas.
 - **Solo se animan `transform` y `opacity`** en todo el sitio.
 - **Ninguna página deja al visitante sin salida:** el CTA del nav está en las
   doce, también en móvil.
@@ -77,7 +88,7 @@ a mano.
 
 ```bash
 npm i -D playwright && npx playwright install chromium
-npm run build && npm run medir:movil
+npm run build && npm run medir:movil && npm run medir:cotizador
 ```
 
 `npm run medir:movil` vigila el navbar, el espacio muerto tras el footer, el
@@ -86,14 +97,28 @@ nacieron de fallos reales. Las medidas de la tabla de arriba (altos, acciones,
 encabezados, animaciones) salen de `document.getAnimations()` y
 `getBoundingClientRect()` sobre las mismas páginas ya construidas.
 
+`npm run medir:cotizador` (nuevo el 2026-08-06) vigila el recorrido completo:
+que el envío pase por `/gracias/`, que la cifra sea la misma en el total
+corriente, el resultado y el mensaje de WhatsApp, que los precios coincidan con
+`/planes`, que lo que el plan ya trae salga bloqueado, y que **cada etiqueta
+mueva el total exactamente lo que anuncia** (34 combinaciones de capacidad ×
+plan). Mientras esa última pase, ninguna etiqueta del cotizador puede mentir.
+
+La regla al añadir una comprobación a cualquiera de las dos: **romper lo que
+vigila y ver que salta.** Dos de las de `medir:cotizador` pasaban en verde con
+la función que vigilaban desactivada; una comprobación así no es una red, es un
+adorno que da confianza falsa.
+
 ---
 
 # El plan hasta salir de beta
 
 Ordenado por lo que de verdad mueve la aguja, no por lo que es fácil. El orden
 de los bloques 1 a 5 es el orden de ejecución: el 1 tenía fecha límite y el 2
-es el que decide si el sitio convence o no. El bloque 6 va aparte: no compite
-con los otros, lo dispara la decisión de empezar a trabajar las redes.
+es el que decide si el sitio convence o no. Los bloques 6 y 7 van aparte y no
+compiten con los otros: al 6 lo dispara la decisión de empezar a trabajar las
+redes, y el 7 —el chat— depende de que haya una clave conectada en Netlify,
+sin la cual el widget deriva a WhatsApp y nada de lo que hay ahí se nota.
 
 ## Bloque 1 — Antes de comprar el dominio
 
@@ -142,6 +167,28 @@ Todo esto es programable aquí y ninguna pieza necesita dinero.
 | 17 | **El envío del cotizador solo sale por WhatsApp.** En escritorio sin WhatsApp Web el flujo se corta. `/contacto` ya no depende de eso. | `[tuyo]` + `[cuenta]` |
 | 18 | **Revisar el mapeo respuesta → plan del cotizador.** Los precios son tuyos; las reglas que deciden qué plan corresponde a cada respuesta son una propuesta mía, no una decisión tomada. Vive entero en `src/data/quote.ts`. | `[tuyo]` |
 | 19 | **Comprobar que los envíos del formulario llegan.** `formDestination` vale `'netlify'`: los envíos caen en Netlify Forms. Falta verlo en el panel, activar la notificación por correo y hacer un envío de prueba. | `[tuyo]` |
+| 31 | **Commerce cobra $650 por el panel que `/planes` dice que incluye.** El plan se vende con «Panel para gestionar tus pedidos» y el módulo «Panel de control» se cobra igual: Commerce + panel = $1,850. Rompe la regla 2. **Decisión tuya:** ¿son la misma cosa? Si lo son, `panel` gana `includedFrom: 'commerce'`; si no, los dos nombres tienen que dejar de ser la misma palabra. | `[tuyo]` |
+| 32 | **«Un sistema a medida» cotiza $850 pelado.** Su propio texto promete reservas, portal y panel —$2,000 en módulos— y si no se marcan en el paso 3 sale Corporate a secas, con la etiqueta «Total estimado». **Decisión tuya:** ¿premarcar esas tres capacidades al elegirlo, o solo advertir? | `[tuyo]` |
+| 33 | **«Salir en Google» exige Corporate mientras Launch se vende como «preparada para salir en Google».** Lo que de verdad exige Corporate es el blog. O se renombra la capacidad, o Launch deja de prometerlo: hoy `/planes` y el cotizador dan dos respuestas distintas a la misma pregunta. | `[código]` |
+| 34 | **Las etiquetas «Desde $X» del paso 2 mienten en cuanto el paso 1 sube el plan.** Con «Vender en línea» marcado, las cuatro opciones de tamaño anuncian $295, $450, $850 y $1,200 — y las cuatro dan $1,200. Las capacidades ya enseñan su delta real desde el 2026-08-06; los pasos de plan siguen sin hacerlo. | `[código]` |
+| 35 | **«Recibir mensajes por WhatsApp» es una opción que no puede hacer nada.** Está incluida en los cuatro planes, así que siempre sale bloqueada. Sacarla del paso y dejarla como línea fija acorta el paso más largo del cotizador. | `[código]` |
+
+**Hecho el 2026-08-06 (auditoría del cotizador).** Cerrados: el envío vuelve a
+pasar por `/gracias/`; «Ninguna de estas» desmarca en vez de solo avanzar —
+cobraba hasta $1,050 de lo que la persona acababa de rechazar—; las capacidades
+que el plan ya trae salen apagadas y no se pueden marcar; cada etiqueta dice lo
+que cuesta marcarla, incluido el salto de plan («+$350 · pasa a Commerce» donde
+antes decía «Incluido en Commerce», que se lee como gratis); desde el resultado
+se puede corregir una respuesta sin perder las otras; `reduce-motion` apaga el
+scroll; hay `noscript`; el contacto se valida; y pedir «Ya» con un plan de 15–20
+días ya no se calla. El cálculo dejó de estar escrito dos veces: `computeQuote`
+era código muerto mientras una copia a mano hacía el trabajo en el navegador.
+
+**El bloqueo mira el plan de los pasos 1 y 2, no el final, y no es un detalle:**
+tres capacidades suben de plan al marcarlas, así que bloquear por el plan final
+dejaría «Cobrar en línea» marcada, incluida y sin poder desmarcarse — encerrando
+a la persona en $1,200. Con blog y CMS, que se justifican mutuamente, el enredo
+es peor. Si algún día se toca esa regla, esto es lo que hay que volver a pensar.
 
 ## Bloque 4 — Que te encuentren
 
@@ -224,23 +271,31 @@ pasa a «Precio y fecha cerrados»; y «Trabajo publicado» pasa a «Sitios que
 hicimos», porque lo primero es como lo llama una agencia y lo segundo como lo
 llama el cliente.
 
-**Hecho el 2026-08-03 (el `Lead` del cotizador):** terminar el cotizador abría
-`wa.me` y ahí se acababa todo, sin pasar por `/gracias/`, que es el único punto
-del sitio donde el píxel cuenta una conversión. O sea: el camino que mejor
-convierte —cuatro respuestas, una cifra aceptada y un mensaje ya redactado— era
-invisible para Meta, que solo veía el formulario de `/contacto`. Con publicidad
-encendida, eso es optimizar hacia visitas en vez de hacia clientes. Ahora el
-envío hace lo mismo que `/contacto`: WhatsApp en una pestaña nueva y esta se va
-a `/gracias/`. El evento **no** se dispara a mano en el cotizador a propósito —
-qué cuenta como `Lead` se decide en un solo sitio, el fragmento del píxel de
-`BaseLayout`, que mira la ruta; dispararlo también aquí contaría dos veces el
-mismo lead, y una conversión inflada engaña peor que una que falta. Si el
-navegador bloquea la pestaña, se manda el mensaje y se pierde la medición: el
-mismo orden de prioridades que ya tenía `/contacto`. Comprobado de punta a punta
-con el recorrido completo: se llega a `/gracias/` y se dispara exactamente un
-`PageView` y un `Lead`. De paso, `/gracias/` deja de decir «acabo de enviar el
-formulario» en su botón de WhatsApp, porque ahora se llega por dos caminos y ese
-texto solo describía uno.
+**Hecho el 2026-08-03 y REALMENTE cerrado el 2026-08-06 (el `Lead` del
+cotizador):** terminar el cotizador abría `wa.me` y ahí se acababa todo, sin
+pasar por `/gracias/`, que es el único punto del sitio donde el píxel cuenta una
+conversión. O sea: el camino que mejor convierte —cuatro respuestas, una cifra
+aceptada y un mensaje ya redactado— era invisible para Meta, que solo veía el
+formulario de `/contacto`. Con publicidad encendida, eso es optimizar hacia
+visitas en vez de hacia clientes. Ahora el envío hace lo mismo que `/contacto`:
+WhatsApp en una pestaña nueva y esta se va a `/gracias/`. El evento **no** se
+dispara a mano en el cotizador a propósito — qué cuenta como `Lead` se decide en
+un solo sitio, el fragmento del píxel de `BaseLayout`, que mira la ruta;
+dispararlo también aquí contaría dos veces el mismo lead, y una conversión
+inflada engaña peor que una que falta. De paso, `/gracias/` deja de decir «acabo
+de enviar el formulario» en su botón de WhatsApp, porque ahora se llega por dos
+caminos y ese texto solo describía uno.
+
+**Lo que aquí decía «comprobado de punta a punta» era falso, y conviene no
+borrarlo:** la redirección se pedía con `window.open(url, '_blank', 'noopener')`
+y se usaba el valor devuelto para decidir el destino. Esa llamada devuelve
+`null` SIEMPRE por especificación, así que durante tres días el recorrido
+terminó en dos pestañas de WhatsApp, sin pasar por `/gracias/` y sin contar un
+solo `Lead` — exactamente el fallo que este párrafo daba por resuelto. No fue
+descuido al escribirlo: leyendo el código parecía correcto, y solo se ve
+abriendo un navegador. De ahí sale `npm run medir:cotizador`, y de ahí sale la
+regla de que lo que se declare comprobado en este documento tenga un cepo
+detrás.
 
 **Lo que sigue sin hacer:** los cuatro botones de `/smark/` son indistinguibles
 en la analítica — no hay forma de saber cuál se toca, así que cualquier
@@ -259,6 +314,46 @@ analítica mientras la haya.
 ahora y vive en `panaclaw.netlify.app/…`; el día que cambie `site` en
 `astro.config.mjs` funciona sin tocar nada más. Pero repartir un `.netlify.app`
 en redes es exactamente el problema de credibilidad que se quiere evitar.
+
+## Bloque 7 — El chat
+
+Lo que el chat sabe se genera en el build desde los mismos archivos que dibujan
+el sitio, así que **precios, planes, módulos, Care, plazos, proceso, proyectos,
+FAQ y privacidad no pueden desincronizarse**: cambiar `$850` en `plans.ts` lo
+cambia en `/planes`, en el cotizador y en lo que responde el bot, en el mismo
+build. Eso ya está resuelto y no hay que volver a mirarlo.
+
+**El hallazgo del 2026-08-06, medido contra 24 preguntas de cliente:** las 15
+sobre el negocio se responden bien. El problema es el contrario del que se
+esperaba — **no es que falte información, es que la recuperación siempre
+devuelve algo**. Para lo que el sitio no cubre devuelve el hecho que más
+palabras comparta, y el modelo lo usa: «¿Tienen testimonios?» contestaba con el
+módulo *Portal de clientes*, porque comparten la palabra «clientes». La regla 1
+del prompt («responde solo con el contexto») solo salta cuando el contexto viene
+vacío, y casi nunca viene vacío.
+
+Un umbral de puntuación **no** lo arregla, y está medido: los aciertos y los
+falsos positivos se solapan, así que el corte rompería respuestas correctas
+antes que las malas. Lo que funciona es escribir el hecho, aunque diga «todavía
+no». El método completo está en [`chat.md`](chat.md).
+
+Por eso los cuatro primeros pendientes de aquí **son los mismos que los puntos 4,
+5, 6 y 8**: mientras el sitio no tenga esa información, el chat tampoco puede
+tenerla, y hoy responde a esas preguntas con cualquier cosa.
+
+| # | Pendiente | Quién |
+|---|---|---|
+| 36 | **«¿Quiénes son ustedes?» responde «Listo en días, no en meses».** Es el punto 4 visto desde el chat. En cuanto exista el bloque de quién está detrás, se convierte en un hecho de la KB. | `[tuyo]` |
+| 37 | **«¿Qué significa PanaClaw?» responde con el plan Start** (comparten la palabra). Es el punto 5. | `[tuyo]` |
+| 38 | **«¿Dan garantía?» responde con las rondas de cambios.** Adyacente, pero no es la pregunta. Es el punto 6. | `[tuyo]` |
+| 39 | **«¿Tienen RUC?» no recupera nada.** Es el punto 8, y es la única de las cuatro donde el silencio es mejor que la respuesta de hoy. | `[tuyo]` |
+| 40 | **Decidir qué NO se hace, y escribirlo.** «¿Hacen aplicaciones móviles?», «¿manejan mis redes sociales?» — hoy contestan con la lista de módulos y con el plan Corporate. No lo escribo yo porque es una decisión comercial: decir «no lo hacemos» cierra una puerta, y esa puerta es tuya. | `[tuyo]` |
+| 41 | **Registrar las preguntas que recuperan poco o nada.** Hoy no se guardan. Y no basta con las de cero hechos, que son pocas: hay que guardar también las que puntúan bajo, porque son las que producen los aciertos falsos. Es la lista de la compra de la KB, escrita por los clientes. | `[código]` |
+| 42 | **El chat no sabe nada del cotizador nuevo.** Tiene un hecho genérico («cuatro preguntas, sin dejar tus datos») que sigue siendo cierto, pero no sabe que las capacidades incluidas salen bloqueadas ni que una capacidad puede subirte de plan. Si alguien pregunta «¿me cobran el blog si voy con Corporate?», no lo puede responder. | `[código]` |
+| 43 | **Confirmar que el chat responde hoy en producción.** No se puede saber desde el repo: las claves viven solo en el panel de Netlify. `chat.md` documenta un incidente real con `GROQ_API_KEY`, así que alguna hubo configurada. Si hoy no hay ninguna válida, el widget deriva a WhatsApp **sin avisar de nada** — se ve igual de bien roto que funcionando. Un mensaje de prueba en el sitio publicado lo resuelve. | `[tuyo]` |
+
+El 43 va primero: el resto de esta lista describe cómo responde algo que quizá
+no esté respondiendo, y desde aquí no hay forma de saberlo.
 
 ---
 
