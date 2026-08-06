@@ -77,7 +77,7 @@ a mano.
 
 ```bash
 npm i -D playwright && npx playwright install chromium
-npm run build && npm run medir:movil
+npm run build && npm run medir:movil && npm run medir:cotizador
 ```
 
 `npm run medir:movil` vigila el navbar, el espacio muerto tras el footer, el
@@ -85,6 +85,18 @@ alto del footer en móvil y que el panel del chat no se corte — los cuatro
 nacieron de fallos reales. Las medidas de la tabla de arriba (altos, acciones,
 encabezados, animaciones) salen de `document.getAnimations()` y
 `getBoundingClientRect()` sobre las mismas páginas ya construidas.
+
+`npm run medir:cotizador` (nuevo el 2026-08-06) vigila el recorrido completo:
+que el envío pase por `/gracias/`, que la cifra sea la misma en el total
+corriente, el resultado y el mensaje de WhatsApp, que los precios coincidan con
+`/planes`, que lo que el plan ya trae salga bloqueado, y que **cada etiqueta
+mueva el total exactamente lo que anuncia** (34 combinaciones de capacidad ×
+plan). Mientras esa última pase, ninguna etiqueta del cotizador puede mentir.
+
+La regla al añadir una comprobación a cualquiera de las dos: **romper lo que
+vigila y ver que salta.** Dos de las de `medir:cotizador` pasaban en verde con
+la función que vigilaban desactivada; una comprobación así no es una red, es un
+adorno que da confianza falsa.
 
 ---
 
@@ -142,6 +154,11 @@ Todo esto es programable aquí y ninguna pieza necesita dinero.
 | 17 | **El envío del cotizador solo sale por WhatsApp.** En escritorio sin WhatsApp Web el flujo se corta. `/contacto` ya no depende de eso. | `[tuyo]` + `[cuenta]` |
 | 18 | **Revisar el mapeo respuesta → plan del cotizador.** Los precios son tuyos; las reglas que deciden qué plan corresponde a cada respuesta son una propuesta mía, no una decisión tomada. Vive entero en `src/data/quote.ts`. | `[tuyo]` |
 | 19 | **Comprobar que los envíos del formulario llegan.** `formDestination` vale `'netlify'`: los envíos caen en Netlify Forms. Falta verlo en el panel, activar la notificación por correo y hacer un envío de prueba. | `[tuyo]` |
+| 31 | **Commerce cobra $650 por el panel que `/planes` dice que incluye.** El plan se vende con «Panel para gestionar tus pedidos» y el módulo «Panel de control» se cobra igual: Commerce + panel = $1,850. Rompe la regla 2. **Decisión tuya:** ¿son la misma cosa? Si lo son, `panel` gana `includedFrom: 'commerce'`; si no, los dos nombres tienen que dejar de ser la misma palabra. | `[tuyo]` |
+| 32 | **«Un sistema a medida» cotiza $850 pelado.** Su propio texto promete reservas, portal y panel —$2,000 en módulos— y si no se marcan en el paso 3 sale Corporate a secas, con la etiqueta «Total estimado». **Decisión tuya:** ¿premarcar esas tres capacidades al elegirlo, o solo advertir? | `[tuyo]` |
+| 33 | **«Salir en Google» exige Corporate mientras Launch se vende como «preparada para salir en Google».** Lo que de verdad exige Corporate es el blog. O se renombra la capacidad, o Launch deja de prometerlo: hoy `/planes` y el cotizador dan dos respuestas distintas a la misma pregunta. | `[código]` |
+| 34 | **Las etiquetas «Desde $X» del paso 2 mienten en cuanto el paso 1 sube el plan.** Con «Vender en línea» marcado, las cuatro opciones de tamaño anuncian $295, $450, $850 y $1,200 — y las cuatro dan $1,200. Las capacidades ya enseñan su delta real desde el 2026-08-06; los pasos de plan siguen sin hacerlo. | `[código]` |
+| 35 | **«Recibir mensajes por WhatsApp» es una opción que no puede hacer nada.** Está incluida en los cuatro planes, así que siempre sale bloqueada. Sacarla del paso y dejarla como línea fija acorta el paso más largo del cotizador. | `[código]` |
 
 ## Bloque 4 — Que te encuentren
 
@@ -224,23 +241,31 @@ pasa a «Precio y fecha cerrados»; y «Trabajo publicado» pasa a «Sitios que
 hicimos», porque lo primero es como lo llama una agencia y lo segundo como lo
 llama el cliente.
 
-**Hecho el 2026-08-03 (el `Lead` del cotizador):** terminar el cotizador abría
-`wa.me` y ahí se acababa todo, sin pasar por `/gracias/`, que es el único punto
-del sitio donde el píxel cuenta una conversión. O sea: el camino que mejor
-convierte —cuatro respuestas, una cifra aceptada y un mensaje ya redactado— era
-invisible para Meta, que solo veía el formulario de `/contacto`. Con publicidad
-encendida, eso es optimizar hacia visitas en vez de hacia clientes. Ahora el
-envío hace lo mismo que `/contacto`: WhatsApp en una pestaña nueva y esta se va
-a `/gracias/`. El evento **no** se dispara a mano en el cotizador a propósito —
-qué cuenta como `Lead` se decide en un solo sitio, el fragmento del píxel de
-`BaseLayout`, que mira la ruta; dispararlo también aquí contaría dos veces el
-mismo lead, y una conversión inflada engaña peor que una que falta. Si el
-navegador bloquea la pestaña, se manda el mensaje y se pierde la medición: el
-mismo orden de prioridades que ya tenía `/contacto`. Comprobado de punta a punta
-con el recorrido completo: se llega a `/gracias/` y se dispara exactamente un
-`PageView` y un `Lead`. De paso, `/gracias/` deja de decir «acabo de enviar el
-formulario» en su botón de WhatsApp, porque ahora se llega por dos caminos y ese
-texto solo describía uno.
+**Hecho el 2026-08-03 y REALMENTE cerrado el 2026-08-06 (el `Lead` del
+cotizador):** terminar el cotizador abría `wa.me` y ahí se acababa todo, sin
+pasar por `/gracias/`, que es el único punto del sitio donde el píxel cuenta una
+conversión. O sea: el camino que mejor convierte —cuatro respuestas, una cifra
+aceptada y un mensaje ya redactado— era invisible para Meta, que solo veía el
+formulario de `/contacto`. Con publicidad encendida, eso es optimizar hacia
+visitas en vez de hacia clientes. Ahora el envío hace lo mismo que `/contacto`:
+WhatsApp en una pestaña nueva y esta se va a `/gracias/`. El evento **no** se
+dispara a mano en el cotizador a propósito — qué cuenta como `Lead` se decide en
+un solo sitio, el fragmento del píxel de `BaseLayout`, que mira la ruta;
+dispararlo también aquí contaría dos veces el mismo lead, y una conversión
+inflada engaña peor que una que falta. De paso, `/gracias/` deja de decir «acabo
+de enviar el formulario» en su botón de WhatsApp, porque ahora se llega por dos
+caminos y ese texto solo describía uno.
+
+**Lo que aquí decía «comprobado de punta a punta» era falso, y conviene no
+borrarlo:** la redirección se pedía con `window.open(url, '_blank', 'noopener')`
+y se usaba el valor devuelto para decidir el destino. Esa llamada devuelve
+`null` SIEMPRE por especificación, así que durante tres días el recorrido
+terminó en dos pestañas de WhatsApp, sin pasar por `/gracias/` y sin contar un
+solo `Lead` — exactamente el fallo que este párrafo daba por resuelto. No fue
+descuido al escribirlo: leyendo el código parecía correcto, y solo se ve
+abriendo un navegador. De ahí sale `npm run medir:cotizador`, y de ahí sale la
+regla de que lo que se declare comprobado en este documento tenga un cepo
+detrás.
 
 **Lo que sigue sin hacer:** los cuatro botones de `/smark/` son indistinguibles
 en la analítica — no hay forma de saber cuál se toca, así que cualquier
