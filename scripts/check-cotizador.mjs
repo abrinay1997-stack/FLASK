@@ -26,6 +26,9 @@
  *   F. Cada etiqueta mueve el total exactamente lo que anuncia, para las 11
  *      capacidades y los 4 planes. Es la comprobación que de verdad importa:
  *      mientras pase, ninguna etiqueta del cotizador puede mentir.
+ *   G. `prefers-reduced-motion` apaga el scroll animado — midiendo también el
+ *      caso contrario, para que la comprobación no pase por accidente.
+ *   H. Desde el resultado se puede corregir una respuesta sin perder las otras.
  *
  * Sale con código 1 si algo falla, así que sirve tal cual en CI.
  *
@@ -393,6 +396,93 @@ async function checkEtiquetasHonestas(browser, base) {
   await ctx.close();
 }
 
+/* ------------------------------------------------------------------ *
+ * G · reduced-motion apaga el scroll animado
+ * ------------------------------------------------------------------ */
+
+/** Salta al resultado midiendo el scroll a mitad de camino y ya asentado. */
+async function medirSalto(browser, opts) {
+  const ctx = await browser.newContext(opts);
+  const page = await ctx.newPage();
+  await abrirCotizador(page, opts.base);
+  await marcar(page, 'nuevo');
+  await siguiente(page);
+  await marcar(page, 'una');
+  await siguiente(page);
+  await siguiente(page);
+  await marcar(page, 'ya');
+  await page.locator('.cot-step').nth(3).locator('button[data-next]').click();
+  await page.waitForTimeout(50);
+  const aMitad = await page.evaluate(() => window.scrollY);
+  await page.waitForTimeout(1200);
+  const asentado = await page.evaluate(() => window.scrollY);
+  await ctx.close();
+  return { aMitad, asentado };
+}
+
+async function checkReducedMotion(browser, base) {
+  console.log('\nG. Con prefers-reduced-motion, el scroll no se anima');
+
+  /*
+   * Se miden LOS DOS casos a propósito. Comprobar solo el de la preferencia
+   * activa daría verde también si el scroll dejara de moverse por cualquier
+   * otro motivo, y el cepo no valdría nada — es el error que tuvo la primera
+   * versión de la comprobación E.
+   */
+  const conPreferencia = await medirSalto(browser, { base, reducedMotion: 'reduce' });
+  const sinPreferencia = await medirSalto(browser, { base, reducedMotion: 'no-preference' });
+
+  const instantaneo = conPreferencia.aMitad === conPreferencia.asentado;
+  const animadoSinElla = sinPreferencia.aMitad !== sinPreferencia.asentado;
+
+  if (!instantaneo)
+    fail(`con reduce-motion el scroll se anima igual (${conPreferencia.aMitad} → ${conPreferencia.asentado})`);
+  if (!animadoSinElla)
+    fail('sin la preferencia el scroll tampoco se anima: la comprobación de reduce-motion no prueba nada');
+
+  console.log(
+    `   con reduce-motion   ${String(conPreferencia.aMitad).padStart(5)} → ${String(conPreferencia.asentado).padEnd(6)} instantáneo  ${mark(instantaneo)}`
+  );
+  console.log(
+    `   sin la preferencia  ${String(sinPreferencia.aMitad).padStart(5)} → ${String(sinPreferencia.asentado).padEnd(6)} animado      ${mark(animadoSinElla)}`
+  );
+}
+
+/* ------------------------------------------------------------------ *
+ * H · Salidas del resultado
+ * ------------------------------------------------------------------ */
+async function checkSalidas(browser, base) {
+  console.log('\nH. Desde el resultado se puede corregir sin perderlo todo');
+  const ctx = await browser.newContext();
+  const page = await ctx.newPage();
+
+  await recorrer(page, base, {
+    objetivo: 'nuevo',
+    alcance: 'una',
+    capacidades: ['reservas'],
+    urgencia: 'ya',
+  });
+
+  await page.locator('[data-edit]').click();
+  await page.waitForTimeout(200);
+  const conservadas = await page.locator('input:checked').count();
+  const okEditar = conservadas === 4; // objetivo, alcance, una capacidad y urgencia
+
+  // De vuelta al resultado: cuatro pasos, porque "Empezar de nuevo" vive allí.
+  for (let i = 0; i < 4; i++) await siguiente(page);
+  await page.locator('[data-restart]').click();
+  await page.waitForTimeout(200);
+  const trasReiniciar = await page.locator('input:checked').count();
+  const okReiniciar = trasReiniciar === 0;
+
+  if (!okEditar) fail(`"Cambiar una respuesta" conservó ${conservadas} de 4 respuestas`);
+  if (!okReiniciar) fail(`"Empezar de nuevo" dejó ${trasReiniciar} respuestas marcadas`);
+
+  console.log(`   cambiar una respuesta  conserva ${conservadas}/4   ${mark(okEditar)}`);
+  console.log(`   empezar de nuevo       deja ${trasReiniciar}/4      ${mark(okReiniciar)}`);
+  await ctx.close();
+}
+
 /* ------------------------------------------------------------------ */
 async function main() {
   try {
@@ -414,6 +504,8 @@ async function main() {
     await checkPrecios(browser, base);
     await checkBloqueadas(browser, base);
     await checkEtiquetasHonestas(browser, base);
+    await checkReducedMotion(browser, base);
+    await checkSalidas(browser, base);
   } finally {
     await browser.close();
     server.close();

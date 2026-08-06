@@ -320,6 +320,20 @@ export interface QuoteResult {
   total: Money;
   delivery: string;
   urgencia: string;
+  /** Solo cuando pidió "Ya" y el plan tarda más de una semana. */
+  urgenciaAviso?: string;
+}
+
+/**
+ * Días que anuncia un plazo escrito ("Entrega 15–20 días" → 20, "Entrega 72 h"
+ * → 3). Se lee del propio texto para que cambiar un plazo en `plans.ts` no
+ * obligue a tocar nada más.
+ */
+function diasDePlazo(delivery: string): number {
+  const nums = delivery.match(/\d+/g)?.map(Number) ?? [];
+  if (!nums.length) return 0;
+  const mayor = Math.max(...nums);
+  return /\bh\b|hora/i.test(delivery) ? mayor / 24 : mayor;
 }
 
 export function computeQuote(answers: Answers): QuoteResult | null {
@@ -366,6 +380,17 @@ export function computeQuote(answers: Answers): QuoteResult | null {
     steps.find((s) => s.id === 'urgencia')!.options.find((o) => o.value === answers.urgencia?.[0])
       ?.label ?? '';
 
+  /*
+   * El paso de urgencia dice que no cambia el precio —y es cierto— pero
+   * tampoco cambiaba nada visible: se podía pedir "esta semana" y recibir un
+   * plazo de 15 a 20 días sin que nadie lo mencionara. Esto solo constata la
+   * tensión; prometer prioridad es una decisión comercial, no del cotizador.
+   */
+  const urgenciaAviso =
+    answers.urgencia?.[0] === 'ya' && diasDePlazo(plan.delivery) > 7
+      ? `Marcaste "Ya", y este plan va en ${plan.delivery.replace(/^Entrega /, '')}.`
+      : undefined;
+
   return {
     plan,
     reason,
@@ -373,5 +398,6 @@ export function computeQuote(answers: Answers): QuoteResult | null {
     total,
     delivery: extras > 0 ? `${plan.delivery}, más el plazo de cada capacidad` : plan.delivery,
     urgencia: urgenciaLabel,
+    urgenciaAviso,
   };
 }

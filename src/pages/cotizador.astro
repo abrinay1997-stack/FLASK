@@ -49,6 +49,20 @@ import { routes } from '../data/links';
         </div>
       </div>
 
+      <!--
+        Sin JavaScript el cotizador es HTML muerto: se ve el primer paso con el
+        botón deshabilitado y ahí se acaba. No se va a rehacer sin JS —el
+        cálculo en vivo es el producto— pero dejar a alguien en una pantalla
+        que no responde sí se arregla con dos líneas.
+      -->
+      <noscript>
+        <p class="cot-noscript">
+          El cotizador necesita JavaScript para calcular en vivo. Los precios están
+          publicados igual en <a href={routes.planes}>planes</a>, y por
+          <a href={routes.contacto}>contacto</a> te lo pasamos por escrito.
+        </p>
+      </noscript>
+
       <form class="cot-form" data-quote novalidate>
         {steps.map((step, i) => (
           <fieldset class="cot-step" data-step={step.id} hidden={i > 0}>
@@ -98,10 +112,17 @@ import { routes } from '../data/links';
       </form>
 
       <!-- RESULTADO -->
-      <div class="cot-result" data-result hidden aria-live="polite">
+      <!--
+        Sin `aria-live` en el bloque entero: al aparecer hacía que un lector de
+        pantalla releyera plan, líneas, total y formulario de una tacada, y de
+        paso competía con el `aria-live` del contador de pasos. Lo que sí hay
+        es foco en el titular, que es el patrón estándar para "la vista cambió"
+        y además deja el teclado donde toca.
+      -->
+      <div class="cot-result" data-result hidden>
         <div class="cot-result-head">
           <span class="eyebrow">Tu estimación</span>
-          <h2 data-plan-name>—</h2>
+          <h2 data-plan-name tabindex="-1">—</h2>
           <p class="cot-reason" data-reason></p>
         </div>
 
@@ -114,6 +135,7 @@ import { routes } from '../data/links';
           </div>
           <div class="cot-total-meta">
             <span data-delivery></span>
+            <span class="cot-urgencia" data-urgencia hidden></span>
             <span class="cot-disclaimer">
               Estimación, no factura. La propuesta escrita confirma alcance, cronograma y cifra final.
             </span>
@@ -142,7 +164,13 @@ import { routes } from '../data/links';
             <button type="button" class="btn btn-primary" data-send>
               <span class="dot"></span> Enviar y recibir la propuesta
             </button>
-            <button type="button" class="btn btn-ghost" data-restart>Empezar de nuevo</button>
+            <!--
+              Cambiar una respuesta CONSERVA las cuatro. Antes la única salida
+              era empezar de cero, así que corregir una coma costaba rehacerlo
+              todo, justo en el momento de mayor intención de compra.
+            -->
+            <button type="button" class="btn btn-ghost" data-edit>Cambiar una respuesta</button>
+            <button type="button" class="cot-skip" data-restart>Empezar de nuevo</button>
           </div>
 
           <p class="cot-alt">
@@ -168,6 +196,7 @@ import { routes } from '../data/links';
   } from '../data/quote';
   import { routes } from '../data/links';
   import { contact } from '../data/site';
+  import { prefersReducedMotion } from '../scripts/motion';
 
   /**
    * El cálculo NO se reimplementa aquí: se importa de `src/data/quote.ts` y
@@ -176,6 +205,15 @@ import { routes } from '../data/links';
    * las dos darían el mismo resultado y solo una llegaba a ejecutarse jamás.
    */
   const CAPACIDADES = 'capacidades';
+
+  /**
+   * `scrollIntoView({behavior:'smooth'})` IGNORA el `scroll-behavior:auto` que
+   * la hoja de estilos pone bajo `prefers-reduced-motion`: el argumento
+   * explícito gana a la CSS. Era el único sitio del sitio donde la preferencia
+   * no se respetaba, y solo se ve midiendo el scroll cuadro a cuadro.
+   */
+  const llevarA = (el: Element, block: ScrollLogicalPosition) =>
+    el.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block });
 
   function initCotizador() {
     const found = document.querySelector<HTMLFormElement>('[data-quote]');
@@ -303,10 +341,22 @@ import { routes } from '../data/links';
       document.querySelector('[data-total]')!.textContent = formatMoney(q.total);
       document.querySelector('[data-delivery]')!.textContent = q.delivery;
 
+      /*
+       * El paso de urgencia dice que no cambia el precio, y es verdad, pero
+       * tampoco cambiaba nada visible: se podía pedir "esta semana" y recibir
+       * un plazo de 15–20 días sin una palabra. El aviso solo constata la
+       * tensión —no promete prioridad, que es una decisión comercial y no del
+       * cotizador.
+       */
+      const aviso = document.querySelector<HTMLElement>('[data-urgencia]')!;
+      aviso.hidden = !q.urgenciaAviso;
+      aviso.textContent = q.urgenciaAviso ?? '';
+
       root.hidden = true;
       progress.hidden = true;
       result.hidden = false;
-      result.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      llevarA(result, 'start');
+      document.querySelector<HTMLElement>('[data-plan-name]')!.focus();
     }
 
     function send() {
@@ -320,6 +370,21 @@ import { routes } from '../data/links';
         err.textContent = 'Falta tu nombre o por dónde te escribimos.';
         err.hidden = false;
         (nombre ? viaEl : nombreEl).focus();
+        return;
+      }
+      /*
+       * Comprobación mínima, no un validador. Antes pasaba una sola letra y el
+       * mensaje llegaba con un contacto inservible: se pierde el lead sin que
+       * nadie se entere. Se acepta cualquier forma de escribir un teléfono
+       * —con espacios, guiones o prefijo— porque rechazar un número bueno
+       * cuesta más que aceptar uno raro.
+       */
+      const pareceCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(via);
+      const pareceTelefono = via.replace(/\D/g, '').length >= 7;
+      if (!pareceCorreo && !pareceTelefono) {
+        err.textContent = 'Eso no parece un WhatsApp ni un correo. Revísalo y te escribimos.';
+        err.hidden = false;
+        viaEl.focus();
         return;
       }
       err.hidden = true;
@@ -415,24 +480,38 @@ import { routes } from '../data/links';
       }
     });
 
-    document.querySelector('[data-send]')?.addEventListener('click', send);
-    document.querySelector('[data-restart]')?.addEventListener('click', () => {
-      root.reset();
+    function volverAlFormulario() {
       result.hidden = true;
       root.hidden = false;
       progress.hidden = false;
       go(0);
-      progress.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      llevarA(progress, 'center');
+    }
+
+    document.querySelector('[data-send]')?.addEventListener('click', send);
+    document.querySelector('[data-edit]')?.addEventListener('click', volverAlFormulario);
+    document.querySelector('[data-restart]')?.addEventListener('click', () => {
+      root.reset();
+      volverAlFormulario();
     });
 
     paint();
   }
 
-  document.addEventListener('astro:page-load', initCotizador);
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initCotizador, { once: true });
-  } else {
-    initCotizador();
+  /*
+   * Este script se vuelve a ejecutar en cada visita a la página —así funcionan
+   * las transiciones de vista— pero `document` sobrevive a la navegación. Sin
+   * el guardia se registraba un `astro:page-load` más en cada visita: inertes
+   * todos por el `dataset.bound`, pero acumulándose igual.
+   *
+   * La llamada directa basta para la primera carga: los módulos van diferidos,
+   * así que el DOM ya está listo cuando esto corre.
+   */
+  const hooks = window as unknown as { __cotizadorHook?: boolean };
+  initCotizador();
+  if (!hooks.__cotizadorHook) {
+    hooks.__cotizadorHook = true;
+    document.addEventListener('astro:page-load', initCotizador);
   }
 </script>
 
@@ -682,6 +761,35 @@ import { routes } from '../data/links';
     border: solid var(--deep-black);
     border-width: 0 2px 2px 0;
     transform: translateY(-1px) rotate(45deg);
+  }
+
+  /* El nav flota sobre la página: sin esto, mover el foco al enunciado deja la
+     pregunta justo debajo de la barra y medio tapada. */
+  .cot-step legend,
+  .cot-result {
+    scroll-margin-top: 130px;
+  }
+
+  .cot-noscript {
+    max-width: 60ch;
+    padding: 20px 22px;
+    border: 1px solid rgba(255, 81, 0, 0.35);
+    border-radius: 14px;
+    font-size: 16px;
+    font-weight: 300;
+    line-height: 1.55;
+    color: var(--studio-gray);
+  }
+  .cot-noscript a {
+    color: var(--flash-orange);
+  }
+
+  .cot-urgencia {
+    display: block;
+    margin-top: 8px;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--soft-white);
   }
 
   .cot-nav {

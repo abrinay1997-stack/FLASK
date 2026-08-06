@@ -27,19 +27,33 @@ cuando no lo encuentra degrada solo a WhatsApp (ver [`docs/chat.md`](docs/chat.m
 | `npm run preview` | Sirve `dist/` localmente |
 | `npm run check` | `astro check` — tipos de TypeScript y diagnósticos de `.astro` |
 | `npm run medir:movil` | Auditoría de layout en móvil sobre `dist/` (requiere `npm run build` antes) |
+| `npm run medir:cotizador` | Auditoría del cotizador sobre `dist/`: recorrido, etiquetas y totales |
 | `npm run medir` | Mide los proyectos publicados con Lighthouse |
 | `npm run capturas` | Captura la portada de cada proyecto en `src/assets/proyectos/` |
 | `npm run brand` | Regenera favicons y `og.png` en `public/` — solo al cambiar el branding |
 
 `npm run build` **no** comprueba tipos. Para eso está `npm run check`.
 
-### Las dos auditorías
+### Las auditorías de navegador
 
 `npm run medir:movil` comprueba sobre el sitio ya construido que el navbar quede
 centrado, que ninguna página deje espacio muerto tras el footer, que el footer no
 se coma media pantalla de más y que el panel del chat no se corte. Nació de fallos
 reales, y cada comprobación se verificó reintroduciendo el bug para confirmar que
 salta. Sale con código 1 si algo se pasa de presupuesto.
+
+`npm run medir:cotizador` hace lo mismo con el cotizador: que el envío pase por
+`/gracias/` —el único punto donde el píxel cuenta una conversión—, que la cifra
+sea la misma en el total corriente, en el resultado y en el mensaje de WhatsApp,
+que los precios coincidan con `/planes`, y que **cada etiqueta mueva el total
+exactamente lo que anuncia**, para las once capacidades y los cuatro planes.
+Nació de un fallo que se dio por comprobado durante semanas porque leyendo el
+código parecía correcto.
+
+Las dos comparten `scripts/_harness.mjs` (cargar Playwright y servir `dist/`).
+La regla al añadir una comprobación: **romper lo que vigila y ver que salta**.
+Un cepo que también pasa con la función desactivada no vigila nada — le ocurrió
+a la primera versión de dos de las que hay ahí.
 
 Necesita Playwright, que **no** es dependencia del proyecto a propósito —
 arrastra la descarga de un navegador y encarecería cada build de Netlify para
