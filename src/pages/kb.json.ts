@@ -272,6 +272,35 @@ export const GET: APIRoute = () => {
       'para que compruebes tú mismo cómo carga.',
   });
 
+  /**
+   * Prueba social: lo que hay, dicho sin adornos.
+   *
+   * "¿Tienen testimonios?" recuperaba el módulo "Portal de clientes" —comparten
+   * la palabra "clientes"— y esa clase de acierto falso es peor que no
+   * encontrar nada: con un hecho plausible delante, el modelo responde en vez
+   * de admitir que no lo sabe. Mientras no haya testimonios publicados, la
+   * respuesta honesta es que no los hay y que en su lugar están los sitios
+   * funcionando, que es una prueba más fuerte y comprobable en un clic.
+   */
+  add({
+    id: 'prueba-social',
+    topic: 'proyectos',
+    q: [
+      'tienen testimonios',
+      'opiniones de clientes',
+      'reseñas',
+      'comentarios de clientes',
+      'que dicen sus clientes',
+      'hay reviews',
+      'clientes satisfechos',
+    ],
+    text:
+      'Todavía no publicamos testimonios escritos. Lo que sí puedes comprobar tú mismo son los sitios ' +
+      'que ya están funcionando: ' +
+      projects.map((p) => `${p.name} (${p.domain})`).join(', ') +
+      '. Ábrelos y mira cómo cargan; nos parece mejor prueba que una cita en una página.',
+  });
+
   /* ---------------- FAQ ---------------- */
   for (const group of faqGroups) {
     for (const [i, item] of group.items.entries()) {
@@ -296,6 +325,14 @@ export const GET: APIRoute = () => {
       'donde estan',
       'atienden fuera de panama',
       'quiero hablar con alguien',
+      // "¿Tienen oficina?" no recuperaba nada: este hecho ya la respondía —se
+      // opera en remoto— pero ninguna de sus frases llevaba esa palabra. La
+      // recuperación es léxica: solo encuentra lo que está escrito.
+      'tienen oficina',
+      'oficina fisica',
+      'donde queda su local',
+      'podemos vernos en persona',
+      'reuniones presenciales',
     ],
     text:
       // Deliberadamente sin el número: la respuesta del chat lleva al chat,
