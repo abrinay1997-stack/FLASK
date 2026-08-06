@@ -21,6 +21,11 @@
  *   D. El precio de cada plan en el cotizador es el que dice /planes. Un
  *      cotizador que diga un número distinto destruye justo la confianza que el
  *      sitio vende.
+ *   E. Lo que el plan ya trae sale apagado y no se puede marcar — y nada
+ *      bloqueado queda marcado, que encerraría a la persona en el plan caro.
+ *   F. Cada etiqueta mueve el total exactamente lo que anuncia, para las 11
+ *      capacidades y los 4 planes. Es la comprobación que de verdad importa:
+ *      mientras pase, ninguna etiqueta del cotizador puede mentir.
  *
  * Sale con código 1 si algo falla, así que sirve tal cual en CI.
  *
@@ -45,10 +50,29 @@ async function pasoActual(page) {
   return Number(txt.match(/Paso (\d+)/)[1]) - 1;
 }
 
-const marcar = (page, value) =>
-  // Las casillas reales miden 1×1 y son transparentes: lo clicable es la
-  // etiqueta que las envuelve. `force` va por eso, no por tapar un fallo.
-  page.locator(`input[value="${value}"]`).check({ force: true });
+/**
+ * Se pulsa la ETIQUETA, no la casilla.
+ *
+ * Las casillas miden 1×1 y son transparentes; lo que pulsa una persona es la
+ * tarjeta entera. Forzar el clic sobre el input se saltaba justo eso —y de paso
+ * daba carreras con la hidratación, porque el radio nativo cambia de estado
+ * aunque el script todavía no esté enganchado.
+ */
+const tarjeta = (page, value) => page.locator(`label.cot-opt:has(input[value="${value}"])`);
+
+async function marcar(page, value) {
+  if (!(await page.locator(`input[value="${value}"]`).isChecked())) await tarjeta(page, value).click();
+}
+
+async function desmarcar(page, value) {
+  if (await page.locator(`input[value="${value}"]`).isChecked()) await tarjeta(page, value).click();
+}
+
+/** Hasta que el script no engancha, la página es HTML muerto: esperar a eso. */
+async function abrirCotizador(page, base) {
+  await page.goto(`${base}/cotizador/`, { waitUntil: 'load' });
+  await page.waitForSelector('[data-quote][data-bound="true"]', { timeout: 5000 });
+}
 
 async function siguiente(page) {
   const i = await pasoActual(page);
@@ -65,7 +89,7 @@ async function ninguna(page) {
  * Devuelve el total corriente justo antes de pedirlo, para poder compararlo.
  */
 async function recorrer(page, base, { objetivo, alcance, capacidades = [], urgencia, saltar = false }) {
-  await page.goto(`${base}/cotizador/`, { waitUntil: 'load' });
+  await abrirCotizador(page, base);
   await marcar(page, objetivo);
   await siguiente(page);
   await marcar(page, alcance);
@@ -228,6 +252,147 @@ async function checkPrecios(browser, base) {
   await ctx.close();
 }
 
+/* ------------------------------------------------------------------ *
+ * E · Lo que el plan ya trae no se puede marcar
+ * ------------------------------------------------------------------ */
+
+/** Deja el recorrido plantado en el paso de capacidades. */
+async function hastaCapacidades(page, base, { objetivo, alcance }) {
+  await abrirCotizador(page, base);
+  await marcar(page, objetivo);
+  await siguiente(page);
+  await marcar(page, alcance);
+  await siguiente(page);
+}
+
+async function estadoDeCapacidades(page) {
+  return page.evaluate(() =>
+    [...document.querySelectorAll('input[name="capacidades"]')].map((input) => ({
+      value: input.value,
+      etiqueta: document.querySelector(`[data-opt-price="${input.value}"]`)?.textContent.trim() ?? '',
+      bloqueada: input.disabled,
+      marcada: input.checked,
+      apagada: !!input.closest('.cot-opt')?.classList.contains('is-locked'),
+    }))
+  );
+}
+
+/*
+ * Qué tiene que salir bloqueado con cada plan base.
+ *
+ * Va escrito a mano y no derivado de los datos, a propósito: derivarlo haría la
+ * comprobación circular —pasaría igual con la función desactivada, que es justo
+ * lo que le ocurrió a la primera versión de este cepo—. Si cambia una regla de
+ * `CAPABILITIES`, esta lista tiene que cambiar a mano, que es la forma de
+ * obligar a mirarla.
+ */
+const BLOQUEADAS_ESPERADAS = {
+  'PanaClaw Start': ['form'],
+  'PanaClaw Launch': ['form'],
+  'PanaClaw Corporate': ['blog', 'cms', 'form'],
+  'PanaClaw Commerce': ['blog', 'cms', 'cobros', 'form', 'inventario'],
+};
+
+async function checkBloqueadas(browser, base) {
+  console.log('\nE. Lo que el plan ya trae aparece apagado y no se puede marcar');
+  const ctx = await browser.newContext();
+  const page = await ctx.newPage();
+
+  for (const caso of RUTAS_A_PLAN) {
+    await hastaCapacidades(page, base, caso);
+    const estado = await estadoDeCapacidades(page);
+
+    // La etiqueta y el bloqueo tienen que contar lo mismo, y nada bloqueado
+    // puede quedarse marcado: una casilla que no se puede desmarcar encerraría
+    // a la persona en el plan caro.
+    const incoherentes = estado.filter(
+      (c) => c.bloqueada !== (c.etiqueta === 'Ya incluido') || c.bloqueada !== c.apagada
+    );
+    const marcadas = estado.filter((c) => c.bloqueada && c.marcada);
+    const bloqueadas = estado.filter((c) => c.bloqueada).map((c) => c.value).sort();
+    const esperadas = BLOQUEADAS_ESPERADAS[caso.plan];
+    const coincide = bloqueadas.join(',') === esperadas.join(',');
+    const ok = incoherentes.length === 0 && marcadas.length === 0 && coincide;
+
+    if (incoherentes.length)
+      fail(`${caso.plan}: ${incoherentes.map((c) => c.value).join(', ')} dicen una cosa y hacen otra`);
+    if (marcadas.length) fail(`${caso.plan}: ${marcadas.map((c) => c.value).join(', ')} bloqueadas y marcadas`);
+    if (!coincide)
+      fail(`${caso.plan}: se bloquean [${bloqueadas.join(', ') || '—'}] y se esperaba [${esperadas.join(', ')}]`);
+
+    console.log(
+      `   ${caso.plan.padEnd(20)} bloqueadas: ${String(bloqueadas.length).padStart(2)}` +
+        `  (${bloqueadas.join(', ') || '—'})`.padEnd(38) +
+        mark(ok)
+    );
+  }
+
+  /*
+   * Caso aparte: lo que sale gratis por OTRA capacidad marcada no se bloquea, y
+   * es deliberado. Desde Launch, marcar "Cobrar en línea" sube a Commerce y con
+   * ello el blog entra incluido — pero si se bloqueara, y luego se desmarcara
+   * "Cobrar en línea", la persona se quedaría con una casilla imposible de
+   * tocar. Se queda marcable, solo que a coste cero.
+   */
+  await hastaCapacidades(page, base, { objetivo: 'rehacer', alcance: 'landing' });
+  await marcar(page, 'cobros');
+  const [blog] = (await estadoDeCapacidades(page)).filter((c) => c.value === 'blog');
+  const okGratis = blog.etiqueta === 'Incluido' && !blog.bloqueada;
+  if (!okGratis)
+    fail(`gratis por otra opción: "blog" quedó "${blog.etiqueta}"${blog.bloqueada ? ' y bloqueada' : ''}`);
+  console.log(`   gratis por otra opción  blog: "${blog.etiqueta}", bloqueada: ${blog.bloqueada ? 'sí' : 'no'}   ${mark(okGratis)}`);
+
+  await ctx.close();
+}
+
+/* ------------------------------------------------------------------ *
+ * F · Cada etiqueta dice lo que de verdad cambia el total
+ * ------------------------------------------------------------------ */
+
+/** '$2,200 – $2,850' → {min,max} · '+$555 · pasa a Corporate' → {min:555,max:555} */
+function cifras(texto) {
+  const nums = texto.replace(/,/g, '').match(/\d+(\.\d+)?/g)?.map(Number) ?? [0];
+  return { min: nums[0], max: nums[nums.length - 1] };
+}
+
+async function checkEtiquetasHonestas(browser, base) {
+  console.log('\nF. Cada etiqueta mueve el total exactamente lo que anuncia');
+  const ctx = await browser.newContext();
+  const page = await ctx.newPage();
+  let comprobadas = 0;
+  let fallos = 0;
+
+  for (const caso of RUTAS_A_PLAN) {
+    await hastaCapacidades(page, base, caso);
+    for (const cap of await estadoDeCapacidades(page)) {
+      if (cap.bloqueada) continue; // no se puede marcar: nada que comparar
+
+      const antes = cifras(await page.locator('[data-running-total]').textContent());
+      await marcar(page, cap.value);
+      const despues = cifras(await page.locator('[data-running-total]').textContent());
+      await desmarcar(page, cap.value);
+
+      const real = { min: despues.min - antes.min, max: despues.max - antes.max };
+      const anunciado = cap.etiqueta === 'Incluido' ? { min: 0, max: 0 } : cifras(cap.etiqueta);
+      const ok = real.min === anunciado.min && real.max === anunciado.max;
+
+      comprobadas++;
+      if (!ok) {
+        fallos++;
+        fail(
+          `${caso.plan} · "${cap.value}": la etiqueta dice "${cap.etiqueta}" ` +
+            `y el total se mueve ${real.min}–${real.max}`
+        );
+      }
+    }
+  }
+
+  console.log(
+    `   ${String(comprobadas).padStart(2)} combinaciones capacidad × plan comprobadas   ${mark(fallos === 0)}`
+  );
+  await ctx.close();
+}
+
 /* ------------------------------------------------------------------ */
 async function main() {
   try {
@@ -247,6 +412,8 @@ async function main() {
     await checkNinguna(browser, base);
     await checkCifraEstable(browser, base);
     await checkPrecios(browser, base);
+    await checkBloqueadas(browser, base);
+    await checkEtiquetasHonestas(browser, base);
   } finally {
     await browser.close();
     server.close();
