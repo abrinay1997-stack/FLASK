@@ -416,7 +416,21 @@ const engine = {
        * mismo que ya tiene /contacto.
        */
       const url = `https://wa.me/${engine.whatsapp}?text=${encodeURIComponent(txt)}`;
-      const tab = window.open(url, '_blank', 'noopener');
+      /*
+       * `window.open(…, 'noopener')` devuelve null SIEMPRE, por especificación:
+       * con esa opción no hay handle que entregar. Aquí el valor decide si esta
+       * pestaña se va a /gracias/ o al propio WhatsApp, así que pedirlo así
+       * dejaba el camino entero roto en silencio: se abría la pestaña nueva y
+       * ADEMÁS esta se iba a wa.me, o sea dos pestañas idénticas, ningún paso
+       * por /gracias/ y por tanto ni un solo `Lead` contado. El código parecía
+       * correcto —de ahí que se diera por comprobado— y solo se ve abriendo un
+       * navegador de verdad; por eso ahora hay un arnés que lo vigila.
+       *
+       * Se abre sin la opción y se corta el `opener` a mano: mismo aislamiento
+       * frente a la pestaña de WhatsApp, y sí devuelve la referencia.
+       */
+      const tab = window.open(url, '_blank');
+      if (tab) tab.opener = null;
       location.href = tab ? engine.routes.gracias : url;
     }
 
